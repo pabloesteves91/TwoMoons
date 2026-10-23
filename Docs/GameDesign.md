@@ -48,7 +48,7 @@ Drei Stufen: **Gewöhnlich**, **Selten**, **Ultra-Selten**.
 
 - **Hauptfigur:** Der Spieler wählt beim Spielstart aus 2–4 fertigen Figuren und gibt einen Namen ein.
 - **Der Name „TwoMoons“:** Es gibt eine sagenumwobene Karte „Two Moons“. Gerüchte über
-  sie ziehen sich durch die Story, und im Laufe des Spiels findet man sie.
+  sie ziehen sich durch die Story. Gefunden wird sie im Finale (Kapitel 7) beim großen Turnier.
 - **Aufbau:** Kapitel mit Aufgaben und Belohnungen bilden den roten Faden. Der Ruf des
   Ladens steigt mit zufriedenen Kunden und zeigt den Fortschritt.
 - **Anfang:** Die Hauptfigur erfüllt sich einen Kindheitstraum: Sie kündigt ihren Job
@@ -90,15 +90,33 @@ Nach dem Finale kann man weiterspielen.
 - Import: Filter Mode „Point“, keine Kompression, Pixels Per Unit = 16
 - Platzhalter haben dieselbe Größe wie die späteren Bilder, damit sie direkt ausgetauscht werden können
 
-## Erster Prototyp
+## Erster Prototyp: Kapitel 1
 
-- Kleiner Laden mit Platzhaltergrafik
-- Spielerfigur, die sich bewegt und mit Objekten interagiert
-- Ein Regal zum Auffüllen
-- Kunden, die Ware nehmen und an der Kasse bezahlen
-- Geldanzeige
+- Winziger Laden (10×8 Felder) mit Eingang, Theke, Kasse und Computer
+- Figurenauswahl (3 Figuren) und Namenseingabe beim Start
+- Ware wird am Computer hinter der Theke bestellt und kommt am nächsten Morgen als Karton
+- Kassieren: zur Kasse gehen und mit [E] jeden Kunden selbst bedienen
+- Tagesablauf: Vorbereitung → Laden öffnen (Schild an der Tür) → 9–18 Uhr → Abrechnung → Schlafen
 
 ## Offen
 
-- In welchem Kapitel die Karte „Two Moons“ gefunden wird
 - Kartenwerte und Pack-Wahrscheinlichkeiten je Seltenheit
+
+## Prototyp starten (Kapitel 1)
+
+1. Projekt in Unity 6 öffnen und warten, bis die Skripte kompiliert sind.
+2. Im Menü oben **TwoMoons → Kapitel 1 einrichten** wählen. Das legt an:
+   - Platzhalter-Bilder in `Assets/Art/Sprites` (16×16 PNG)
+   - `Assets/Art/SpriteLibrary.asset` (verknüpft alle Bilder)
+   - die Szene `Assets/Scenes/Kapitel1.unity`
+3. Auf **Play** drücken.
+
+**Steuerung:** WASD/Pfeiltasten laufen · E benutzen · Q Karton abstellen · B Bau-Modus
+(Linksklick aufstellen, Rechtsklick abbrechen) · Esc schließt Menüs. Controller geht auch.
+
+**Eigene Bilder:** Die PNGs in `Assets/Art/Sprites` mit gleichem Dateinamen durch eigene
+16×16-Pixelbilder ersetzen. Neue Bilder in `Assets/Art` bekommen automatisch die richtigen
+Pixel-Art-Einstellungen. Eigene Bilder werden beim erneuten Einrichten nicht überschrieben.
+
+**Code:** `Assets/Scripts` – der Laden wird komplett aus Code aufgebaut (`GameBootstrap`),
+das Raster steht in `ShopGrid`, Preise und Bestellungen in `Catalog`.
