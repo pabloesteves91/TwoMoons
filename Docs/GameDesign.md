@@ -22,7 +22,9 @@ bis zum Ziel.
 
 1. **Einkaufen** – Boosterpacks und Displays am Computer beim Großhändler bestellen. Die Lieferung kommt sofort an den Eingang.
 2. **Einräumen** – Mit der Figur Ware ins Regal stellen.
-3. **Preise** – Preise festlegen: zu teuer → Kunden gehen, zu billig → kein Gewinn.
+3. **Preise** – Am Computer per Schieberegler (1–10 €, 10-Cent-Schritte) festlegen. Kunden vergleichen mit dem
+   Marktwert: ab Marktwert steigt die Chance, dass sie nicht kaufen (ab +60 % kauft keiner), bis 85 % vom
+   Marktwert gilt es als Schnäppchen (mehr Packs, mehr Ruf). Angezeigt werden Einkauf, Marktwert, Preis und Gewinn pro Pack.
 4. **Verkaufen** – Kunden laufen herum, nehmen Ware und bezahlen an der Kasse.
 5. **Packs öffnen** – Seltene Karten behalten, verkaufen oder ausstellen.
 6. **Ausbauen** – Laden vergrößern, Möbel, Spieltische, Turniere, Mitarbeiter.
@@ -102,7 +104,7 @@ Nach dem Finale kann man weiterspielen.
 
 ## Erster Prototyp: Kapitel 1
 
-- Winziger Laden (10×8 Felder) mit Eingang, Theke, Kasse und Computer
+- Laden im Breitformat (20×8 Felder) mit Eingang, Theke, Kasse und Computer – füllt den Bildschirm
 - Figurenauswahl (3 Figuren) und Namenseingabe beim Start
 - Ware wird am Computer hinter der Theke bestellt und kommt sofort als Karton an den Eingang
 - Kassieren: zur Kasse gehen und mit [E] jeden Kunden selbst bedienen

@@ -5,19 +5,19 @@ namespace TwoMoons
 {
     /// <summary>
     /// Das Raster des Ladens. Ein Feld = 1 Unity-Einheit = 16 Pixel.
-    /// Innenraum: x 1–10, y 2–9 (10×8 Felder). y = 0 ist die Straße, y = 1 die untere Wand mit der Tür.
+    /// Innenraum: x 1–20, y 2–9 (20×8 Felder, passend zum Breitbild). y = 0 ist die Straße, y = 1 die untere Wand mit der Tür.
     /// </summary>
     public class ShopGrid : MonoBehaviour
     {
-        public const int Width = 12;
+        public const int Width = 22;
         public const int Height = 11;
 
-        public static readonly Vector2Int SpawnCell = new Vector2Int(6, 0);
-        public static readonly Vector2Int DoorCell = new Vector2Int(6, 1);
-        public static readonly Vector2Int SignCell = new Vector2Int(5, 1);
+        public static readonly Vector2Int SpawnCell = new Vector2Int(Width / 2, 0);
+        public static readonly Vector2Int DoorCell = new Vector2Int(Width / 2, 1);
+        public static readonly Vector2Int SignCell = new Vector2Int(Width / 2 - 1, 1);
         public static readonly Vector2Int RegisterCell = new Vector2Int(3, 7);
         public static readonly Vector2Int ComputerCell = new Vector2Int(1, 9);
-        public static readonly Vector2Int PlayerStartCell = new Vector2Int(6, 4);
+        public static readonly Vector2Int PlayerStartCell = new Vector2Int(Width / 2, 4);
 
         public static readonly Vector2Int[] CounterCells =
             { new Vector2Int(1, 7), new Vector2Int(2, 7), new Vector2Int(3, 7), new Vector2Int(4, 7) };
@@ -26,11 +26,11 @@ namespace TwoMoons
         public static readonly Vector2Int[] QueueCells =
             { new Vector2Int(3, 6), new Vector2Int(3, 5), new Vector2Int(3, 4), new Vector2Int(3, 3) };
 
-        /// <summary>Hier stellt der Lieferdienst morgens die Kartons ab.</summary>
+        /// <summary>Hier stellt der Lieferdienst die Kartons ab, rechts neben dem Eingang.</summary>
         public static readonly Vector2Int[] DeliveryCells =
         {
-            new Vector2Int(8, 2), new Vector2Int(9, 2), new Vector2Int(10, 2),
-            new Vector2Int(8, 3), new Vector2Int(9, 3), new Vector2Int(10, 3),
+            new Vector2Int(13, 2), new Vector2Int(14, 2), new Vector2Int(15, 2),
+            new Vector2Int(13, 3), new Vector2Int(14, 3), new Vector2Int(15, 3),
         };
 
         /// <summary>Felder, die immer erreichbar bleiben müssen (hinter der Kasse, am Computer).</summary>

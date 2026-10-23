@@ -10,13 +10,14 @@ namespace TwoMoons
     {
         const float VirtualHeight = 540f;
         const float Margin = 10f;
-        const float PanelWidth = 250f;
+        const float PanelWidth = 290f;
 
         GUIStyle panel, text, bold, title, prompt, hint, button;
         string nameInput = "";
         int figure;
         Vector2 orderScroll;
         bool questsExpanded;
+        bool showPrices;
 
         void Update()
         {
@@ -136,15 +137,14 @@ namespace TwoMoons
             var current = quests.Find(q => !q.Done);
             int rows = questsExpanded ? quests.Count : 1;
 
-            var area = new Rect(width - PanelWidth - Margin, Margin, PanelWidth, 64f + rows * 22f);
+            var area = new Rect(width - PanelWidth - Margin, Margin, PanelWidth, 34f + rows * 22f);
             GUI.Box(area, GUIContent.none, panel);
-            GUI.Label(new Rect(area.x + 10f, area.y + 8f, area.width - 50f, 22f), ChapterOne.Title, bold);
-            GUI.Label(new Rect(area.x + 10f, area.y + 28f, area.width - 50f, 20f), $"Aufgaben {done}/{quests.Count}   [Tab]", hint);
-
-            if (GUI.Button(new Rect(area.xMax - 38f, area.y + 10f, 28f, 28f), questsExpanded ? "▲" : "▼", button))
+            GUI.Label(new Rect(area.x + 10f, area.y + 6f, area.width - 90f, 22f), ChapterOne.Title, bold);
+            GUI.Label(new Rect(area.xMax - 84f, area.y + 6f, 44f, 22f), $"{done}/{quests.Count}", hint);
+            if (GUI.Button(new Rect(area.xMax - 36f, area.y + 5f, 28f, 24f), questsExpanded ? "▲" : "▼", button))
                 ToggleQuests();
 
-            float y = area.y + 52f;
+            float y = area.y + 30f;
             if (questsExpanded)
             {
                 foreach (var quest in quests)
@@ -223,17 +223,40 @@ namespace TwoMoons
 
         void DrawComputer(float width)
         {
-            // Höchstens so hoch wie der Bildschirm; die Angebote darunter lassen sich scrollen.
-            float height = Mathf.Min(VirtualHeight - 120f, 150f + Catalog.Orders.Length * 70f);
-            var area = new Rect((width - 460f) / 2f, 60f, 460f, height);
+            // Höchstens so hoch wie der Bildschirm; der Inhalt lässt sich scrollen.
+            float height = Mathf.Min(VirtualHeight - 120f, 330f);
+            var area = new Rect((width - 480f) / 2f, 60f, 480f, height);
             GUI.Box(area, GUIContent.none, panel);
             GUILayout.BeginArea(new Rect(area.x + 16f, area.y + 12f, area.width - 32f, area.height - 24f));
 
-            GUILayout.Label("Großhandel – Bestellung", title);
-            GUILayout.Label($"Geld: {Money.Format(Game.MoneyCents)}     Lieferung: sofort an den Eingang", text);
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Computer", title);
+            GUILayout.FlexibleSpace();
+            GUILayout.Label($"Geld: {Money.Format(Game.MoneyCents)}", bold);
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUI.color = showPrices ? new Color(1f, 1f, 1f, 0.55f) : Color.white;
+            if (Button("Bestellen", GUILayout.Height(30f))) showPrices = false;
+            GUI.color = showPrices ? Color.white : new Color(1f, 1f, 1f, 0.55f);
+            if (Button("Preise", GUILayout.Height(30f))) showPrices = true;
+            GUI.color = Color.white;
+            GUILayout.EndHorizontal();
             GUILayout.Space(8f);
 
             orderScroll = GUILayout.BeginScrollView(orderScroll);
+            if (showPrices) DrawPriceList();
+            else DrawOrderList();
+            GUILayout.EndScrollView();
+
+            GUILayout.Space(6f);
+            if (Button("Schließen [Esc]", GUILayout.Height(32f))) Game.ComputerOpen = false;
+            GUILayout.EndArea();
+        }
+
+        void DrawOrderList()
+        {
+            GUILayout.Label("Lieferung: sofort an den Eingang", hint);
             foreach (var option in Catalog.Orders)
             {
                 GUILayout.BeginHorizontal();
@@ -248,11 +271,46 @@ namespace TwoMoons
                 GUILayout.EndHorizontal();
                 GUILayout.Space(8f);
             }
-            GUILayout.EndScrollView();
+        }
 
-            GUILayout.Space(6f);
-            if (Button("Schließen [Esc]", GUILayout.Height(32f))) Game.ComputerOpen = false;
-            GUILayout.EndArea();
+        void DrawPriceList()
+        {
+            GUILayout.Label("Teurer als der Marktwert schreckt Kunden ab, günstiger bringt mehr Verkäufe und Ruf.", hint);
+            GUILayout.Space(4f);
+            foreach (var product in Catalog.Products)
+            {
+                int price = Game.GetPrice(product);
+                int profit = price - product.BuyPrice;
+
+                GUILayout.Label(product.Name, bold);
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"Einkauf: {Money.Format(product.BuyPrice)}", text);
+                GUILayout.Label($"Marktwert: {Money.Format(product.MarketValue)}", text);
+                GUILayout.EndHorizontal();
+
+                GUILayout.BeginHorizontal();
+                GUILayout.Label("Dein Preis", text, GUILayout.Width(80f));
+                // Schieberegler in 10-Cent-Schritten.
+                float euros = GUILayout.HorizontalSlider(price / 100f, GameManager.MinPrice / 100f, GameManager.MaxPrice / 100f, GUILayout.Height(20f));
+                int newPrice = Mathf.RoundToInt(euros * 10f) * 10;
+                if (newPrice != price) Game.SetPrice(product, newPrice);
+                GUILayout.Label(Money.Format(price), bold, GUILayout.Width(70f));
+                GUILayout.EndHorizontal();
+
+                GUI.color = profit > 0 ? new Color(0.6f, 1f, 0.6f) : new Color(1f, 0.55f, 0.55f);
+                GUILayout.Label($"Gewinn pro Pack: {Money.Format(profit)}   ·   {PriceVerdict(price, product.MarketValue)}", text);
+                GUI.color = Color.white;
+                GUILayout.Space(10f);
+            }
+        }
+
+        static string PriceVerdict(int price, int marketValue)
+        {
+            float ratio = price / (float)marketValue;
+            if (ratio <= 0.85f) return "Schnäppchen!";
+            if (ratio <= 1f) return "Fairer Preis";
+            if (ratio <= 1.3f) return "Etwas teuer";
+            return "Viel zu teuer";
         }
 
         void DrawSummary(float width)

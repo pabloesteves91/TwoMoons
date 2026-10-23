@@ -59,6 +59,8 @@ namespace TwoMoons
         public float DayTime { get; private set; }
         public DayStats Today { get; private set; } = new DayStats();
 
+        readonly Dictionary<ProductId, int> prices = new Dictionary<ProductId, int>();
+
         public bool ComputerOpen;
         public bool SettingsOpen;
         public bool BuildMode;
@@ -239,7 +241,18 @@ namespace TwoMoons
             CustomerServed?.Invoke();
         }
 
-        public void CustomerLeftHappy() => ChangeReputation(2);
+        public const int MinPrice = 100;
+        public const int MaxPrice = 1000;
+
+        /// <summary>Verkaufspreis pro Stück. Ohne eigene Einstellung gilt der Marktwert.</summary>
+        public int GetPrice(Product product) =>
+            prices.TryGetValue(product.Id, out int cents) ? cents : product.MarketValue;
+
+        public void SetPrice(Product product, int cents) =>
+            prices[product.Id] = Mathf.Clamp(cents, MinPrice, MaxPrice);
+
+        /// <summary>Schnäppchen freuen die Kunden besonders.</summary>
+        public void CustomerLeftHappy(bool bargain) => ChangeReputation(bargain ? 3 : 2);
 
         public void CustomerLeftUnhappy(string reason)
         {

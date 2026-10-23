@@ -9,7 +9,10 @@ namespace TwoMoons
         public ProductId Id;
         public string Name;
         public string SpriteKey;
-        public int SellPrice;
+        /// <summary>Einkaufspreis pro Stück beim Großhändler.</summary>
+        public int BuyPrice;
+        /// <summary>Was Kunden für fair halten. Startwert für den Verkaufspreis.</summary>
+        public int MarketValue;
     }
 
     public class OrderOption
@@ -30,8 +33,12 @@ namespace TwoMoons
             Id = ProductId.MonsteraPack,
             Name = "Monstera-Booster",
             SpriteKey = "packMonstera",
-            SellPrice = 400,
+            BuyPrice = 250,
+            MarketValue = 400,
         };
+
+        /// <summary>Alles, wofür man am Computer einen Preis festlegen kann.</summary>
+        public static readonly Product[] Products = { MonsteraPack };
 
         public static readonly OrderOption[] Orders =
         {

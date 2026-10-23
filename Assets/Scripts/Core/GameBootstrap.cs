@@ -12,7 +12,7 @@ namespace TwoMoons
         [SerializeField] AudioLibrary sounds = null;
 
         static readonly Vector2Int[] StartDirt =
-            { new Vector2Int(2, 3), new Vector2Int(5, 4), new Vector2Int(8, 5), new Vector2Int(7, 8), new Vector2Int(9, 6) };
+            { new Vector2Int(2, 3), new Vector2Int(7, 4), new Vector2Int(17, 5), new Vector2Int(12, 8), new Vector2Int(19, 7) };
 
         void Awake()
         {

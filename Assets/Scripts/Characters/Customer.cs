@@ -14,6 +14,11 @@ namespace TwoMoons
         const float BrowseSeconds = 2f;
         const float PatienceSeconds = 30f;
 
+        /// <summary>Bis zu diesem Anteil vom Marktwert gilt der Preis als Schnäppchen.</summary>
+        const float BargainRatio = 0.85f;
+        /// <summary>Ab Marktwert steigt die Chance, dass der Kunde nicht kauft; bei +60 % kauft keiner mehr.</summary>
+        const float PainRange = 0.6f;
+
         State state;
         List<Vector2Int> path;
         int pathIndex;
@@ -22,9 +27,11 @@ namespace TwoMoons
         Shelf shelf;
         Product product;
         int itemCount;
+        int unitPrice;
+        bool bargain;
         SpriteRenderer spriteRenderer;
 
-        public int Total => product == null ? 0 : itemCount * product.SellPrice;
+        public int Total => itemCount * unitPrice;
 
         public bool IsWaitingAtRegister => state == State.Queued && queueIndex == 0 && Arrived;
 
@@ -104,7 +111,23 @@ namespace TwoMoons
                     timer -= Time.deltaTime;
                     if (timer > 0f) break;
                     product = shelf != null ? shelf.Product : null;
-                    itemCount = shelf != null ? shelf.Take(Random.Range(1, 4)) : 0;
+                    if (product == null)
+                    {
+                        Leave(false, "Ein Kunde ist gegangen: Das Regal war leer.");
+                        break;
+                    }
+
+                    // Preis mit dem Marktwert vergleichen.
+                    unitPrice = Game.GetPrice(product);
+                    float ratio = unitPrice / (float)product.MarketValue;
+                    if (Random.value < Mathf.Clamp01((ratio - 1f) / PainRange))
+                    {
+                        Leave(false, $"Ein Kunde fand {product.Name} zu teuer ({Money.Format(unitPrice)}).");
+                        break;
+                    }
+                    bargain = ratio <= BargainRatio;
+                    itemCount = shelf.Take(Random.Range(1, 4) + (bargain ? 1 : 0));
+
                     if (itemCount == 0)
                     {
                         Leave(false, "Ein Kunde ist gegangen: Das Regal war leer.");
@@ -158,7 +181,7 @@ namespace TwoMoons
             if (itemCount > 0 && shelf != null) shelf.PutBack(product, itemCount);
             itemCount = 0;
 
-            if (happy) Game.CustomerLeftHappy();
+            if (happy) Game.CustomerLeftHappy(bargain);
             else Game.CustomerLeftUnhappy(reason);
 
             state = State.Leaving;
