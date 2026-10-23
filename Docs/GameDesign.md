@@ -58,9 +58,29 @@ Drei Stufen: **Gewöhnlich**, **Selten**, **Ultra-Selten**.
 
 Drei erfundene Spiele, jeweils mit eigenem Stil:
 
-1. **Monster sammeln** – süße und coole Kreaturen zum Sammeln
-2. **Fantasy & Magie** – Zauberer, Drachen, Ritter
-3. **Anime & Duelle** – Duellanten, Krieger, spektakuläre Monster
+1. **Monstera** – Monster sammeln: süße und coole Kreaturen
+2. **Spellforge** – Fantasy & Magie: Zauberer, Drachen, Ritter
+3. **Soul Clash** – Anime & Duelle: Duellanten, Krieger, spektakuläre Monster
+
+## Story-Kapitel (Entwurf)
+
+Jedes Kapitel hat Aufgaben, schaltet neue Funktionen frei und endet mit einer kleinen Szene.
+
+| # | Kapitel | Aufgaben (Beispiele) | Schaltet frei |
+|---|---|---|---|
+| 1 | **Der Traum beginnt** | Laden putzen, erstes Regal aufstellen, Monstera-Packs einräumen, erste 5 Kunden bedienen | Grundverkauf, Kasse, Tagesablauf |
+| 2 | **Die ersten Stammkunden** | Preise anpassen, 3 Tage mit Gewinn abschließen, Zubehör ins Sortiment nehmen | Spellforge, Zubehör, Preisgestaltung |
+| 3 | **Schätze aus dem Pack** | 10 Packs selbst öffnen, erste Ultra-Seltene finden, Vitrine aufstellen | Pack-Öffnen, Sammelbuch, Vitrine & Einzelkarten |
+| 4 | **Handeln wie ein Profi** | Erste Sammlung eines Kunden ankaufen, Karte mit Gewinn weiterverkaufen | Ankauf & Verhandeln, Soul Clash |
+| 5 | **Der erste Spieltisch** | Spieltisch kaufen, erstes kleines Turnier ausrichten | Spieltische, kleine Turniere |
+| 6 | **TwoMoons wächst** | Laden erweitern, ersten Mitarbeiter einstellen, Ruf-Stufe erreichen | Ladenerweiterung, Mitarbeiter |
+| 7 | **Das große Turnier** | Großes Stadtturnier vorbereiten und ausrichten | Finale: TwoMoons ist der beste Laden der Stadt |
+
+**Ruf-Stufen:** Unbekannt → Geheimtipp → Beliebt → Stadtbekannt → Legendär.
+Zufriedene Kunden, faire Preise und gelungene Turniere erhöhen den Ruf. Manche
+Kapitel brauchen eine bestimmte Ruf-Stufe, bevor sie beginnen.
+
+Nach dem Finale kann man weiterspielen.
 
 ## Grafik-Vorgaben für eigene Bilder
 
@@ -79,7 +99,6 @@ Drei erfundene Spiele, jeweils mit eigenem Stil:
 ## Offen
 
 - Aussehen der Hauptfigur
-- Inhalt der einzelnen Story-Kapitel
-- Namen der drei Kartenspiele
+- Story-Kapitel prüfen und anpassen (Entwurf oben)
 - Bedeutung des Namens „TwoMoons“ in der Story
 - Seltenheitsstufen und Kartenwerte
