@@ -27,8 +27,28 @@ bis zum Ziel.
 5. **Packs öffnen** – Seltene Karten behalten, verkaufen oder ausstellen.
 6. **Ausbauen** – Laden vergrößern, Möbel, Spieltische, Turniere, Mitarbeiter.
 
+## Zeit
+
+Das Spiel läuft in Tagen: Morgens öffnet der Laden, abends schließt er. Danach folgen
+Abrechnung, Ware bestellen und Schlafen, dann beginnt der nächste Tag.
+
+## Angebot im Laden
+
+- **Boosterpacks und Displays** der drei Kartenspiele
+- **Einzelkarten** – wertvolle Karten in einer Vitrine ausstellen und teuer verkaufen
+- **Ankauf** – Kunden bieten Karten an, der Preis wird ausgehandelt
+- **Spieltische und Turniere** – Kunden spielen im Laden, Turniere bringen Ruf und Einnahmen
+- **Zubehör** – Hüllen, Ordner, Spielmatten, Snacks und Getränke
+
+## Seltenheiten
+
+Drei Stufen: **Gewöhnlich**, **Selten**, **Ultra-Selten**.
+
 ## Story
 
+- **Hauptfigur:** Den Namen wählt der Spieler beim Spielstart.
+- **Aufbau:** Kapitel mit Aufgaben und Belohnungen bilden den roten Faden. Der Ruf des
+  Ladens steigt mit zufriedenen Kunden und zeigt den Fortschritt.
 - **Anfang:** Die Hauptfigur erfüllt sich einen Kindheitstraum: Sie kündigt ihren Job
   und eröffnet mit wenig Geld ihren eigenen TCG-Laden TwoMoons.
 - **Ziel/Ende:** TwoMoons wird zum besten Laden der Stadt – Höhepunkt ist ein großes
@@ -58,7 +78,8 @@ Drei erfundene Spiele, jeweils mit eigenem Stil:
 
 ## Offen
 
-- Name und Aussehen der Hauptfigur
+- Aussehen der Hauptfigur
+- Inhalt der einzelnen Story-Kapitel
 - Namen der drei Kartenspiele
 - Bedeutung des Namens „TwoMoons“ in der Story
 - Seltenheitsstufen und Kartenwerte
