@@ -96,6 +96,17 @@ Nach dem Finale kann man weiterspielen.
 - Lautstärke: Musik und Effekte getrennt einstellbar (Menü über Esc), wird gespeichert
 - Zuerst erzeugte Platzhalter (WAV in `Assets/Art/Audio`), eigene Sounds mit gleichem Dateinamen ersetzen
 
+## Startmenü und Speichern (geplant)
+
+- **Hintergrund:** der Laden leicht abgedunkelt, Kunden laufen herum
+- **Logo:** Pixel-Version des TwoMoons-Logos im Startmenü (`Assets/Art/UI/logo.png`);
+  Original-Logo zusätzlich möglich, Pixel-Version auch im Spiel (z. B. Ladenschild)
+- **Menüpunkte:** Fortsetzen (nur wenn ein Spielstand existiert) · Neues Spiel · Laden · Einstellungen · Credits · Beenden
+- **Speichern:** automatisch jeden Abend beim Schlafen + jederzeit manuell über das Esc-Menü
+- **3 Speicherplätze**, jeder zeigt Name und Figur, Tag und Kapitel, Datum der letzten Speicherung
+- **Credits:** vorerst Platzhalter „TwoMoons – ein Spiel von …“
+- **Farben:** alle Menüs in den Logo-Farben – Dunkelbraun als Hintergrund, Rot-Orange und Gold für Knöpfe und Akzente
+
 ## Grafik-Vorgaben für eigene Bilder
 
 - Raster: 16×16 Pixel pro Bodenfeld (1 Unity-Einheit = 16 Pixel)
