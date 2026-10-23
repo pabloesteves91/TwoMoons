@@ -78,7 +78,7 @@ namespace TwoMoons
 
         /// <summary>
         /// Zeichnet das Logo in die Box (Seitenverhältnis bleibt erhalten).
-        /// Erst aus der SpriteLibrary, sonst direkt aus Assets/Art/UI/Resources/logo.png, sonst als Schriftzug.
+        /// Erst aus der SpriteLibrary, sonst direkt aus Assets/Art/UI/Resources (beliebiger Dateiname), sonst als Schriftzug.
         /// </summary>
         public static void DrawLogo(Rect box)
         {
@@ -90,12 +90,21 @@ namespace TwoMoons
                 return;
             }
 
-            if (logoTexture == null) logoTexture = Resources.Load<Texture2D>("logo");
+            if (logoTexture == null) logoTexture = LoadLogoTexture();
             if (logoTexture != null) GUI.DrawTexture(Fit(box, logoTexture.width, logoTexture.height), logoTexture);
             else GUI.Label(box, "TwoMoons", BigTitle);
         }
 
-        static Rect Fit(Rect box, float width, float height)
+        /// <summary>„logo.png“, sonst das erste Bild im Resources-Ordner – egal wie die Datei heißt.</summary>
+        static Texture2D LoadLogoTexture()
+        {
+            var logo = Resources.Load<Texture2D>("logo");
+            if (logo != null) return logo;
+            var all = Resources.LoadAll<Texture2D>("");
+            return all.Length > 0 ? all[0] : null;
+        }
+
+                static Rect Fit(Rect box, float width, float height)
         {
             float scale = Mathf.Min(box.width / width, box.height / height);
             var size = new Vector2(width * scale, height * scale);
