@@ -12,8 +12,8 @@ bis zum Ziel.
 | Thema | Entscheidung |
 |---|---|
 | Ansicht | 2D, von oben (Top-Down) |
-| Grafik | Zuerst Platzhalter (einfache Formen), später echte Sprites |
-| Karten | Mehrere erfundene Kartenspiele mit eigenen Namen und Designs (keine echten Marken) |
+| Grafik | Pixel-Art im 16×16-Raster. Zuerst Platzhalter, Logo und Pixelbilder werden später durch eigene ersetzt |
+| Karten | Drei erfundene Kartenspiele mit eigenen Namen und Designs (keine echten Marken) |
 | Boosterpacks | Großes Highlight: Öffnen mit Animation, Seltenheitsstufen, Sammelbuch, wertvolle Karten verkaufen |
 | Steuerung | Kombiniert: Figur läuft durch den Laden (WASD/Controller), Bau-Modus mit der Maus zum Einrichten |
 | Ziel | Story mit Figuren, Aufgaben und einem Ende |
@@ -27,6 +27,27 @@ bis zum Ziel.
 5. **Packs öffnen** – Seltene Karten behalten, verkaufen oder ausstellen.
 6. **Ausbauen** – Laden vergrößern, Möbel, Spieltische, Turniere, Mitarbeiter.
 
+## Story
+
+- **Anfang:** Die Hauptfigur erfüllt sich einen Kindheitstraum: Sie kündigt ihren Job
+  und eröffnet mit wenig Geld ihren eigenen TCG-Laden TwoMoons.
+- **Ziel/Ende:** TwoMoons wird zum besten Laden der Stadt – Höhepunkt ist ein großes
+  Turnier/Event, das der Laden ausrichtet.
+
+## Kartenspiele
+
+Drei erfundene Spiele, jeweils mit eigenem Stil:
+
+1. **Monster sammeln** – süße und coole Kreaturen zum Sammeln
+2. **Fantasy & Magie** – Zauberer, Drachen, Ritter
+3. **Anime & Duelle** – Duellanten, Krieger, spektakuläre Monster
+
+## Grafik-Vorgaben für eigene Bilder
+
+- Raster: 16×16 Pixel pro Bodenfeld (1 Unity-Einheit = 16 Pixel)
+- Import: Filter Mode „Point“, keine Kompression, Pixels Per Unit = 16
+- Platzhalter haben dieselbe Größe wie die späteren Bilder, damit sie direkt ausgetauscht werden können
+
 ## Erster Prototyp
 
 - Kleiner Laden mit Platzhaltergrafik
@@ -37,6 +58,7 @@ bis zum Ziel.
 
 ## Offen
 
-- Story: Wer ist die Hauptfigur, warum der Laden, was ist das Ende?
-- Namen und Themen der erfundenen Kartenspiele
+- Name und Aussehen der Hauptfigur
+- Namen der drei Kartenspiele
+- Bedeutung des Namens „TwoMoons“ in der Story
 - Seltenheitsstufen und Kartenwerte
