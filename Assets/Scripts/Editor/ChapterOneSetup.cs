@@ -6,11 +6,13 @@ using UnityEngine;
 
 namespace TwoMoons.EditorTools
 {
-    /// <summary>Menü „TwoMoons → Kapitel 1 einrichten“: legt Platzhalter-Bilder, SpriteLibrary und Szene an.</summary>
+    /// <summary>Menü „TwoMoons → Kapitel 1 einrichten“: legt Platzhalter-Bilder und -Sounds, die Bibliotheken und die Szene an.</summary>
     public static class ChapterOneSetup
     {
         const string SpriteFolder = PixelArtImporter.ArtFolder + "Sprites";
         const string LibraryPath = PixelArtImporter.ArtFolder + "SpriteLibrary.asset";
+        const string AudioFolder = PixelArtImporter.ArtFolder + "Audio";
+        const string AudioLibraryPath = PixelArtImporter.ArtFolder + "AudioLibrary.asset";
         const string ScenePath = "Assets/Scenes/Kapitel1.unity";
 
         [MenuItem("TwoMoons/Kapitel 1 einrichten")]
@@ -21,14 +23,17 @@ namespace TwoMoons.EditorTools
                 return;
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
 
-            int created = CreateMissingSprites();
+            int createdSprites = CreateMissingSprites();
+            int createdSounds = CreateMissingSounds();
             var library = CreateOrUpdateLibrary();
-            CreateScene(library);
+            var audioLibrary = CreateOrUpdateAudioLibrary();
+            CreateScene(library, audioLibrary);
 
             EditorUtility.DisplayDialog("TwoMoons",
-                $"Kapitel 1 ist eingerichtet ({created} neue Platzhalter-Bilder).\n\n" +
+                $"Kapitel 1 ist eingerichtet ({createdSprites} neue Platzhalter-Bilder, {createdSounds} neue Sounds).\n\n" +
                 "Drücke jetzt auf Play.\n\n" +
-                $"Eigene 16×16-Pixelbilder: einfach die PNGs in {SpriteFolder} mit demselben Namen ersetzen.",
+                $"Eigene 16×16-Pixelbilder: die PNGs in {SpriteFolder} mit demselben Namen ersetzen.\n" +
+                $"Eigene Sounds: die WAVs in {AudioFolder} mit demselben Namen ersetzen.",
                 "OK");
         }
 
@@ -48,6 +53,66 @@ namespace TwoMoons.EditorTools
             }
             AssetDatabase.Refresh();
             return created;
+        }
+
+        /// <summary>Schreibt nur Sounds, die es noch nicht gibt – eigene Sounds werden nie überschrieben.</summary>
+        static int CreateMissingSounds()
+        {
+            Directory.CreateDirectory(AudioFolder);
+            int created = 0;
+            foreach (var key in AudioLibrary.Keys)
+            {
+                string path = $"{AudioFolder}/{key}.wav";
+                if (File.Exists(path)) continue;
+                WriteWav(path, PlaceholderSounds.CreateSamples(key), PlaceholderSounds.SampleRate);
+                created++;
+            }
+            AssetDatabase.Refresh();
+            return created;
+        }
+
+        /// <summary>16-Bit-Mono-WAV.</summary>
+        static void WriteWav(string path, float[] samples, int sampleRate)
+        {
+            using (var writer = new BinaryWriter(File.Create(path)))
+            {
+                int dataSize = samples.Length * 2;
+                writer.Write(System.Text.Encoding.ASCII.GetBytes("RIFF"));
+                writer.Write(36 + dataSize);
+                writer.Write(System.Text.Encoding.ASCII.GetBytes("WAVEfmt "));
+                writer.Write(16);
+                writer.Write((short)1);
+                writer.Write((short)1);
+                writer.Write(sampleRate);
+                writer.Write(sampleRate * 2);
+                writer.Write((short)2);
+                writer.Write((short)16);
+                writer.Write(System.Text.Encoding.ASCII.GetBytes("data"));
+                writer.Write(dataSize);
+                foreach (float sample in samples)
+                    writer.Write((short)Mathf.RoundToInt(Mathf.Clamp(sample, -1f, 1f) * short.MaxValue));
+            }
+        }
+
+        static AudioLibrary CreateOrUpdateAudioLibrary()
+        {
+            var library = AssetDatabase.LoadAssetAtPath<AudioLibrary>(AudioLibraryPath);
+            if (library == null)
+            {
+                library = ScriptableObject.CreateInstance<AudioLibrary>();
+                AssetDatabase.CreateAsset(library, AudioLibraryPath);
+            }
+
+            foreach (var key in AudioLibrary.Keys)
+            {
+                var field = typeof(AudioLibrary).GetField(key);
+                if (field.GetValue(library) as AudioClip != null) continue;
+                field.SetValue(library, AssetDatabase.LoadAssetAtPath<AudioClip>($"{AudioFolder}/{key}.wav"));
+            }
+
+            EditorUtility.SetDirty(library);
+            AssetDatabase.SaveAssets();
+            return library;
         }
 
         static SpriteLibrary CreateOrUpdateLibrary()
@@ -71,7 +136,7 @@ namespace TwoMoons.EditorTools
             return library;
         }
 
-        static void CreateScene(SpriteLibrary library)
+        static void CreateScene(SpriteLibrary library, AudioLibrary audioLibrary)
         {
             var scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
@@ -83,6 +148,7 @@ namespace TwoMoons.EditorTools
             var bootstrap = new GameObject("TwoMoons").AddComponent<GameBootstrap>();
             var serialized = new SerializedObject(bootstrap);
             serialized.FindProperty("sprites").objectReferenceValue = library;
+            serialized.FindProperty("sounds").objectReferenceValue = audioLibrary;
             serialized.ApplyModifiedPropertiesWithoutUndo();
 
             EditorSceneManager.SaveScene(scene, ScenePath);

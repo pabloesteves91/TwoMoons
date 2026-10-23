@@ -14,6 +14,7 @@ namespace TwoMoons
         GUIStyle panel, text, bold, title, prompt, hint, button;
         string nameInput = "";
         int figure;
+        Vector2 orderScroll;
 
         static GameManager Game => GameManager.Instance;
 
@@ -26,11 +27,12 @@ namespace TwoMoons
 
             if (Game.Phase == GamePhase.CharacterSelect)
             {
-                DrawCharacterSelect(width);
+                if (Game.SettingsOpen) DrawSettings(width);
+                else DrawCharacterSelect(width);
                 return;
             }
 
-            DrawTopBar();
+            DrawTopBar(width);
             float questsBottom = DrawQuests(width);
             DrawToasts(width, questsBottom + Margin);
             DrawPrompt(width);
@@ -38,7 +40,18 @@ namespace TwoMoons
             if (Game.ComputerOpen) DrawComputer(width);
             if (Game.Phase == GamePhase.Summary) DrawSummary(width);
             if (Game.DialogLines != null) DrawDialog(width);
+            if (Game.SettingsOpen) DrawSettings(width);
         }
+
+        /// <summary>Knopf mit Klick-Sound.</summary>
+        bool Button(GUIContent content, params GUILayoutOption[] options)
+        {
+            if (!GUILayout.Button(content, button, options)) return false;
+            SoundManager.Play(Sfx.UiClick);
+            return true;
+        }
+
+        bool Button(string label, params GUILayoutOption[] options) => Button(new GUIContent(label), options);
 
         void DrawCharacterSelect(float width)
         {
@@ -62,7 +75,7 @@ namespace TwoMoons
                 var sprite = Art.Get($"player{i + 1}");
                 bool selected = figure == i;
                 GUI.color = selected ? Color.white : new Color(1f, 1f, 1f, 0.55f);
-                if (GUILayout.Button(GUIContent.none, button, GUILayout.Width(110f), GUILayout.Height(110f))) figure = i;
+                if (Button(GUIContent.none, GUILayout.Width(110f), GUILayout.Height(110f))) figure = i;
                 var buttonRect = GUILayoutUtility.GetLastRect();
                 DrawSprite(sprite, new Rect(buttonRect.x + 15f, buttonRect.y + 10f, 80f, 80f));
                 if (selected) GUI.Label(new Rect(buttonRect.x, buttonRect.yMax - 22f, buttonRect.width, 20f), "ausgewählt", hint);
@@ -72,14 +85,18 @@ namespace TwoMoons
             GUILayout.EndHorizontal();
             GUILayout.FlexibleSpace();
 
+            GUILayout.BeginHorizontal();
+            if (Button("Einstellungen", GUILayout.Width(140f), GUILayout.Height(40f))) Game.SettingsOpen = true;
+            GUILayout.Space(10f);
             GUI.enabled = nameInput.Trim().Length > 0;
-            if (GUILayout.Button("Los geht's!", button, GUILayout.Height(40f))) Game.StartGame(nameInput, figure);
+            if (Button("Los geht's!", GUILayout.Height(40f))) Game.StartGame(nameInput, figure);
             GUI.enabled = true;
+            GUILayout.EndHorizontal();
 
             GUILayout.EndArea();
         }
 
-        void DrawTopBar()
+        void DrawTopBar(float width)
         {
             string phase;
             switch (Game.Phase)
@@ -89,8 +106,12 @@ namespace TwoMoons
                 case GamePhase.Closing: phase = "Ladenschluss"; break;
                 default: phase = "Feierabend"; break;
             }
-            string line = $"Tag {Game.Day}   {Game.ClockText}   {phase}      Geld: {Money.Format(Game.MoneyCents)}      Ruf: {Game.ReputationName}";
-            GUI.Box(new Rect(Margin, Margin, 640f, 34f), line, panel);
+            string line = $"Tag {Game.Day}  ·  {Game.ClockText}  ·  {phase}  ·  Geld: {Money.Format(Game.MoneyCents)}  ·  Ruf: {Game.ReputationName}  ·  [Esc] Menü";
+            // Platz lassen für die Aufgabenliste rechts.
+            float barWidth = Mathf.Min(760f, width - 270f - 3f * Margin);
+            var content = new GUIContent(line);
+            float barHeight = Mathf.Max(34f, panel.CalcHeight(content, barWidth));
+            GUI.Box(new Rect(Margin, Margin, barWidth, barHeight), content, panel);
         }
 
         /// <summary>Aufgabenliste oben rechts. Gibt die Unterkante zurück.</summary>
@@ -157,14 +178,17 @@ namespace TwoMoons
 
         void DrawComputer(float width)
         {
-            var area = new Rect((width - 440f) / 2f, 80f, 440f, 120f + Catalog.Orders.Length * 62f);
+            // Höchstens so hoch wie der Bildschirm; die Angebote darunter lassen sich scrollen.
+            float height = Mathf.Min(VirtualHeight - 120f, 150f + Catalog.Orders.Length * 70f);
+            var area = new Rect((width - 460f) / 2f, 60f, 460f, height);
             GUI.Box(area, GUIContent.none, panel);
             GUILayout.BeginArea(new Rect(area.x + 16f, area.y + 12f, area.width - 32f, area.height - 24f));
 
             GUILayout.Label("Großhandel – Bestellung", title);
-            GUILayout.Label($"Geld: {Money.Format(Game.MoneyCents)}     Lieferung: morgen früh", text);
+            GUILayout.Label($"Geld: {Money.Format(Game.MoneyCents)}     Lieferung: sofort an den Eingang", text);
             GUILayout.Space(8f);
 
+            orderScroll = GUILayout.BeginScrollView(orderScroll);
             foreach (var option in Catalog.Orders)
             {
                 GUILayout.BeginHorizontal();
@@ -174,24 +198,22 @@ namespace TwoMoons
                 GUILayout.EndVertical();
                 GUILayout.FlexibleSpace();
                 GUI.enabled = Game.MoneyCents >= option.Cost;
-                if (GUILayout.Button("Kaufen", button, GUILayout.Width(90f), GUILayout.Height(36f))) Game.Order(option);
+                if (Button("Kaufen", GUILayout.Width(90f), GUILayout.Height(36f))) Game.Order(option);
                 GUI.enabled = true;
                 GUILayout.EndHorizontal();
-                GUILayout.Space(6f);
+                GUILayout.Space(8f);
             }
+            GUILayout.EndScrollView();
 
-            if (Game.PendingDeliveries.Count > 0)
-                GUILayout.Label($"Bestellt für morgen: {Game.PendingDeliveries.Count} Lieferung(en)", text);
-
-            GUILayout.FlexibleSpace();
-            if (GUILayout.Button("Schließen [Esc]", button, GUILayout.Height(32f))) Game.ComputerOpen = false;
+            GUILayout.Space(6f);
+            if (Button("Schließen [Esc]", GUILayout.Height(32f))) Game.ComputerOpen = false;
             GUILayout.EndArea();
         }
 
         void DrawSummary(float width)
         {
             var stats = Game.Today;
-            var area = new Rect((width - 420f) / 2f, 80f, 420f, 330f);
+            var area = new Rect((width - 420f) / 2f, 80f, 420f, 310f);
             GUI.Box(area, GUIContent.none, panel);
             GUILayout.BeginArea(new Rect(area.x + 20f, area.y + 14f, area.width - 40f, area.height - 28f));
 
@@ -205,14 +227,39 @@ namespace TwoMoons
             SummaryRow("Zufriedene Kunden", stats.CustomersServed.ToString());
             SummaryRow("Unzufriedene Kunden", stats.CustomersUnhappy.ToString());
             SummaryRow("Ruf", Game.ReputationName);
-            GUILayout.Space(6f);
-            GUILayout.Label(Game.PendingDeliveries.Count > 0
-                ? $"Morgen früh kommen {Game.PendingDeliveries.Count} Lieferung(en)."
-                : "Für morgen ist nichts bestellt.", text);
 
             GUILayout.FlexibleSpace();
-            if (GUILayout.Button($"Schlafen → Tag {Game.Day + 1}", button, GUILayout.Height(40f))) Game.Sleep();
+            if (Button($"Schlafen → Tag {Game.Day + 1}", GUILayout.Height(40f))) Game.Sleep();
             GUILayout.EndArea();
+        }
+
+        void DrawSettings(float width)
+        {
+            var area = new Rect((width - 400f) / 2f, 110f, 400f, 250f);
+            GUI.Box(area, GUIContent.none, panel);
+            GUILayout.BeginArea(new Rect(area.x + 20f, area.y + 14f, area.width - 40f, area.height - 28f));
+
+            GUILayout.Label("Einstellungen", title);
+            GUILayout.Space(10f);
+            float music = VolumeSlider("Musik", SoundManager.MusicVolume);
+            if (!Mathf.Approximately(music, SoundManager.MusicVolume)) SoundManager.MusicVolume = music;
+            GUILayout.Space(8f);
+            float effects = VolumeSlider("Effekte", SoundManager.EffectsVolume);
+            if (!Mathf.Approximately(effects, SoundManager.EffectsVolume)) SoundManager.EffectsVolume = effects;
+
+            GUILayout.FlexibleSpace();
+            if (Button("Weiter [Esc]", GUILayout.Height(36f))) Game.SettingsOpen = false;
+            GUILayout.EndArea();
+        }
+
+        float VolumeSlider(string label, float value)
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label(label, bold, GUILayout.Width(80f));
+            float result = GUILayout.HorizontalSlider(value, 0f, 1f, GUILayout.Height(20f));
+            GUILayout.Label($"{Mathf.RoundToInt(result * 100f)} %", text, GUILayout.Width(50f));
+            GUILayout.EndHorizontal();
+            return result;
         }
 
         void SummaryRow(string label, string value)

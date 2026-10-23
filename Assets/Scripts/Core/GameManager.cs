@@ -58,9 +58,9 @@ namespace TwoMoons
         public int ShelvesToPlace;
         public float DayTime { get; private set; }
         public DayStats Today { get; private set; } = new DayStats();
-        public readonly List<OrderOption> PendingDeliveries = new List<OrderOption>();
 
         public bool ComputerOpen;
+        public bool SettingsOpen;
         public bool BuildMode;
 
         public string[] DialogLines { get; private set; }
@@ -79,7 +79,7 @@ namespace TwoMoons
 
         public bool InputLocked =>
             Phase == GamePhase.CharacterSelect || Phase == GamePhase.Summary ||
-            DialogLines != null || ComputerOpen || BuildMode;
+            DialogLines != null || ComputerOpen || SettingsOpen || BuildMode;
 
         public int ClockMinutes =>
             Phase == GamePhase.Preparation ? OpenMinute - 60 :
@@ -112,8 +112,8 @@ namespace TwoMoons
         {
             Toasts.RemoveAll(t => t.Until < Time.unscaledTime);
 
-            // Dialoge und das Bestellmenü halten das Spiel an.
-            Time.timeScale = DialogLines != null || ComputerOpen ? 0f : 1f;
+            // Dialoge, Bestellmenü und Einstellungen halten das Spiel an.
+            Time.timeScale = DialogLines != null || ComputerOpen || SettingsOpen ? 0f : 1f;
 
             if (DialogLines != null)
             {
@@ -121,7 +121,19 @@ namespace TwoMoons
                 return;
             }
 
-            if (ComputerOpen && GameInput.CancelPressed) ComputerOpen = false;
+            if (ComputerOpen)
+            {
+                if (GameInput.ConsumeCancel()) ComputerOpen = false;
+            }
+            else if (SettingsOpen)
+            {
+                if (GameInput.ConsumeCancel()) SettingsOpen = false;
+            }
+            else if (!InputLocked && GameInput.ConsumeCancel())
+            {
+                SettingsOpen = true;
+                SoundManager.Play(Sfx.UiClick);
+            }
 
             if (Phase == GamePhase.Open)
             {
@@ -130,12 +142,14 @@ namespace TwoMoons
                 {
                     Phase = GamePhase.Closing;
                     ShowToast("18:00 – Ladenschluss! Die letzten Kunden werden noch bedient.");
+                    SoundManager.Play(Sfx.DayEnd);
                 }
             }
             else if (Phase == GamePhase.Closing && Customer.Active.Count == 0)
             {
                 Phase = GamePhase.Summary;
                 ComputerOpen = false;
+                SettingsOpen = false;
                 BuildMode = false;
             }
         }
@@ -165,6 +179,7 @@ namespace TwoMoons
 
         void AdvanceDialog()
         {
+            SoundManager.Play(Sfx.Dialog);
             DialogIndex++;
             if (DialogIndex < DialogLines.Length) return;
             DialogLines = null;
@@ -183,20 +198,33 @@ namespace TwoMoons
             Phase = GamePhase.Open;
             DayTime = 0f;
             ShowToast("Der Laden ist geöffnet!");
+            SoundManager.Play(Sfx.Doorbell);
             ShopOpened?.Invoke();
         }
 
+        /// <summary>Bestellung bezahlen. Die Ware wird sofort am Eingang geliefert.</summary>
         public bool Order(OrderOption option)
         {
             if (MoneyCents < option.Cost)
             {
                 ShowToast("Dafür reicht das Geld nicht.");
+                SoundManager.Play(Sfx.Error);
                 return false;
             }
             MoneyCents -= option.Cost;
             Today.Expenses += option.Cost;
-            PendingDeliveries.Add(option);
-            ShowToast($"Bestellt: {option.Name}. Lieferung morgen früh.");
+            SoundManager.Play(Sfx.Order);
+
+            if (option.Kind == OrderKind.Shelf)
+            {
+                ShelvesToPlace++;
+                ShowToast($"Regal geliefert! Drücke [B], um es aufzustellen ({ShelvesToPlace} übrig).");
+            }
+            else
+            {
+                WorldFactory.SpawnBox(WorldFactory.FreeDeliveryCell(), Catalog.Get(option.Product), option.Amount);
+                ShowToast($"{option.Name} geliefert! Der Karton steht am Eingang.");
+            }
             return true;
         }
 
@@ -207,6 +235,7 @@ namespace TwoMoons
             Today.PacksSold += packs;
             Today.CustomersServed++;
             ShowToast($"+{Money.Format(cents)}", 2f);
+            SoundManager.Play(Sfx.Register);
             CustomerServed?.Invoke();
         }
 
@@ -223,32 +252,19 @@ namespace TwoMoons
         {
             int before = ReputationStage;
             Reputation = Mathf.Max(0, Reputation + delta);
-            if (ReputationStage > before) ShowToast($"Dein Laden ist jetzt „{ReputationName}“!", 5f);
+            if (ReputationStage <= before) return;
+            ShowToast($"Dein Laden ist jetzt „{ReputationName}“!", 5f);
+            SoundManager.Play(Sfx.Quest);
         }
 
-        /// <summary>Nach der Abrechnung: neuer Tag, Lieferungen kommen an.</summary>
+        /// <summary>Nach der Abrechnung beginnt ein neuer Tag.</summary>
         public void Sleep()
         {
             Day++;
             Today = new DayStats();
             DayTime = 0f;
             Phase = GamePhase.Preparation;
-
-            foreach (var order in PendingDeliveries)
-            {
-                if (order.Kind == OrderKind.Shelf)
-                {
-                    ShelvesToPlace++;
-                }
-                else
-                {
-                    var cell = WorldFactory.FreeDeliveryCell();
-                    WorldFactory.SpawnBox(cell, Catalog.Get(order.Product), order.Amount);
-                }
-            }
-            if (PendingDeliveries.Count > 0) ShowToast("Die Lieferung ist da!");
             if (ShelvesToPlace > 0) ShowToast($"Regale zum Aufstellen: {ShelvesToPlace} – drücke [B].");
-            PendingDeliveries.Clear();
 
             int dirt = UnityEngine.Random.Range(0, 3);
             for (int i = 0; i < dirt; i++) WorldFactory.SpawnDirtSomewhere();

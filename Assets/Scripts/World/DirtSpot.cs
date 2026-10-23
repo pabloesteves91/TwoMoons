@@ -6,6 +6,7 @@ namespace TwoMoons
 
         public override void Interact(PlayerController player)
         {
+            SoundManager.Play(Sfx.Clean);
             GameManager.Instance.NotifyDirtCleaned();
             Destroy(gameObject);
         }

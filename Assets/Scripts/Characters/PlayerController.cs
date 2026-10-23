@@ -76,6 +76,7 @@ namespace TwoMoons
             box.transform.SetParent(transform);
             box.transform.localPosition = new Vector3(0f, 0.55f, 0f);
             box.GetComponent<YSort>().bias = 60;
+            SoundManager.Play(Sfx.Pickup);
         }
 
         void Drop()
@@ -86,6 +87,7 @@ namespace TwoMoons
             box.transform.position = ShopGrid.CellToWorld(ShopGrid.WorldToCell(transform.position));
             box.GetComponent<YSort>().bias = 0;
             box.enabled = true;
+            SoundManager.Play(Sfx.Drop);
         }
 
         public void DestroyCarried()

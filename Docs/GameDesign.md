@@ -20,7 +20,7 @@ bis zum Ziel.
 
 ## Spielablauf
 
-1. **Einkaufen** – Boosterpacks und Displays beim Großhändler bestellen.
+1. **Einkaufen** – Boosterpacks und Displays am Computer beim Großhändler bestellen. Die Lieferung kommt sofort an den Eingang.
 2. **Einräumen** – Mit der Figur Ware ins Regal stellen.
 3. **Preise** – Preise festlegen: zu teuer → Kunden gehen, zu billig → kein Gewinn.
 4. **Verkaufen** – Kunden laufen herum, nehmen Ware und bezahlen an der Kasse.
@@ -84,6 +84,16 @@ Kapitel brauchen eine bestimmte Ruf-Stufe, bevor sie beginnen.
 
 Nach dem Finale kann man weiterspielen.
 
+## Sound
+
+- Stil: 8-Bit / Chiptune
+- Soundeffekte: Kasse, Türglocke, Karton aufheben/abstellen, Einräumen, Putzen, Bestellen, Aufstellen,
+  Fehler, Aufgabe erledigt, Kapitel-Fanfare, Ladenschluss
+- Menü-Klänge: Knöpfe und Dialoge
+- Hintergrundmusik: gemütliche Chiptune-Schleife
+- Lautstärke: Musik und Effekte getrennt einstellbar (Menü über Esc), wird gespeichert
+- Zuerst erzeugte Platzhalter (WAV in `Assets/Art/Audio`), eigene Sounds mit gleichem Dateinamen ersetzen
+
 ## Grafik-Vorgaben für eigene Bilder
 
 - Raster: 16×16 Pixel pro Bodenfeld (1 Unity-Einheit = 16 Pixel)
@@ -94,7 +104,7 @@ Nach dem Finale kann man weiterspielen.
 
 - Winziger Laden (10×8 Felder) mit Eingang, Theke, Kasse und Computer
 - Figurenauswahl (3 Figuren) und Namenseingabe beim Start
-- Ware wird am Computer hinter der Theke bestellt und kommt am nächsten Morgen als Karton
+- Ware wird am Computer hinter der Theke bestellt und kommt sofort als Karton an den Eingang
 - Kassieren: zur Kasse gehen und mit [E] jeden Kunden selbst bedienen
 - Tagesablauf: Vorbereitung → Laden öffnen (Schild an der Tür) → 9–18 Uhr (10 Minuten Echtzeit) → Abrechnung → Schlafen
 
@@ -107,12 +117,13 @@ Nach dem Finale kann man weiterspielen.
 1. Projekt in Unity 6 öffnen und warten, bis die Skripte kompiliert sind.
 2. Im Menü oben **TwoMoons → Kapitel 1 einrichten** wählen. Das legt an:
    - Platzhalter-Bilder in `Assets/Art/Sprites` (16×16 PNG)
-   - `Assets/Art/SpriteLibrary.asset` (verknüpft alle Bilder)
+   - Platzhalter-Sounds in `Assets/Art/Audio` (WAV)
+   - `Assets/Art/SpriteLibrary.asset` und `Assets/Art/AudioLibrary.asset` (verknüpfen alle Bilder und Sounds)
    - die Szene `Assets/Scenes/Kapitel1.unity`
 3. Auf **Play** drücken.
 
 **Steuerung:** WASD/Pfeiltasten laufen · E benutzen · Q Karton abstellen · B Bau-Modus
-(Linksklick aufstellen, Rechtsklick abbrechen) · Esc schließt Menüs. Controller geht auch.
+(Linksklick aufstellen, Rechtsklick abbrechen) · Esc öffnet die Einstellungen bzw. schließt Menüs. Controller geht auch.
 
 **Eigene Bilder:** Die PNGs in `Assets/Art/Sprites` mit gleichem Dateinamen durch eigene
 16×16-Pixelbilder ersetzen. Neue Bilder in `Assets/Art` bekommen automatisch die richtigen

@@ -43,6 +43,7 @@ namespace TwoMoons
             box.Amount -= moved;
             if (box.Amount <= 0) player.DestroyCarried();
             Refresh();
+            SoundManager.Play(Sfx.Stock);
             GameManager.Instance.NotifyShelfStocked(moved);
         }
 

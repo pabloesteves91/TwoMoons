@@ -44,10 +44,16 @@ namespace TwoMoons
 
             var game = GameManager.Instance;
             quest.Progress = Mathf.Min(quest.Target, quest.Progress + amount);
-            if (quest.Done) game.ShowToast($"Aufgabe erledigt: {quest.Text}");
+            if (!quest.Done) return;
+            game.ShowToast($"Aufgabe erledigt: {quest.Text}");
 
-            if (!Quests.TrueForAll(q => q.Done)) return;
+            if (!Quests.TrueForAll(q => q.Done))
+            {
+                SoundManager.Play(Sfx.Quest);
+                return;
+            }
             Completed = true;
+            SoundManager.Play(Sfx.Fanfare);
             game.ChangeReputation(10);
             game.ShowDialog(new[]
             {

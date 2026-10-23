@@ -45,6 +45,19 @@ namespace TwoMoons
             (Keyboard.current?.escapeKey.wasPressedThisFrame ?? false) ||
             (Gamepad.current?.buttonEast.wasPressedThisFrame ?? false);
 
+        static int cancelConsumedFrame = -1;
+
+        /// <summary>
+        /// Esc/Zurück nur einmal pro Frame auswerten, damit z. B. das Schließen des Bau-Modus
+        /// nicht gleichzeitig das Einstellungsmenü öffnet.
+        /// </summary>
+        public static bool ConsumeCancel()
+        {
+            if (!CancelPressed || cancelConsumedFrame == Time.frameCount) return false;
+            cancelConsumedFrame = Time.frameCount;
+            return true;
+        }
+
         /// <summary>Weiter in Dialogen: Leertaste, Enter, E, Mausklick oder A-Taste.</summary>
         public static bool ConfirmPressed =>
             (Keyboard.current?.spaceKey.wasPressedThisFrame ?? false) ||

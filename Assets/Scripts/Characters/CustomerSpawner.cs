@@ -17,7 +17,11 @@ namespace TwoMoons
             timer -= Time.deltaTime;
             if (timer > 0f) return;
 
-            if (Customer.Active.Count < MaxCustomers) WorldFactory.SpawnCustomer();
+            if (Customer.Active.Count < MaxCustomers)
+            {
+                WorldFactory.SpawnCustomer();
+                SoundManager.Play(Sfx.Doorbell);
+            }
             float reputationFactor = Mathf.Lerp(1f, 0.5f, game.ReputationStage / 4f);
             timer = Random.Range(8f, 16f) * reputationFactor;
         }

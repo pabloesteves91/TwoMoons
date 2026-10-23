@@ -27,13 +27,21 @@ namespace TwoMoons
                 ghost.enabled = false;
                 if (GameInput.BuildPressed && !game.InputLocked && game.Phase != GamePhase.Summary)
                 {
-                    if (game.ShelvesToPlace > 0) game.BuildMode = true;
-                    else game.ShowToast("Kein Regal zum Aufstellen – bestell eins am Computer.");
+                    if (game.ShelvesToPlace > 0)
+                    {
+                        game.BuildMode = true;
+                        SoundManager.Play(Sfx.UiClick);
+                    }
+                    else
+                    {
+                        game.ShowToast("Kein Regal zum Aufstellen – bestell eins am Computer.");
+                        SoundManager.Play(Sfx.Error);
+                    }
                 }
                 return;
             }
 
-            if (GameInput.BuildPressed || GameInput.CancelPressed || GameInput.RightClickPressed)
+            if (GameInput.BuildPressed || GameInput.RightClickPressed || GameInput.ConsumeCancel())
             {
                 game.BuildMode = false;
                 return;
@@ -46,8 +54,14 @@ namespace TwoMoons
             ghost.transform.position = ShopGrid.CellToWorld(cell);
             ghost.color = valid ? ValidColor : InvalidColor;
 
-            if (valid && GameInput.ClickPressed)
+            if (!GameInput.ClickPressed) return;
+            if (!valid)
             {
+                SoundManager.Play(Sfx.Error);
+            }
+            else
+            {
+                SoundManager.Play(Sfx.Build);
                 WorldFactory.SpawnShelf(cell);
                 game.ShelvesToPlace--;
                 game.NotifyShelfPlaced();
