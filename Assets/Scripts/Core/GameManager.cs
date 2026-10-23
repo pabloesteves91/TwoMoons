@@ -34,7 +34,7 @@ namespace TwoMoons
     public class GameManager : MonoBehaviour
     {
         public const int StartMoney = 10000;
-        public const float DayLengthSeconds = 240f;
+        public const float DayLengthSeconds = 600f;
         public const int OpenMinute = 9 * 60;
         public const int CloseMinute = 18 * 60;
 

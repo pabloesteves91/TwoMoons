@@ -96,7 +96,7 @@ Nach dem Finale kann man weiterspielen.
 - Figurenauswahl (3 Figuren) und Namenseingabe beim Start
 - Ware wird am Computer hinter der Theke bestellt und kommt am nächsten Morgen als Karton
 - Kassieren: zur Kasse gehen und mit [E] jeden Kunden selbst bedienen
-- Tagesablauf: Vorbereitung → Laden öffnen (Schild an der Tür) → 9–18 Uhr → Abrechnung → Schlafen
+- Tagesablauf: Vorbereitung → Laden öffnen (Schild an der Tür) → 9–18 Uhr (10 Minuten Echtzeit) → Abrechnung → Schlafen
 
 ## Offen
 
