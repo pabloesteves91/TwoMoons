@@ -101,4 +101,4 @@ Nach dem Finale kann man weiterspielen.
 - Aussehen der Hauptfigur
 - Story-Kapitel prüfen und anpassen (Entwurf oben)
 - Bedeutung des Namens „TwoMoons“ in der Story
-- Seltenheitsstufen und Kartenwerte
+- Kartenwerte und Pack-Wahrscheinlichkeiten je Seltenheit
