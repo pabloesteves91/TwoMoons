@@ -46,7 +46,9 @@ Drei Stufen: **Gewöhnlich**, **Selten**, **Ultra-Selten**.
 
 ## Story
 
-- **Hauptfigur:** Den Namen wählt der Spieler beim Spielstart.
+- **Hauptfigur:** Der Spieler wählt beim Spielstart aus 2–4 fertigen Figuren und gibt einen Namen ein.
+- **Der Name „TwoMoons“:** Es gibt eine sagenumwobene Karte „Two Moons“. Gerüchte über
+  sie ziehen sich durch die Story, und im Laufe des Spiels findet man sie.
 - **Aufbau:** Kapitel mit Aufgaben und Belohnungen bilden den roten Faden. Der Ruf des
   Ladens steigt mit zufriedenen Kunden und zeigt den Fortschritt.
 - **Anfang:** Die Hauptfigur erfüllt sich einen Kindheitstraum: Sie kündigt ihren Job
@@ -62,7 +64,7 @@ Drei erfundene Spiele, jeweils mit eigenem Stil:
 2. **Spellforge** – Fantasy & Magie: Zauberer, Drachen, Ritter
 3. **Soul Clash** – Anime & Duelle: Duellanten, Krieger, spektakuläre Monster
 
-## Story-Kapitel (Entwurf)
+## Story-Kapitel
 
 Jedes Kapitel hat Aufgaben, schaltet neue Funktionen frei und endet mit einer kleinen Szene.
 
@@ -98,7 +100,5 @@ Nach dem Finale kann man weiterspielen.
 
 ## Offen
 
-- Aussehen der Hauptfigur
-- Story-Kapitel prüfen und anpassen (Entwurf oben)
-- Bedeutung des Namens „TwoMoons“ in der Story
+- In welchem Kapitel die Karte „Two Moons“ gefunden wird
 - Kartenwerte und Pack-Wahrscheinlichkeiten je Seltenheit
