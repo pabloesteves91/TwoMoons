@@ -1,11 +1,28 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace TwoMoons
 {
     /// <summary>Kasse mit Warteschlange. Der Spieler kassiert jeden Kunden selbst mit [E].</summary>
     public class CashRegister : Interactable
     {
+        /// <summary>Im Hauptmenü kassiert der Laden von selbst.</summary>
+        const float DemoServeSeconds = 1.5f;
+
         readonly List<Customer> queue = new List<Customer>();
+        float demoTimer;
+
+        void Update()
+        {
+            var front = Front;
+            if (GameManager.Instance.Phase != GamePhase.MainMenu || front == null)
+            {
+                demoTimer = DemoServeSeconds;
+                return;
+            }
+            demoTimer -= Time.deltaTime;
+            if (demoTimer <= 0f) front.Pay();
+        }
 
         Customer Front => queue.Count > 0 && queue[0].IsWaitingAtRegister ? queue[0] : null;
 

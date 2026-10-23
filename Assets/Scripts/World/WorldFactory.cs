@@ -10,10 +10,13 @@ namespace TwoMoons
 
         static GameManager Game => GameManager.Instance;
 
+        /// <summary>Alles im Laden hängt hier drunter, damit die Welt für ein neues Spiel komplett abgebaut werden kann.</summary>
+        public static Transform Root;
+
         public static SpriteRenderer CreateSprite(string name, string spriteKey, Vector3 position, int order = 0, Transform parent = null)
         {
             var go = new GameObject(name);
-            go.transform.SetParent(parent, false);
+            go.transform.SetParent(parent != null ? parent : Root, false);
             go.transform.position = position;
             var renderer = go.AddComponent<SpriteRenderer>();
             renderer.sprite = Art.Get(spriteKey);
@@ -34,7 +37,7 @@ namespace TwoMoons
         public static void CreateBlocker(Vector2Int cell, Transform parent)
         {
             var go = new GameObject("Blocker");
-            go.transform.SetParent(parent, false);
+            go.transform.SetParent(parent != null ? parent : Root, false);
             go.transform.position = ShopGrid.CellToWorld(cell);
             go.AddComponent<BoxCollider2D>().size = Vector2.one;
         }

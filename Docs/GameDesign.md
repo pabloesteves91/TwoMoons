@@ -96,13 +96,18 @@ Nach dem Finale kann man weiterspielen.
 - Lautstärke: Musik und Effekte getrennt einstellbar (Menü über Esc), wird gespeichert
 - Zuerst erzeugte Platzhalter (WAV in `Assets/Art/Audio`), eigene Sounds mit gleichem Dateinamen ersetzen
 
-## Startmenü und Speichern (geplant)
+## Startmenü und Speichern
 
 - **Hintergrund:** der Laden leicht abgedunkelt, Kunden laufen herum
 - **Logo:** Pixel-Version des TwoMoons-Logos im Startmenü (`Assets/Art/UI/logo.png`);
   Original-Logo zusätzlich möglich, Pixel-Version auch im Spiel (z. B. Ladenschild)
 - **Menüpunkte:** Fortsetzen (nur wenn ein Spielstand existiert) · Neues Spiel · Laden · Einstellungen · Credits · Beenden
-- **Speichern:** automatisch jeden Abend beim Schlafen + jederzeit manuell über das Esc-Menü
+- **Speichern:** automatisch jeden Morgen nach dem Schlafen + jederzeit manuell über das Esc-Menü.
+  Spielstände liegen als JSON in `Application.persistentDataPath` (`spielstand_1.json` …).
+  Beim Laden beginnt der gespeicherte Tag morgens vor dem Öffnen.
+- **Esc-Menü im Spiel:** Weiter · Speichern · Einstellungen · Zum Hauptmenü · Spiel beenden (mit Nachfrage, ob gespeichert werden soll)
+- **Neues Spiel:** Speicherplatz wählen (belegt → Nachfrage „Überschreiben?“), dann Name und Figur
+- **Laden:** Spielstand wählen oder mit Nachfrage löschen
 - **3 Speicherplätze**, jeder zeigt Name und Figur, Tag und Kapitel, Datum der letzten Speicherung
 - **Credits:** vorerst Platzhalter „TwoMoons – ein Spiel von …“
 - **Farben:** alle Menüs in den Logo-Farben – Dunkelbraun als Hintergrund, Rot-Orange und Gold für Knöpfe und Akzente

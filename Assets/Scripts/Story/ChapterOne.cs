@@ -37,6 +37,16 @@ namespace TwoMoons
             game.CustomerServed += () => Advance(4, 1);
         }
 
+        public int[] SaveProgress() => Quests.ConvertAll(q => q.Progress).ToArray();
+
+        public void RestoreProgress(int[] progress)
+        {
+            if (progress == null) return;
+            for (int i = 0; i < Quests.Count && i < progress.Length; i++)
+                Quests[i].Progress = Mathf.Clamp(progress[i], 0, Quests[i].Target);
+            Completed = Quests.TrueForAll(q => q.Done);
+        }
+
         void Advance(int index, int amount)
         {
             var quest = Quests[index];

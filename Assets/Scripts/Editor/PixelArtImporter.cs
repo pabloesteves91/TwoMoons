@@ -10,6 +10,7 @@ namespace TwoMoons.EditorTools
     public class PixelArtImporter : AssetPostprocessor
     {
         public const string ArtFolder = "Assets/Art/";
+        public const string UiFolder = ArtFolder + "UI/";
 
         void OnPreprocessTexture()
         {
@@ -20,7 +21,8 @@ namespace TwoMoons.EditorTools
             importer.textureType = TextureImporterType.Sprite;
             importer.spriteImportMode = SpriteImportMode.Single;
             importer.spritePixelsPerUnit = Art.PixelsPerUnit;
-            importer.filterMode = FilterMode.Point;
+            // Menübilder (Logo) werden verkleinert angezeigt und sollen dabei weich bleiben.
+            importer.filterMode = assetPath.StartsWith(UiFolder) ? FilterMode.Bilinear : FilterMode.Point;
             importer.textureCompression = TextureImporterCompression.Uncompressed;
             importer.mipmapEnabled = false;
             importer.alphaIsTransparency = true;

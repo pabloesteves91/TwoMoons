@@ -47,6 +47,14 @@ namespace TwoMoons
             GameManager.Instance.NotifyShelfStocked(moved);
         }
 
+        /// <summary>Bestand direkt setzen (Spielstand laden, Hauptmenü).</summary>
+        public void SetStock(Product product, int stock)
+        {
+            Product = product;
+            Stock = Mathf.Clamp(stock, 0, Capacity);
+            Refresh();
+        }
+
         /// <summary>Kunde nimmt Ware. Gibt zurück, wie viele Packs er wirklich bekommen hat.</summary>
         public int Take(int wanted)
         {

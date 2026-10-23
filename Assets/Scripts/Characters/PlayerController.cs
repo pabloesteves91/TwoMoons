@@ -83,7 +83,7 @@ namespace TwoMoons
         {
             var box = Carried;
             Carried = null;
-            box.transform.SetParent(null);
+            box.transform.SetParent(WorldFactory.Root);
             box.transform.position = ShopGrid.CellToWorld(ShopGrid.WorldToCell(transform.position));
             box.GetComponent<YSort>().bias = 0;
             box.enabled = true;

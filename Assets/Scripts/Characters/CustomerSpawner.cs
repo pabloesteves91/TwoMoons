@@ -12,7 +12,7 @@ namespace TwoMoons
         void Update()
         {
             var game = GameManager.Instance;
-            if (game.Phase != GamePhase.Open) return;
+            if (game.Phase != GamePhase.Open && game.Phase != GamePhase.MainMenu) return;
 
             timer -= Time.deltaTime;
             if (timer > 0f) return;
@@ -20,7 +20,7 @@ namespace TwoMoons
             if (Customer.Active.Count < MaxCustomers)
             {
                 WorldFactory.SpawnCustomer();
-                SoundManager.Play(Sfx.Doorbell);
+                if (game.Phase != GamePhase.MainMenu) SoundManager.Play(Sfx.Doorbell);
             }
             float reputationFactor = Mathf.Lerp(1f, 0.5f, game.ReputationStage / 4f);
             timer = Random.Range(8f, 16f) * reputationFactor;

@@ -131,6 +131,9 @@ namespace TwoMoons.EditorTools
                 field.SetValue(library, AssetDatabase.LoadAssetAtPath<Sprite>($"{SpriteFolder}/{key}.png"));
             }
 
+            if (library.logo == null)
+                library.logo = AssetDatabase.LoadAssetAtPath<Sprite>(PixelArtImporter.UiFolder + "logo.png");
+
             EditorUtility.SetDirty(library);
             AssetDatabase.SaveAssets();
             return library;

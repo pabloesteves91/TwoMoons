@@ -11,6 +11,9 @@ namespace TwoMoons
         static SpriteLibrary library;
         static readonly Dictionary<string, Sprite> cache = new Dictionary<string, Sprite>();
 
+        /// <summary>Das TwoMoons-Logo für das Hauptmenü, oder null, wenn keins eingetragen ist.</summary>
+        public static Sprite Logo => library != null && library.logo != null ? library.logo : null;
+
         public static void Init(SpriteLibrary spriteLibrary)
         {
             library = spriteLibrary;

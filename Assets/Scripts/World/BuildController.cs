@@ -15,6 +15,7 @@ namespace TwoMoons
         {
             mainCamera = Camera.main;
             ghost = WorldFactory.CreateSprite("Bau-Vorschau", "shelf", Vector3.zero, 30000, transform);
+            ghost.transform.position = Vector3.zero;
             ghost.enabled = false;
         }
 

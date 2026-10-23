@@ -1,9 +1,10 @@
+using System.Collections;
 using UnityEngine;
 
 namespace TwoMoons
 {
     /// <summary>
-    /// Startpunkt von Kapitel 1: baut den Laden aus Code auf.
+    /// Startpunkt des Spiels: baut den Laden aus Code auf – fürs Hauptmenü, ein neues Spiel oder einen Spielstand.
     /// In der Szene braucht es nur dieses Objekt (und eine Kamera).
     /// </summary>
     public class GameBootstrap : MonoBehaviour
@@ -14,28 +15,79 @@ namespace TwoMoons
         static readonly Vector2Int[] StartDirt =
             { new Vector2Int(2, 3), new Vector2Int(7, 4), new Vector2Int(17, 5), new Vector2Int(12, 8), new Vector2Int(19, 7) };
 
+        /// <summary>Volle Regale für den Laden im Hintergrund des Hauptmenüs.</summary>
+        static readonly Vector2Int[] DemoShelves =
+            { new Vector2Int(8, 6), new Vector2Int(12, 6), new Vector2Int(16, 6), new Vector2Int(10, 3), new Vector2Int(18, 3) };
+
+        static GameBootstrap instance;
+        GameObject world;
+
         void Awake()
         {
+            instance = this;
             Art.Init(sprites);
             SoundManager.Init(sounds);
             SetUpCamera();
+            gameObject.AddComponent<SoundManager>();
+            Build(game => game.InitMainMenu());
+        }
+
+        public static void ShowMainMenu() => instance.StartCoroutine(instance.Rebuild(game => game.InitMainMenu()));
+
+        public static void NewGame(int slot) => instance.StartCoroutine(instance.Rebuild(game => game.InitNewGame(slot)));
+
+        public static void LoadGame(int slot)
+        {
+            var data = SaveSystem.Load(slot);
+            if (data == null) return;
+            instance.StartCoroutine(instance.Rebuild(game => game.InitFromSave(slot, data)));
+        }
+
+        /// <summary>Alte Welt abbauen, einen Frame warten (damit alles wirklich weg ist), neue aufbauen.</summary>
+        IEnumerator Rebuild(System.Action<GameManager> init)
+        {
+            Time.timeScale = 1f;
+            if (world != null) Destroy(world);
+            yield return null;
+            Build(init);
+        }
+
+        void Build(System.Action<GameManager> init)
+        {
+            world = new GameObject("Welt");
+            WorldFactory.Root = world.transform;
 
             var game = new GameObject("GameManager").AddComponent<GameManager>();
+            game.transform.SetParent(world.transform);
             game.Grid = new GameObject("ShopGrid").AddComponent<ShopGrid>();
+            game.Grid.transform.SetParent(world.transform);
             game.Grid.Init();
 
             BuildShop(game);
-
             game.Player = WorldFactory.SpawnPlayer(ShopGrid.PlayerStartCell);
-            game.ShelvesToPlace = 1;
-            WorldFactory.SpawnBox(ShopGrid.DeliveryCells[0], Catalog.MonsteraPack, 12);
-            foreach (var cell in StartDirt) WorldFactory.SpawnDirt(cell);
 
-            game.gameObject.AddComponent<SoundManager>();
             game.gameObject.AddComponent<CustomerSpawner>();
             game.gameObject.AddComponent<BuildController>();
             game.gameObject.AddComponent<ChapterOne>();
             game.gameObject.AddComponent<GameHUD>();
+            game.gameObject.AddComponent<MainMenuUI>();
+
+            init(game);
+        }
+
+        /// <summary>Startzustand von Kapitel 1: ein Regal zum Aufstellen, ein Karton, fünf Flecken.</summary>
+        public static void SetUpNewGameWorld(GameManager game)
+        {
+            game.ShelvesToPlace = 1;
+            WorldFactory.SpawnBox(ShopGrid.DeliveryCells[0], Catalog.MonsteraPack, 12);
+            foreach (var cell in StartDirt) WorldFactory.SpawnDirt(cell);
+        }
+
+        public static void SetUpDemoWorld(GameManager game)
+        {
+            foreach (var cell in DemoShelves)
+                WorldFactory.SpawnShelf(cell).SetStock(Catalog.MonsteraPack, Shelf.Capacity);
+            game.Player.transform.position = ShopGrid.CellToWorld(ShopGrid.StaffCells[0]);
         }
 
         static void SetUpCamera()
@@ -49,13 +101,14 @@ namespace TwoMoons
             }
             camera.orthographic = true;
             camera.clearFlags = CameraClearFlags.SolidColor;
-            camera.backgroundColor = new Color(0.12f, 0.1f, 0.18f);
+            camera.backgroundColor = new Color(0.12f, 0.08f, 0.06f);
             if (camera.GetComponent<CameraFit>() == null) camera.gameObject.AddComponent<CameraFit>();
         }
 
         static void BuildShop(GameManager game)
         {
             var root = new GameObject("Laden").transform;
+            root.SetParent(WorldFactory.Root);
 
             for (int x = 0; x < ShopGrid.Width; x++)
             for (int y = 0; y < ShopGrid.Height; y++)

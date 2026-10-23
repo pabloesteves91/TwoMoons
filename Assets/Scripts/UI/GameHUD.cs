@@ -3,43 +3,45 @@ using UnityEngine;
 namespace TwoMoons
 {
     /// <summary>
-    /// Einfache Bildschirmanzeige für den Prototyp (Unity IMGUI).
-    /// Wird später durch eine richtige Pixel-Oberfläche ersetzt.
+    /// Anzeige während des Spiels (Unity IMGUI): Kopfzeile, Aufgaben, Hinweise, Computer, Abrechnung, Dialoge und Esc-Menü.
     /// </summary>
     public class GameHUD : MonoBehaviour
     {
-        const float VirtualHeight = 540f;
-        const float Margin = 10f;
+        enum PauseScreen { Main, Settings, ConfirmMainMenu, ConfirmQuit }
+
+        const float VirtualHeight = UiKit.VirtualHeight;
+        const float Margin = UiKit.Margin;
         const float PanelWidth = 290f;
 
         GUIStyle panel, text, bold, title, prompt, hint, button;
-        string nameInput = "";
-        int figure;
         Vector2 orderScroll;
         bool questsExpanded;
         bool showPrices;
+        PauseScreen pauseScreen;
+
+        static GameManager Game => GameManager.Instance;
+
+        static bool InGame => Game.Phase != GamePhase.MainMenu && Game.Phase != GamePhase.CharacterSelect;
 
         void Update()
         {
             if (GameInput.FullscreenTogglePressed) Screen.fullScreen = !Screen.fullScreen;
-            if (GameInput.QuestTogglePressed && Game.Phase != GamePhase.CharacterSelect) ToggleQuests();
+            if (GameInput.QuestTogglePressed && InGame && !Game.PauseOpen) ToggleQuests();
+            if (!Game.PauseOpen) pauseScreen = PauseScreen.Main;
         }
-
-        static GameManager Game => GameManager.Instance;
 
         void OnGUI()
         {
-            EnsureStyles();
-            float scale = Screen.height / VirtualHeight;
-            GUI.matrix = Matrix4x4.Scale(new Vector3(scale, scale, 1f));
-            float width = Screen.width / scale;
+            if (!InGame) return;
 
-            if (Game.Phase == GamePhase.CharacterSelect)
-            {
-                if (Game.SettingsOpen) DrawSettings(width);
-                else DrawCharacterSelect(width);
-                return;
-            }
+            float width = UiKit.Begin();
+            panel = UiKit.Panel;
+            text = UiKit.Text;
+            bold = UiKit.Bold;
+            title = UiKit.Title;
+            prompt = UiKit.Prompt;
+            hint = UiKit.Hint;
+            button = UiKit.ButtonStyle;
 
             DrawTopBar(width);
             float questsBottom = DrawQuests(width);
@@ -49,60 +51,65 @@ namespace TwoMoons
             if (Game.ComputerOpen) DrawComputer(width);
             if (Game.Phase == GamePhase.Summary) DrawSummary(width);
             if (Game.DialogLines != null) DrawDialog(width);
-            if (Game.SettingsOpen) DrawSettings(width);
+            if (Game.PauseOpen) DrawPause(width);
         }
 
-        /// <summary>Knopf mit Klick-Sound.</summary>
-        bool Button(GUIContent content, params GUILayoutOption[] options)
+        static bool Button(string label, params GUILayoutOption[] options) => UiKit.Button(label, options);
+
+        void DrawPause(float width)
         {
-            if (!GUILayout.Button(content, button, options)) return false;
-            SoundManager.Play(Sfx.UiClick);
-            return true;
-        }
-
-        bool Button(string label, params GUILayoutOption[] options) => Button(new GUIContent(label), options);
-
-        void DrawCharacterSelect(float width)
-        {
-            var area = new Rect((width - 520f) / 2f, 70f, 520f, 400f);
-            GUI.Box(area, GUIContent.none, panel);
-            GUILayout.BeginArea(new Rect(area.x + 20f, area.y + 16f, area.width - 40f, area.height - 32f));
-
-            GUILayout.Label("TwoMoons", title);
-            GUILayout.Label("Ein TCG-Laden, ein Traum – und zwei Monde.", text);
-            GUILayout.Space(16f);
-
-            GUILayout.Label("Wie heißt du?", bold);
-            GUI.SetNextControlName("name");
-            nameInput = GUILayout.TextField(nameInput, 20, GUILayout.Height(28f));
-            GUILayout.Space(16f);
-
-            GUILayout.Label("Wähle deine Figur:", bold);
-            GUILayout.BeginHorizontal();
-            for (int i = 0; i < 3; i++)
+            UiKit.DarkenScreen(width, 0.4f);
+            switch (pauseScreen)
             {
-                var sprite = Art.Get($"player{i + 1}");
-                bool selected = figure == i;
-                GUI.color = selected ? Color.white : new Color(1f, 1f, 1f, 0.55f);
-                if (Button(GUIContent.none, GUILayout.Width(110f), GUILayout.Height(110f))) figure = i;
-                var buttonRect = GUILayoutUtility.GetLastRect();
-                DrawSprite(sprite, new Rect(buttonRect.x + 15f, buttonRect.y + 10f, 80f, 80f));
-                if (selected) GUI.Label(new Rect(buttonRect.x, buttonRect.yMax - 22f, buttonRect.width, 20f), "ausgewählt", hint);
-                GUI.color = Color.white;
-                GUILayout.Space(10f);
+                case PauseScreen.Main:
+                    UiKit.BeginWindow(UiKit.Centered(width, 300f, 300f));
+                    GUILayout.Label("Pause", title);
+                    GUILayout.Space(6f);
+                    if (UiKit.BigButtonLayout("Weiter [Esc]")) Game.PauseOpen = false;
+                    if (UiKit.BigButtonLayout("Speichern")) Game.SaveGame();
+                    if (UiKit.BigButtonLayout("Einstellungen")) pauseScreen = PauseScreen.Settings;
+                    if (UiKit.BigButtonLayout("Zum Hauptmenü")) pauseScreen = PauseScreen.ConfirmMainMenu;
+                    if (UiKit.BigButtonLayout("Spiel beenden")) pauseScreen = PauseScreen.ConfirmQuit;
+                    UiKit.EndWindow();
+                    break;
+
+                case PauseScreen.Settings:
+                    UiKit.BeginWindow(UiKit.Centered(width, 400f, 260f));
+                    GUILayout.Label("Einstellungen", title);
+                    GUILayout.Space(10f);
+                    UiKit.SettingsContent();
+                    GUILayout.FlexibleSpace();
+                    if (Button("Zurück", GUILayout.Height(34f))) pauseScreen = PauseScreen.Main;
+                    UiKit.EndWindow();
+                    break;
+
+                case PauseScreen.ConfirmMainMenu:
+                    DrawLeaveConfirm(width, "Zum Hauptmenü?", GameBootstrap.ShowMainMenu);
+                    break;
+
+                case PauseScreen.ConfirmQuit:
+                    DrawLeaveConfirm(width, "Spiel beenden?", UiKit.QuitGame);
+                    break;
             }
-            GUILayout.EndHorizontal();
+        }
+
+        /// <summary>Vor dem Verlassen fragen, ob gespeichert werden soll.</summary>
+        void DrawLeaveConfirm(float width, string question, System.Action leave)
+        {
+            UiKit.BeginWindow(UiKit.Centered(width, 440f, 200f));
+            GUILayout.Label(question, title);
+            GUILayout.Label("Nicht gespeicherter Fortschritt seit dem letzten Speichern geht verloren.", text);
             GUILayout.FlexibleSpace();
-
+            if (Button("Speichern und verlassen", GUILayout.Height(34f)))
+            {
+                Game.SaveGame();
+                leave();
+            }
             GUILayout.BeginHorizontal();
-            if (Button("Einstellungen", GUILayout.Width(140f), GUILayout.Height(40f))) Game.SettingsOpen = true;
-            GUILayout.Space(10f);
-            GUI.enabled = nameInput.Trim().Length > 0;
-            if (Button("Los geht's!", GUILayout.Height(40f))) Game.StartGame(nameInput, figure);
-            GUI.enabled = true;
+            if (Button("Ohne Speichern", GUILayout.Height(34f))) leave();
+            if (Button("Abbrechen", GUILayout.Height(34f))) pauseScreen = PauseScreen.Main;
             GUILayout.EndHorizontal();
-
-            GUILayout.EndArea();
+            UiKit.EndWindow();
         }
 
         void DrawTopBar(float width)
@@ -159,7 +166,7 @@ namespace TwoMoons
             }
             else
             {
-                GUI.color = new Color(0.6f, 1f, 0.6f);
+                GUI.color = UiKit.Good;
                 GUI.Label(new Rect(area.x + 10f, y, area.width - 20f, 22f), "Alle Aufgaben erledigt!", text);
                 GUI.color = Color.white;
             }
@@ -170,7 +177,7 @@ namespace TwoMoons
         {
             string progress = quest.Target > 1 ? $" ({quest.Progress}/{quest.Target})" : "";
             string mark = quest.Done ? "[x]" : "[  ]";
-            GUI.color = quest.Done ? new Color(0.6f, 1f, 0.6f) : Color.white;
+            GUI.color = quest.Done ? UiKit.Good : Color.white;
             GUI.Label(new Rect(x, y, rowWidth, 22f), $"{mark} {quest.Text}{progress}", text);
             GUI.color = Color.white;
         }
@@ -236,9 +243,9 @@ namespace TwoMoons
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            GUI.color = showPrices ? new Color(1f, 1f, 1f, 0.55f) : Color.white;
+            GUI.color = showPrices ? UiKit.Dimmed : Color.white;
             if (Button("Bestellen", GUILayout.Height(30f))) showPrices = false;
-            GUI.color = showPrices ? Color.white : new Color(1f, 1f, 1f, 0.55f);
+            GUI.color = showPrices ? Color.white : UiKit.Dimmed;
             if (Button("Preise", GUILayout.Height(30f))) showPrices = true;
             GUI.color = Color.white;
             GUILayout.EndHorizontal();
@@ -297,7 +304,7 @@ namespace TwoMoons
                 GUILayout.Label(Money.Format(price), bold, GUILayout.Width(70f));
                 GUILayout.EndHorizontal();
 
-                GUI.color = profit > 0 ? new Color(0.6f, 1f, 0.6f) : new Color(1f, 0.55f, 0.55f);
+                GUI.color = profit > 0 ? UiKit.Good : UiKit.Bad;
                 GUILayout.Label($"Gewinn pro Pack: {Money.Format(profit)}   ·   {PriceVerdict(price, product.MarketValue)}", text);
                 GUI.color = Color.white;
                 GUILayout.Space(10f);
@@ -336,35 +343,6 @@ namespace TwoMoons
             GUILayout.EndArea();
         }
 
-        void DrawSettings(float width)
-        {
-            var area = new Rect((width - 400f) / 2f, 110f, 400f, 250f);
-            GUI.Box(area, GUIContent.none, panel);
-            GUILayout.BeginArea(new Rect(area.x + 20f, area.y + 14f, area.width - 40f, area.height - 28f));
-
-            GUILayout.Label("Einstellungen", title);
-            GUILayout.Space(10f);
-            float music = VolumeSlider("Musik", SoundManager.MusicVolume);
-            if (!Mathf.Approximately(music, SoundManager.MusicVolume)) SoundManager.MusicVolume = music;
-            GUILayout.Space(8f);
-            float effects = VolumeSlider("Effekte", SoundManager.EffectsVolume);
-            if (!Mathf.Approximately(effects, SoundManager.EffectsVolume)) SoundManager.EffectsVolume = effects;
-
-            GUILayout.FlexibleSpace();
-            if (Button("Weiter [Esc]", GUILayout.Height(36f))) Game.SettingsOpen = false;
-            GUILayout.EndArea();
-        }
-
-        float VolumeSlider(string label, float value)
-        {
-            GUILayout.BeginHorizontal();
-            GUILayout.Label(label, bold, GUILayout.Width(80f));
-            float result = GUILayout.HorizontalSlider(value, 0f, 1f, GUILayout.Height(20f));
-            GUILayout.Label($"{Mathf.RoundToInt(result * 100f)} %", text, GUILayout.Width(50f));
-            GUILayout.EndHorizontal();
-            return result;
-        }
-
         void SummaryRow(string label, string value)
         {
             GUILayout.BeginHorizontal();
@@ -380,62 +358,6 @@ namespace TwoMoons
             GUI.Box(area, GUIContent.none, panel);
             GUI.Label(new Rect(area.x + 20f, area.y + 16f, area.width - 40f, area.height - 50f), Game.DialogLines[Game.DialogIndex], text);
             GUI.Label(new Rect(area.x + 20f, area.yMax - 30f, area.width - 40f, 22f), "Weiter: [Leertaste] / Klick", hint);
-        }
-
-        static void DrawSprite(Sprite sprite, Rect rect)
-        {
-            var texture = sprite.texture;
-            var r = sprite.textureRect;
-            var uv = new Rect(r.x / texture.width, r.y / texture.height, r.width / texture.width, r.height / texture.height);
-            GUI.DrawTextureWithTexCoords(rect, texture, uv);
-        }
-
-        void EnsureStyles()
-        {
-            if (panel != null) return;
-
-            var background = new Texture2D(1, 1);
-            background.SetPixel(0, 0, new Color(0.09f, 0.07f, 0.14f, 0.88f));
-            background.Apply();
-
-            var buttonBackground = new Texture2D(1, 1);
-            buttonBackground.SetPixel(0, 0, new Color(0.27f, 0.22f, 0.42f, 1f));
-            buttonBackground.Apply();
-
-            var buttonHover = new Texture2D(1, 1);
-            buttonHover.SetPixel(0, 0, new Color(0.38f, 0.31f, 0.58f, 1f));
-            buttonHover.Apply();
-
-            panel = new GUIStyle(GUI.skin.box)
-            {
-                fontSize = 14,
-                alignment = TextAnchor.MiddleLeft,
-                padding = new RectOffset(12, 12, 6, 6),
-                wordWrap = true,
-            };
-            panel.normal.background = background;
-            panel.normal.textColor = Color.white;
-
-            text = new GUIStyle(GUI.skin.label) { fontSize = 14, wordWrap = true };
-            text.normal.textColor = Color.white;
-
-            bold = new GUIStyle(text) { fontStyle = FontStyle.Bold };
-            title = new GUIStyle(text) { fontSize = 22, fontStyle = FontStyle.Bold };
-            title.normal.textColor = new Color(1f, 0.88f, 0.55f);
-
-            prompt = new GUIStyle(panel) { alignment = TextAnchor.MiddleCenter };
-            prompt.normal.textColor = new Color(1f, 0.92f, 0.65f);
-
-            hint = new GUIStyle(text) { alignment = TextAnchor.MiddleCenter, fontSize = 12 };
-            hint.normal.textColor = new Color(1f, 0.92f, 0.65f);
-
-            button = new GUIStyle(GUI.skin.button) { fontSize = 15, fontStyle = FontStyle.Bold };
-            button.normal.background = buttonBackground;
-            button.normal.textColor = Color.white;
-            button.hover.background = buttonHover;
-            button.hover.textColor = Color.white;
-            button.active.background = buttonHover;
-            button.active.textColor = Color.white;
         }
     }
 }

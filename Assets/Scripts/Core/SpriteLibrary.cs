@@ -22,6 +22,10 @@ namespace TwoMoons
         public Sprite box;
         public Sprite dirt;
 
+        [Header("Oberfläche")]
+        [Tooltip("Logo im Hauptmenü (Assets/Art/UI/logo.png), beliebige Größe.")]
+        public Sprite logo;
+
         [Header("Ware")]
         public Sprite packMonstera;
 
