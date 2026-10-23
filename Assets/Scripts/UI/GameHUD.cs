@@ -10,11 +10,19 @@ namespace TwoMoons
     {
         const float VirtualHeight = 540f;
         const float Margin = 10f;
+        const float PanelWidth = 250f;
 
         GUIStyle panel, text, bold, title, prompt, hint, button;
         string nameInput = "";
         int figure;
         Vector2 orderScroll;
+        bool questsExpanded;
+
+        void Update()
+        {
+            if (GameInput.FullscreenTogglePressed) Screen.fullScreen = !Screen.fullScreen;
+            if (GameInput.QuestTogglePressed && Game.Phase != GamePhase.CharacterSelect) ToggleQuests();
+        }
 
         static GameManager Game => GameManager.Instance;
 
@@ -108,32 +116,69 @@ namespace TwoMoons
             }
             string line = $"Tag {Game.Day}  ·  {Game.ClockText}  ·  {phase}  ·  Geld: {Money.Format(Game.MoneyCents)}  ·  Ruf: {Game.ReputationName}  ·  [Esc] Menü";
             // Platz lassen für die Aufgabenliste rechts.
-            float barWidth = Mathf.Min(760f, width - 270f - 3f * Margin);
+            float barWidth = Mathf.Min(760f, width - PanelWidth - 3f * Margin);
             var content = new GUIContent(line);
             float barHeight = Mathf.Max(34f, panel.CalcHeight(content, barWidth));
             GUI.Box(new Rect(Margin, Margin, barWidth, barHeight), content, panel);
         }
 
-        /// <summary>Aufgabenliste oben rechts. Gibt die Unterkante zurück.</summary>
+        /// <summary>
+        /// Aufgabenliste oben rechts. Zugeklappt nur die aktuelle Aufgabe, aufgeklappt (Pfeil oder [Tab]) alle.
+        /// Gibt die Unterkante zurück.
+        /// </summary>
         float DrawQuests(float width)
         {
             var chapter = GetComponent<ChapterOne>();
             if (chapter == null) return Margin;
 
-            float height = 46f + chapter.Quests.Count * 22f;
-            var area = new Rect(width - 270f - Margin, Margin, 270f, height);
+            var quests = chapter.Quests;
+            int done = quests.FindAll(q => q.Done).Count;
+            var current = quests.Find(q => !q.Done);
+            int rows = questsExpanded ? quests.Count : 1;
+
+            var area = new Rect(width - PanelWidth - Margin, Margin, PanelWidth, 64f + rows * 22f);
             GUI.Box(area, GUIContent.none, panel);
-            GUI.Label(new Rect(area.x + 10f, area.y + 8f, area.width - 20f, 24f), ChapterOne.Title, bold);
-            for (int i = 0; i < chapter.Quests.Count; i++)
+            GUI.Label(new Rect(area.x + 10f, area.y + 8f, area.width - 50f, 22f), ChapterOne.Title, bold);
+            GUI.Label(new Rect(area.x + 10f, area.y + 28f, area.width - 50f, 20f), $"Aufgaben {done}/{quests.Count}   [Tab]", hint);
+
+            if (GUI.Button(new Rect(area.xMax - 38f, area.y + 10f, 28f, 28f), questsExpanded ? "▲" : "▼", button))
+                ToggleQuests();
+
+            float y = area.y + 52f;
+            if (questsExpanded)
             {
-                var quest = chapter.Quests[i];
-                string progress = quest.Target > 1 ? $" ({quest.Progress}/{quest.Target})" : "";
-                string mark = quest.Done ? "[x]" : "[  ]";
-                GUI.color = quest.Done ? new Color(0.6f, 1f, 0.6f) : Color.white;
-                GUI.Label(new Rect(area.x + 10f, area.y + 36f + i * 22f, area.width - 20f, 22f), $"{mark} {quest.Text}{progress}", text);
+                foreach (var quest in quests)
+                {
+                    DrawQuestRow(quest, area.x + 10f, y, area.width - 20f);
+                    y += 22f;
+                }
             }
-            GUI.color = Color.white;
+            else if (current != null)
+            {
+                DrawQuestRow(current, area.x + 10f, y, area.width - 20f);
+            }
+            else
+            {
+                GUI.color = new Color(0.6f, 1f, 0.6f);
+                GUI.Label(new Rect(area.x + 10f, y, area.width - 20f, 22f), "Alle Aufgaben erledigt!", text);
+                GUI.color = Color.white;
+            }
             return area.yMax;
+        }
+
+        void DrawQuestRow(Quest quest, float x, float y, float rowWidth)
+        {
+            string progress = quest.Target > 1 ? $" ({quest.Progress}/{quest.Target})" : "";
+            string mark = quest.Done ? "[x]" : "[  ]";
+            GUI.color = quest.Done ? new Color(0.6f, 1f, 0.6f) : Color.white;
+            GUI.Label(new Rect(x, y, rowWidth, 22f), $"{mark} {quest.Text}{progress}", text);
+            GUI.color = Color.white;
+        }
+
+        void ToggleQuests()
+        {
+            questsExpanded = !questsExpanded;
+            SoundManager.Play(Sfx.UiClick);
         }
 
         /// <summary>Meldungen rechts unter der Aufgabenliste, damit sie den Laden nicht verdecken.</summary>
@@ -143,8 +188,8 @@ namespace TwoMoons
             foreach (var toast in Game.Toasts)
             {
                 var content = new GUIContent(toast.Text);
-                float height = Mathf.Max(28f, panel.CalcHeight(content, 270f));
-                GUI.Box(new Rect(width - 270f - Margin, y, 270f, height), content, panel);
+                float height = Mathf.Max(28f, panel.CalcHeight(content, PanelWidth));
+                GUI.Box(new Rect(width - PanelWidth - Margin, y, PanelWidth, height), content, panel);
                 y += height + 4f;
             }
         }

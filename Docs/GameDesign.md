@@ -123,7 +123,8 @@ Nach dem Finale kann man weiterspielen.
 3. Auf **Play** drücken.
 
 **Steuerung:** WASD/Pfeiltasten laufen · E benutzen · Q Karton abstellen · B Bau-Modus
-(Linksklick aufstellen, Rechtsklick abbrechen) · Esc öffnet die Einstellungen bzw. schließt Menüs. Controller geht auch.
+(Linksklick aufstellen, Rechtsklick abbrechen) · Esc öffnet die Einstellungen bzw. schließt Menüs
+· Tab klappt die Aufgabenliste auf/zu · F11 Vollbild (im fertigen Spiel). Controller geht auch.
 
 **Eigene Bilder:** Die PNGs in `Assets/Art/Sprites` mit gleichem Dateinamen durch eigene
 16×16-Pixelbilder ersetzen. Neue Bilder in `Assets/Art` bekommen automatisch die richtigen

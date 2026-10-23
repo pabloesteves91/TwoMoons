@@ -48,11 +48,9 @@ namespace TwoMoons
                 go.AddComponent<AudioListener>();
             }
             camera.orthographic = true;
-            camera.orthographicSize = 6.8f;
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = new Color(0.12f, 0.1f, 0.18f);
-            // Etwas nach rechts verschoben, damit rechts Platz für die Aufgabenliste bleibt.
-            camera.transform.position = new Vector3(ShopGrid.Width / 2f + 3.5f, ShopGrid.Height / 2f - 0.5f, -10f);
+            if (camera.GetComponent<CameraFit>() == null) camera.gameObject.AddComponent<CameraFit>();
         }
 
         static void BuildShop(GameManager game)

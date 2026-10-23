@@ -45,6 +45,12 @@ namespace TwoMoons
             (Keyboard.current?.escapeKey.wasPressedThisFrame ?? false) ||
             (Gamepad.current?.buttonEast.wasPressedThisFrame ?? false);
 
+        public static bool QuestTogglePressed =>
+            (Keyboard.current?.tabKey.wasPressedThisFrame ?? false) ||
+            (Gamepad.current?.selectButton.wasPressedThisFrame ?? false);
+
+        public static bool FullscreenTogglePressed => Keyboard.current?.f11Key.wasPressedThisFrame ?? false;
+
         static int cancelConsumedFrame = -1;
 
         /// <summary>
