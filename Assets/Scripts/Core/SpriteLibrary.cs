@@ -23,7 +23,7 @@ namespace TwoMoons
         public Sprite dirt;
 
         [Header("Oberfläche")]
-        [Tooltip("Logo im Hauptmenü (Assets/Art/UI/logo.png), beliebige Größe.")]
+        [Tooltip("Logo im Hauptmenü, beliebige Größe. Leer = Assets/Art/UI/Resources/logo.png")]
         public Sprite logo;
 
         [Header("Ware")]

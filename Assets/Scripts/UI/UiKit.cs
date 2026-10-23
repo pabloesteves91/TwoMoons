@@ -74,19 +74,32 @@ namespace TwoMoons
             GUI.DrawTextureWithTexCoords(rect, texture, uv);
         }
 
-        /// <summary>Zeichnet das Logo in die Box (Seitenverhältnis bleibt erhalten). Ohne Logo-Datei: Schriftzug.</summary>
+        static Texture2D logoTexture;
+
+        /// <summary>
+        /// Zeichnet das Logo in die Box (Seitenverhältnis bleibt erhalten).
+        /// Erst aus der SpriteLibrary, sonst direkt aus Assets/Art/UI/Resources/logo.png, sonst als Schriftzug.
+        /// </summary>
         public static void DrawLogo(Rect box)
         {
             var logo = Art.Logo;
-            if (logo == null)
+            if (logo != null)
             {
-                GUI.Label(box, "TwoMoons", BigTitle);
+                var r = logo.textureRect;
+                DrawSprite(logo, Fit(box, r.width, r.height));
                 return;
             }
-            var r = logo.textureRect;
-            float scale = Mathf.Min(box.width / r.width, box.height / r.height);
-            var size = new Vector2(r.width * scale, r.height * scale);
-            DrawSprite(logo, new Rect(box.center.x - size.x / 2f, box.center.y - size.y / 2f, size.x, size.y));
+
+            if (logoTexture == null) logoTexture = Resources.Load<Texture2D>("logo");
+            if (logoTexture != null) GUI.DrawTexture(Fit(box, logoTexture.width, logoTexture.height), logoTexture);
+            else GUI.Label(box, "TwoMoons", BigTitle);
+        }
+
+        static Rect Fit(Rect box, float width, float height)
+        {
+            float scale = Mathf.Min(box.width / width, box.height / height);
+            var size = new Vector2(width * scale, height * scale);
+            return new Rect(box.center.x - size.x / 2f, box.center.y - size.y / 2f, size.x, size.y);
         }
 
         /// <summary>Lautstärke-Regler und Vollbild – im Hauptmenü und im Esc-Menü gleich.</summary>

@@ -99,7 +99,7 @@ Nach dem Finale kann man weiterspielen.
 ## Startmenü und Speichern
 
 - **Hintergrund:** der Laden leicht abgedunkelt, Kunden laufen herum
-- **Logo:** Pixel-Version des TwoMoons-Logos im Startmenü (`Assets/Art/UI/logo.png`);
+- **Logo:** Pixel-Version des TwoMoons-Logos im Startmenü (`Assets/Art/UI/Resources/logo.png`, wird automatisch gefunden);
   Original-Logo zusätzlich möglich, Pixel-Version auch im Spiel (z. B. Ladenschild)
 - **Menüpunkte:** Fortsetzen (nur wenn ein Spielstand existiert) · Neues Spiel · Laden · Einstellungen · Credits · Beenden
 - **Speichern:** automatisch jeden Morgen nach dem Schlafen + jederzeit manuell über das Esc-Menü.
