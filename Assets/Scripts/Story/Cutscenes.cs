@@ -133,6 +133,22 @@ namespace TwoMoons
             },
         });
 
+        /// <summary>Nach dem ersten Turnier: Papa war heimlich da.</summary>
+        public static readonly Cutscene FirstTournament = new Cutscene(new[]
+        {
+            new CutsceneScene
+            {
+                Draw = (c, t) => c.DrawShopNight(t, phoneCall: false),
+                Lines = new[]
+                {
+                    ((string)null, "Als die letzten Turnierspieler gegangen sind, liegt ein Zettel auf dem Turnier-Counter."),
+                    (Papa, "„Ich stand ganz hinten und habe zugeschaut. Die Kinder haben gejubelt – genau wie früher bei mir.“"),
+                    (Papa, "„Ich bin so stolz auf dich.“"),
+                    (Kid, "Er war hier … und ich hab ihn nicht mal gesehen."),
+                },
+            },
+        });
+
         /// <summary>Ende von Kapitel 1: Licht im Fenster.</summary>
         public static readonly Cutscene Chapter1End = new Cutscene(new[]
         {

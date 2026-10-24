@@ -149,8 +149,20 @@ namespace TwoMoons
             }
             var deco = go.AddComponent<DecoItem>();
             deco.Init(type, cell);
+            if (type == Furniture.GameTable) go.AddComponent<GameTable>().Init(cell);
+            if (type == Furniture.PrizeCounter) go.AddComponent<PrizeCounter>().Init(cell);
             Game.Decos.Add(deco);
             return deco;
+        }
+
+        public static TournamentPlayer SpawnTournamentPlayer(Vector3 position, Sprite sprite, string name)
+        {
+            var renderer = CreateSprite("Turnierspieler", "customer1", position);
+            renderer.sprite = sprite;
+            renderer.gameObject.AddComponent<YSort>();
+            var player = renderer.gameObject.AddComponent<TournamentPlayer>();
+            player.Name = name;
+            return player;
         }
 
         public static FurniturePackage SpawnPackage(Vector2Int cell)

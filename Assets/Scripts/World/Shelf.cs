@@ -28,6 +28,7 @@ namespace TwoMoons
         {
             var box = player.Carried;
             if (box == null) return Stock > 0 ? $"1× {Product.Name} herausnehmen ({Stock}/{Capacity})" : $"{Label}: leer";
+            if (box.Product.Category == ProductCategory.Promo) return "Turnier-Packs gehören zum Turnier-Counter";
             if (box.Product.Category != Category) return box.Product.Category == ProductCategory.Accessory ? "Zubehör gehört in den Zubehör-Ständer" : "Boosterpacks gehören ins Regal";
             if (Stock >= Capacity) return $"{Label} ist voll";
             if (Product != null && Product != box.Product) return $"Hier liegt schon {Product.Name}";

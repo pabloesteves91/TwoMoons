@@ -3,10 +3,11 @@ namespace TwoMoons
     /// <summary>Die erfundenen Kartenspiele.</summary>
     public enum TcgGame { Monstera, Spellforge, SoulClash }
 
-    public enum ProductId { MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat }
+    /// <summary>Neue Waren immer hinten anhängen – die Nummern stehen in Spielständen.</summary>
+    public enum ProductId { MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat, TournamentPack }
 
     /// <summary>Wo eine Ware im Laden steht: Packs ins Regal, Zubehör in den Zubehör-Ständer.</summary>
-    public enum ProductCategory { Pack, Accessory }
+    public enum ProductCategory { Pack, Accessory, Promo }
 
     public enum OrderKind { ProductBox, Furniture }
 
@@ -72,8 +73,15 @@ namespace TwoMoons
             Category = ProductCategory.Accessory, BuyPrice = 800, MarketValue = 1500, MinLevel = 2,
         };
 
-        /// <summary>Alles, wofür man am Computer einen Preis festlegen kann.</summary>
-        public static readonly Product[] Products = { MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat };
+        /// <summary>Gratis-Packs vom Hersteller – nur für den Turnier-Prizepool, nicht zum Verkaufen.</summary>
+        public static readonly Product TournamentPack = new Product
+        {
+            Id = ProductId.TournamentPack, Name = "Turnier-Packs", SpriteKey = "packMonstera",
+            Category = ProductCategory.Promo, Game = TcgGame.Monstera, MinLevel = 3,
+        };
+
+        /// <summary>Alle Waren, in der Reihenfolge von <see cref="ProductId"/>.</summary>
+        public static readonly Product[] Products = { MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat, TournamentPack };
 
         /// <summary>Tab „Ware“ am Computer.</summary>
         public static readonly OrderOption[] Orders =
@@ -96,6 +104,9 @@ namespace TwoMoons
             Furnishing(Furniture.Rug, "Man kann darüber laufen · Gemütlichkeit +3", 4000, 2),
             Furnishing(Furniture.WallClock, "Für die Wand · Gemütlichkeit +1", 2000, 2),
             Furnishing(Furniture.FairyLights, "Für die Wand, funkelt · Gemütlichkeit +3", 2500, 2),
+            Furnishing(Furniture.GameTable, "4 Plätze für Turniere", 12000, 3),
+            Furnishing(Furniture.PrizeCounter, "Prizepool vorbereiten und Preise verteilen", 15000, 3),
+            Furnishing(Furniture.TournamentBoard, "Für die Wand · zeigt das nächste Turnier", 4000, 3),
         };
 
         /// <summary>Ein Karton Ware zum Großhandelspreis.</summary>

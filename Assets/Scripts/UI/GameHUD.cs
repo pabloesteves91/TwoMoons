@@ -171,6 +171,8 @@ namespace TwoMoons
             }
             string line = $"Tag {Game.Day}  ·  {Game.ClockText}  ·  {phase}  ·  Geld: {Money.Format(Game.MoneyCents)}  ·  Ruf: {Game.ReputationName}  ·  [Esc] Menü";
             line += "\n" + LevelLine();
+            string tournamentLine = Game.Tournament.StatusLine;
+            if (tournamentLine != null) line += "\n" + tournamentLine;
             // Platz lassen für die Aufgabenliste rechts.
             float barWidth = Mathf.Min(760f, width - PanelWidth - 3f * Margin);
             var content = new GUIContent(line);
@@ -410,7 +412,7 @@ namespace TwoMoons
             GUILayout.Space(4f);
             foreach (var product in Catalog.Products)
             {
-                if (product.MinLevel > Game.StoreLevel) continue;
+                if (product.MinLevel > Game.StoreLevel || product.Category == ProductCategory.Promo) continue;
                 int price = Game.GetPrice(product);
                 int profit = price - product.BuyPrice;
 

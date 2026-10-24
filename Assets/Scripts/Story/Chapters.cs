@@ -47,6 +47,7 @@ namespace TwoMoons
                 if (ultras > 0) Advance("ultraPulled", ultras);
             };
             game.CardSold += () => Advance("cardSold", 1);
+            game.TournamentHeld += () => Advance("tournament", 1);
             game.DayEnded += stats =>
             {
                 if (stats.Income - stats.Expenses > 0) Advance("profitDay", 1);

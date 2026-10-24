@@ -44,6 +44,11 @@ namespace TwoMoons
 
         public int Total => card != null ? unitPrice : itemCount * unitPrice;
 
+        /// <summary>Kommt nur, um sich fürs Turnier anzumelden (zahlt Startgeld an der Kasse).</summary>
+        public bool IsTournamentEntrant;
+
+        public Sprite Sprite => spriteRenderer != null ? spriteRenderer.sprite : GetComponent<SpriteRenderer>().sprite;
+
         public bool IsWaitingAtRegister => state == State.Queued && queueIndex == 0 && Arrived;
 
         bool Arrived => path == null || pathIndex >= path.Count;
@@ -63,6 +68,14 @@ namespace TwoMoons
             moodIcon.transform.localScale = Vector3.one * 0.6f;
             moodIcon.enabled = false;
             GetComponent<YSort>().Collect();
+
+            if (IsTournamentEntrant)
+            {
+                unitPrice = TournamentManager.EntryFee;
+                itemCount = 1;
+                JoinQueue();
+                return;
+            }
 
             var showcases = Game.Showcases.FindAll(s => s.HasCards);
             if (showcases.Count > 0 && Random.value < CollectorChance) PickShowcase(showcases);
@@ -243,6 +256,16 @@ namespace TwoMoons
         /// <summary>Bezahlt immer den vollen Preis, egal wie die Laune ist.</summary>
         public void Pay()
         {
+            if (IsTournamentEntrant)
+            {
+                // Startgeld bezahlt: weiter an den Spieltisch.
+                Game.RegisterEntryFee();
+                Game.Register.Remove(this);
+                Game.Tournament.Register(this);
+                Destroy(gameObject);
+                return;
+            }
+
             if (card != null) Game.RegisterCardSale(card, unitPrice);
             else Game.RegisterSale(Total, itemCount, product);
             itemCount = 0;

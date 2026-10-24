@@ -95,6 +95,11 @@ namespace TwoMoons
         public bool PauseOpen;
         public bool BuildMode;
         public bool CollectionOpen;
+        /// <summary>Prizepool- bzw. Siegerehrungs-Fenster am Turnier-Counter.</summary>
+        public bool PrizeCounterOpen;
+
+        TournamentManager tournament;
+        public TournamentManager Tournament => tournament != null ? tournament : tournament = GetComponent<TournamentManager>();
         /// <summary>Vitrine, deren Menü gerade offen ist.</summary>
         public Showcase OpenShowcase;
 
@@ -121,6 +126,7 @@ namespace TwoMoons
         /// <summary>Ein Pack wurde geöffnet; Wert = Anzahl gezogener Ultra-Seltener.</summary>
         public event Action<int> PackOpened;
         public event Action CardSold;
+        public event Action TournamentHeld;
         public event Action DecoPlaced;
         /// <summary>Abends bei der Abrechnung, mit den Zahlen des Tages.</summary>
         public event Action<DayStats> DayEnded;
@@ -128,12 +134,12 @@ namespace TwoMoons
         public bool InputLocked =>
             Phase == GamePhase.MainMenu || Phase == GamePhase.CharacterSelect || Phase == GamePhase.Intro || Phase == GamePhase.Summary ||
             DialogLines != null || ComputerOpen || PauseOpen || BuildMode ||
-            CollectionOpen || OpenShowcase != null || OpenedPack != null || LevelUpShown > 0 || CutscenePlaying;
+            CollectionOpen || OpenShowcase != null || OpenedPack != null || LevelUpShown > 0 || CutscenePlaying || PrizeCounterOpen;
 
         /// <summary>Menüs, die das Spiel anhalten.</summary>
         bool Paused =>
             DialogLines != null || ComputerOpen || PauseOpen || CollectionOpen || OpenShowcase != null || OpenedPack != null ||
-            LevelUpShown > 0 || CutscenePlaying;
+            LevelUpShown > 0 || CutscenePlaying || PrizeCounterOpen;
 
         public int ToPlace(Furniture furniture) => toPlace.TryGetValue(furniture, out int count) ? count : 0;
 
@@ -292,12 +298,13 @@ namespace TwoMoons
             {
                 // Das Pack-Menü kümmert sich selbst um Tasten.
             }
-            else if (CollectionOpen || OpenShowcase != null)
+            else if (CollectionOpen || OpenShowcase != null || PrizeCounterOpen)
             {
                 if (GameInput.ConsumeCancel())
                 {
                     CollectionOpen = false;
                     OpenShowcase = null;
+                    PrizeCounterOpen = false;
                 }
             }
             else if (ComputerOpen)
@@ -329,7 +336,7 @@ namespace TwoMoons
                     SoundManager.Play(Sfx.DayEnd);
                 }
             }
-            else if (Phase == GamePhase.Closing && Customer.Active.Count == 0)
+            else if (Phase == GamePhase.Closing && Customer.Active.Count == 0 && !Tournament.Busy)
             {
                 Phase = GamePhase.Summary;
                 DayEnded?.Invoke(Today);
@@ -396,6 +403,7 @@ namespace TwoMoons
             // Passt der gespeicherte Kapitel-Fortschritt nicht zum Level (ältere Spielstände), beginnt das Kapitel neu.
             ChapterProgress.Restore(StoreLevel, data.chapter == StoreLevel ? data.questProgress : null);
             if (data.seenStories != null) foreach (var id in data.seenStories) seenStories.Add(id);
+            Tournament.LoadFrom(data.tournament);
 
             // Weiter mit der gespeicherten Tageszeit. Kunden, die gerade im Laden waren, kommen nicht mit.
             var phase = (GamePhase)data.phase;
@@ -443,6 +451,7 @@ namespace TwoMoons
             }
             Collection.SaveTo(data);
             data.seenStories.AddRange(seenStories);
+            data.tournament = Tournament.Save();
             foreach (var pair in toPlace)
                 if (pair.Value > 0) data.toPlace.Add(new SavedCount { type = (int)pair.Key, count = pair.Value });
             foreach (var deco in Decos) data.decos.Add(new SavedDeco { type = (int)deco.Type, x = deco.Cell.x, y = deco.Cell.y });
@@ -683,6 +692,8 @@ namespace TwoMoons
             int dirt = UnityEngine.Random.Range(1, 4);
             for (int i = 0; i < dirt; i++) WorldFactory.SpawnDirtSomewhere();
 
+            Tournament.OnNewDay();
+
             // Automatisch speichern, jeden Morgen nach dem Schlafen.
             SaveGame();
         }
@@ -692,6 +703,18 @@ namespace TwoMoons
         public void NotifyShelfPlaced() => ShelfPlaced?.Invoke();
 
         public void NotifyDecoPlaced() => DecoPlaced?.Invoke();
+
+        public void NotifyTournamentHeld() => TournamentHeld?.Invoke();
+
+        /// <summary>Startgeld eines Turnierspielers an der Kasse.</summary>
+        public void RegisterEntryFee()
+        {
+            MoneyCents += TournamentManager.EntryFee;
+            Today.Income += TournamentManager.EntryFee;
+            ShowToast($"Turnier-Anmeldung: +{Money.Format(TournamentManager.EntryFee)}", 2f);
+            SoundManager.Play(Sfx.Register);
+            AddXp(TournamentManager.EntryFee / 100);
+        }
 
         public void NotifyShelfStocked(int packs) => ShelfStocked?.Invoke(packs);
     }

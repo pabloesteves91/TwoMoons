@@ -44,6 +44,9 @@ namespace TwoMoons
         static Quest SellAccessories(int count) => new Quest { Text = "Zubehör verkaufen", Target = count, Key = "accessorySold" };
         static Quest AccessoryStands(int count) =>
             new Quest { Text = "Zubehör-Ständer im Laden", Target = count, Poll = () => Game.Shelves.FindAll(s => s.Category == ProductCategory.Accessory).Count };
+        static Quest Tournaments(int count) => new Quest { Text = "Turniere ausrichten", Target = count, Key = "tournament" };
+        static Quest Furnished(Furniture furniture, int count) =>
+            new Quest { Text = $"{FurnitureCatalog.Get(furniture).Name} im Laden", Target = count, Poll = () => Game.Decos.FindAll(d => d.Type == furniture).Count };
         static Quest BestDay(int packs) => new Quest { Text = "An einem Tag Packs verkaufen", Target = packs, Key = "bestDay" };
 
         // Zustands-Aufgaben
@@ -141,14 +144,20 @@ namespace TwoMoons
                     {
                         new QuestStage
                         {
-                            Title = "Mehr Platz für mehr Spieler",
-                            Quests = new List<Quest> { Shelves(4), Money(300), Sell(150) },
-                            Outro = new[] { "{0}: Die Leute fragen ständig, wann es hier endlich ein Turnier gibt …" },
+                            Title = "Turnier-Vorbereitung",
+                            Quests = new List<Quest> { Furnished(Furniture.GameTable, 1), Furnished(Furniture.PrizeCounter, 1), Furnished(Furniture.TournamentBoard, 1) },
+                            Outro = new[] { "{0}: Alles steht bereit. Jetzt fehlen nur noch die Spieler!" },
+                        },
+                        new QuestStage
+                        {
+                            Title = "Das erste Turnier",
+                            Quests = new List<Quest> { Tournaments(1), Sell(150), Money(300) },
+                            Outro = new[] { "{0}: Die Leute fragen schon, wann das nächste Turnier ist!" },
                         },
                         new QuestStage
                         {
                             Title = "Ein Name in der Stadt",
-                            Quests = new List<Quest> { Reputation(2, "Beliebt"), Serve(120), PullUltra(1) },
+                            Quests = new List<Quest> { Tournaments(2), Reputation(2, "Beliebt"), Serve(120), PullUltra(1) },
                         },
                     };
 

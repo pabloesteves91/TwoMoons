@@ -59,6 +59,15 @@ namespace TwoMoons
     }
 
     [Serializable]
+    public class SavedTournament
+    {
+        public int nextDay;
+        public int[] prizes = new int[4];
+        public int bonusCard = -1;
+        public int held;
+    }
+
+    [Serializable]
     public class SavedDeco
     {
         public int type;
@@ -103,6 +112,7 @@ namespace TwoMoons
         public List<SavedDeco> decos = new List<SavedDeco>();
         public List<string> seenStories = new List<string>();
         public SavedPackage package;
+        public SavedTournament tournament;
         public long savedAtTicks;
 
         public DateTime SavedAt => new DateTime(savedAtTicks);

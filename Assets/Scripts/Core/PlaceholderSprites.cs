@@ -244,6 +244,28 @@ namespace TwoMoons
                     Rect(4, 7, 3, 3, new Color32(240, 200, 80, 255));
                     Rect(9, 7, 3, 3, new Color32(240, 200, 80, 255));
                     break;
+                case "gameTable":
+                    Rect(1, 3, 14, 11, new Color32(120, 80, 50, 255));
+                    Rect(2, 4, 12, 9, new Color32(40, 110, 80, 255));
+                    Rect(4, 6, 3, 4, new Color32(245, 235, 210, 255));
+                    Rect(9, 7, 3, 4, new Color32(245, 235, 210, 255));
+                    Rect(2, 0, 2, 3, new Color32(90, 60, 40, 255));
+                    Rect(12, 0, 2, 3, new Color32(90, 60, 40, 255));
+                    break;
+                case "prizeCounter":
+                    Rect(0, 0, 16, 12, new Color32(110, 40, 30, 255));
+                    Rect(0, 10, 16, 3, new Color32(225, 85, 40, 255));
+                    Rect(6, 12, 4, 3, new Color32(245, 200, 80, 255));
+                    Rect(5, 15, 6, 1, new Color32(245, 200, 80, 255));
+                    Rect(3, 4, 10, 4, new Color32(245, 200, 80, 255));
+                    break;
+                case "tournamentBoard":
+                    Rect(2, 3, 12, 11, new Color32(90, 60, 40, 255));
+                    Rect(3, 4, 10, 9, new Color32(40, 60, 50, 255));
+                    Rect(4, 11, 8, 1, new Color32(240, 240, 230, 255));
+                    Rect(4, 8, 6, 1, new Color32(240, 240, 230, 255));
+                    Rect(4, 6, 7, 1, new Color32(240, 240, 230, 255));
+                    break;
                 case "accessoryStand":
                     Rect(2, 0, 12, 16, new Color32(70, 80, 95, 255));
                     Rect(3, 1, 10, 14, new Color32(45, 50, 60, 255));
