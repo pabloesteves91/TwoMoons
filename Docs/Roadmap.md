@@ -11,12 +11,12 @@
 ### Spieltag
 | | |
 |---|---|
-| Öffnungszeit | 9–18 Uhr = **7 Minuten Echtzeit** |
-| 1 Spielstunde | ca. **47 Sekunden** |
-| Turnier (3 Spielstunden) | ca. **2 Minuten 20 Sekunden** |
+| Öffnungszeit | 9–18 Uhr = **5 Minuten Echtzeit** |
+| 1 Spielstunde | ca. **33 Sekunden** |
+| Turnier (3 Spielstunden) | ca. **1 Minute 40 Sekunden** |
 | Vorbereitung morgens / Abrechnung abends | ohne Zeitdruck |
 
-Mit Vorbereitung und Abrechnung dauert ein ganzer Spieltag etwa **9–10 Minuten**.
+Mit Vorbereitung und Abrechnung dauert ein ganzer Spieltag etwa **6–8 Minuten**.
 
 ### Wie lang ein Kapitel dauert
 Kapitel 1–3 dauern je etwa **1 Stunde**, Kapitel 4–7 je etwa **90 Minuten**. Jedes Kapitel besteht aus

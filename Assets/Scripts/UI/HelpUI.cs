@@ -83,7 +83,7 @@ namespace TwoMoons
         {
             Section("Ein Tag im Laden",
                 "Morgens ist der Laden zu: putzen, einräumen, bestellen, Möbel stellen.",
-                "Am Schild neben der Tür öffnest du den Laden. Ein Tag dauert von 9 bis 18 Uhr (etwa 7 Minuten).",
+                "Am Schild neben der Tür öffnest du den Laden. Ein Tag dauert von 9 bis 18 Uhr (etwa 5 Minuten).",
                 "Abends gibt es die Abrechnung, danach schläfst du – am Morgen wird automatisch gespeichert.");
             Section("Kunden",
                 "Kunden nehmen Ware aus dem Regal und stellen sich an der Kasse an. Drück dort [E].",
