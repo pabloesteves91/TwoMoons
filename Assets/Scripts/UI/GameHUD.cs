@@ -69,7 +69,7 @@ namespace TwoMoons
             switch (pauseScreen)
             {
                 case PauseScreen.Main:
-                    UiKit.BeginWindow(UiKit.Centered(width, 300f, ShowTestTools ? 350f : 300f));
+                    UiKit.BeginWindow(UiKit.Centered(width, 320f, ShowTestTools ? 430f : 340f));
                     GUILayout.Label("Pause", title);
                     GUILayout.Space(6f);
                     if (UiKit.BigButtonLayout("Weiter [Esc]")) Game.PauseOpen = false;
@@ -478,6 +478,19 @@ namespace TwoMoons
         {
             int current = Game.StoreLevel;
             GUILayout.Label($"Laden-Erfahrung: {Game.Xp} XP", hint);
+            if (ShowTestTools && current < StoreLevels.Max)
+            {
+                // Gleiche doppelte Nachfrage wie im Pause-Menü.
+                GUI.color = UiKit.Gold;
+                if (Button($"TEST: Level {current + 1} freischalten", GUILayout.Height(30f)))
+                {
+                    Game.ComputerOpen = false;
+                    Game.PauseOpen = true;
+                    pauseScreen = PauseScreen.TestUnlock;
+                }
+                GUI.color = Color.white;
+                GUILayout.Space(4f);
+            }
             for (int level = 1; level <= StoreLevels.Max; level++)
             {
                 bool reached = level <= current;
