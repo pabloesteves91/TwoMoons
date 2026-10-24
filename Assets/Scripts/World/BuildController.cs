@@ -2,9 +2,17 @@ using UnityEngine;
 
 namespace TwoMoons
 {
-    /// <summary>Bau-Modus mit der Maus: [B] öffnet ihn, Linksklick stellt ein Regal auf.</summary>
+    /// <summary>
+    /// Bau-Modus mit der Maus: [B] öffnet ihn, Linksklick stellt ein Möbelstück auf.
+    /// Sind Regale und Vitrinen da, wechselt ein weiteres [B] zwischen beiden.
+    /// </summary>
     public class BuildController : MonoBehaviour
     {
+        public enum Furniture { Shelf, Showcase }
+
+        /// <summary>Was gerade aufgestellt wird.</summary>
+        public static Furniture Current { get; private set; }
+
         static readonly Color ValidColor = new Color(0.5f, 1f, 0.5f, 0.7f);
         static readonly Color InvalidColor = new Color(1f, 0.4f, 0.4f, 0.7f);
 
@@ -28,20 +36,32 @@ namespace TwoMoons
                 ghost.enabled = false;
                 if (GameInput.BuildPressed && !game.InputLocked && game.Phase != GamePhase.Summary)
                 {
-                    if (game.ShelvesToPlace > 0)
+                    if (game.ShelvesToPlace + game.ShowcasesToPlace > 0)
                     {
+                        Current = game.ShelvesToPlace > 0 ? Furniture.Shelf : Furniture.Showcase;
                         game.BuildMode = true;
+                        ghost.sprite = Art.Get(Current == Furniture.Shelf ? "shelf" : "showcase");
                         SoundManager.Play(Sfx.UiClick);
                     }
                     else
                     {
-                        game.ShowToast("Kein Regal zum Aufstellen – bestell eins am Computer.");
+                        game.ShowToast("Nichts zum Aufstellen – bestell Regale oder Vitrinen am Computer.");
                         SoundManager.Play(Sfx.Error);
                     }
                 }
                 return;
             }
 
+            if (GameInput.BuildPressed && Current == Furniture.Shelf && game.ShowcasesToPlace > 0)
+            {
+                SwitchTo(Furniture.Showcase);
+                return;
+            }
+            if (GameInput.BuildPressed && Current == Furniture.Showcase && game.ShelvesToPlace > 0)
+            {
+                SwitchTo(Furniture.Shelf);
+                return;
+            }
             if (GameInput.BuildPressed || GameInput.RightClickPressed || GameInput.ConsumeCancel())
             {
                 game.BuildMode = false;
@@ -63,11 +83,29 @@ namespace TwoMoons
             else
             {
                 SoundManager.Play(Sfx.Build);
-                WorldFactory.SpawnShelf(cell);
-                game.ShelvesToPlace--;
-                game.NotifyShelfPlaced();
-                if (game.ShelvesToPlace == 0) game.BuildMode = false;
+                if (Current == Furniture.Shelf)
+                {
+                    WorldFactory.SpawnShelf(cell);
+                    game.ShelvesToPlace--;
+                    game.NotifyShelfPlaced();
+                }
+                else
+                {
+                    WorldFactory.SpawnShowcase(cell);
+                    game.ShowcasesToPlace--;
+                }
+
+                if (Current == Furniture.Shelf && game.ShelvesToPlace == 0 && game.ShowcasesToPlace > 0) SwitchTo(Furniture.Showcase);
+                else if (Current == Furniture.Showcase && game.ShowcasesToPlace == 0 && game.ShelvesToPlace > 0) SwitchTo(Furniture.Shelf);
+                else if (game.ShelvesToPlace + game.ShowcasesToPlace == 0) game.BuildMode = false;
             }
+        }
+
+        void SwitchTo(Furniture furniture)
+        {
+            Current = furniture;
+            ghost.sprite = Art.Get(furniture == Furniture.Shelf ? "shelf" : "showcase");
+            SoundManager.Play(Sfx.UiClick);
         }
 
         static bool CanPlace(Vector2Int cell)
@@ -101,6 +139,8 @@ namespace TwoMoons
             if (!HasReachableSide(grid, reach, newShelf)) return false;
             foreach (var shelf in game.Shelves)
                 if (!HasReachableSide(grid, reach, shelf.Cell)) return false;
+            foreach (var showcase in game.Showcases)
+                if (!HasReachableSide(grid, reach, showcase.Cell)) return false;
             return true;
         }
 

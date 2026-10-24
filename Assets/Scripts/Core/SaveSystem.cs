@@ -28,6 +28,21 @@ namespace TwoMoons
     }
 
     [Serializable]
+    public class SavedCard
+    {
+        public int card;
+        public int count;
+    }
+
+    [Serializable]
+    public class SavedShowcase
+    {
+        public int x, y;
+        public int[] cards;
+        public int[] prices;
+    }
+
+    [Serializable]
     public class SavedPrice
     {
         public int product;
@@ -45,12 +60,15 @@ namespace TwoMoons
         public int money;
         public int reputation;
         public int shelvesToPlace;
+        public int showcasesToPlace;
         public int chapter = 1;
         public int[] questProgress;
         public List<SavedPrice> prices = new List<SavedPrice>();
         public List<SavedShelf> shelves = new List<SavedShelf>();
         public List<SavedBox> boxes = new List<SavedBox>();
         public List<SavedCell> dirt = new List<SavedCell>();
+        public List<SavedCard> cards = new List<SavedCard>();
+        public List<SavedShowcase> showcases = new List<SavedShowcase>();
         public long savedAtTicks;
 
         public DateTime SavedAt => new DateTime(savedAtTicks);

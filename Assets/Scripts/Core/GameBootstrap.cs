@@ -71,6 +71,7 @@ namespace TwoMoons
             game.gameObject.AddComponent<ChapterOne>();
             game.gameObject.AddComponent<GameHUD>();
             game.gameObject.AddComponent<MainMenuUI>();
+            game.gameObject.AddComponent<CardScreensUI>();
 
             init(game);
         }
@@ -153,6 +154,7 @@ namespace TwoMoons
             }
 
             WorldFactory.CreateSolid("Computer", "computer", ShopGrid.ComputerCell, root).AddComponent<Computer>();
+            WorldFactory.CreateSolid("Pack-Tisch", "packTable", ShopGrid.PackTableCell, root).AddComponent<PackTable>();
         }
     }
 }

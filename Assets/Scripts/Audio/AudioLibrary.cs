@@ -19,6 +19,9 @@ namespace TwoMoons
         public const string DayEnd = "dayEnd";
         public const string UiClick = "uiClick";
         public const string Dialog = "dialog";
+        public const string CardFlip = "cardFlip";
+        public const string RareCard = "rareCard";
+        public const string ShinyCard = "shinyCard";
         public const string Music = "music";
     }
 
@@ -45,6 +48,11 @@ namespace TwoMoons
         public AudioClip fanfare;
         public AudioClip dayEnd;
 
+        [Header("Karten")]
+        public AudioClip cardFlip;
+        public AudioClip rareCard;
+        public AudioClip shinyCard;
+
         [Header("Menü")]
         public AudioClip uiClick;
         public AudioClip dialog;
@@ -55,7 +63,8 @@ namespace TwoMoons
         public static readonly string[] Keys =
         {
             Sfx.Register, Sfx.Doorbell, Sfx.Pickup, Sfx.Drop, Sfx.Stock, Sfx.Clean, Sfx.Order, Sfx.Build, Sfx.Error,
-            Sfx.Quest, Sfx.Fanfare, Sfx.DayEnd, Sfx.UiClick, Sfx.Dialog, Sfx.Music,
+            Sfx.Quest, Sfx.Fanfare, Sfx.DayEnd, Sfx.CardFlip, Sfx.RareCard, Sfx.ShinyCard,
+            Sfx.UiClick, Sfx.Dialog, Sfx.Music,
         };
     }
 }

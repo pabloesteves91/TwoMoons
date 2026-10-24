@@ -40,6 +40,38 @@ namespace TwoMoons
                 Rect(x + w - 1, y, 1, h, c);
             }
 
+            void Face(Color32 skin, bool smile, bool angry)
+            {
+                var outline = new Color32(40, 25, 20, 255);
+                Rect(4, 2, 8, 12, outline);
+                Rect(2, 4, 12, 8, outline);
+                Rect(5, 3, 6, 10, skin);
+                Rect(3, 5, 10, 6, skin);
+                Rect(5, 8, 2, 2, outline);
+                Rect(9, 8, 2, 2, outline);
+                if (angry)
+                {
+                    Rect(4, 10, 3, 1, outline);
+                    Rect(9, 10, 3, 1, outline);
+                }
+                if (smile)
+                {
+                    Rect(5, 5, 6, 1, outline);
+                    Rect(4, 6, 1, 1, outline);
+                    Rect(11, 6, 1, 1, outline);
+                }
+                else if (angry)
+                {
+                    Rect(5, 5, 6, 1, outline);
+                    Rect(4, 4, 1, 1, outline);
+                    Rect(11, 4, 1, 1, outline);
+                }
+                else
+                {
+                    Rect(5, 5, 6, 1, outline);
+                }
+            }
+
             void Person(Color32 shirt, Color32 hair)
             {
                 var skin = new Color32(240, 200, 160, 255);
@@ -122,6 +154,27 @@ namespace TwoMoons
                     Rect(7, 7, 5, 4, new Color32(90, 70, 40, 170));
                     Rect(10, 3, 3, 2, new Color32(90, 70, 40, 170));
                     break;
+                case "packTable":
+                    Rect(0, 0, 16, 16, new Color32(140, 90, 60, 255));
+                    Rect(0, 8, 16, 5, new Color32(190, 140, 95, 255));
+                    Rect(3, 9, 4, 6, new Color32(60, 170, 90, 255));
+                    Rect(8, 10, 3, 4, new Color32(245, 235, 210, 255));
+                    Rect(12, 10, 3, 4, new Color32(245, 235, 210, 255));
+                    break;
+                case "showcase":
+                    Rect(1, 0, 14, 16, new Color32(110, 70, 45, 255));
+                    Rect(2, 2, 12, 12, new Color32(170, 215, 230, 255));
+                    Rect(2, 8, 12, 1, new Color32(110, 70, 45, 255));
+                    Rect(3, 12, 2, 1, new Color32(255, 255, 255, 255));
+                    break;
+                case "cardIcon":
+                    Rect(4, 1, 8, 13, new Color32(30, 22, 18, 255));
+                    Rect(5, 2, 6, 11, new Color32(240, 200, 80, 255));
+                    Rect(6, 6, 4, 5, new Color32(120, 190, 230, 255));
+                    break;
+                case "moodHappy": Face(new Color32(120, 220, 110, 255), true, false); break;
+                case "moodNeutral": Face(new Color32(250, 215, 80, 255), false, false); break;
+                case "moodAngry": Face(new Color32(240, 90, 70, 255), false, true); break;
                 case "packMonstera":
                     Rect(3, 1, 10, 14, new Color32(60, 170, 90, 255));
                     Frame(3, 1, 10, 14, new Color32(30, 100, 50, 255));

@@ -2,7 +2,7 @@ namespace TwoMoons
 {
     public enum ProductId { MonsteraPack }
 
-    public enum OrderKind { ProductBox, Shelf }
+    public enum OrderKind { ProductBox, Shelf, Showcase }
 
     public class Product
     {
@@ -33,7 +33,7 @@ namespace TwoMoons
             Id = ProductId.MonsteraPack,
             Name = "Monstera-Booster",
             SpriteKey = "packMonstera",
-            BuyPrice = 250,
+            BuyPrice = 300,
             MarketValue = 400,
         };
 
@@ -46,7 +46,7 @@ namespace TwoMoons
             {
                 Name = "Monstera-Display",
                 Description = "Karton mit 12 Monstera-Boosterpacks",
-                Cost = 3000,
+                Cost = 3600,
                 Kind = OrderKind.ProductBox,
                 Product = ProductId.MonsteraPack,
                 Amount = 12,
@@ -57,6 +57,13 @@ namespace TwoMoons
                 Description = "Platz für 24 Boosterpacks",
                 Cost = 6000,
                 Kind = OrderKind.Shelf,
+            },
+            new OrderOption
+            {
+                Name = "Vitrine",
+                Description = "Für 4 Einzelkarten – Sammler kaufen daraus",
+                Cost = 8000,
+                Kind = OrderKind.Showcase,
             },
         };
 

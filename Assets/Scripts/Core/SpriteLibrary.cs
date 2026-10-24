@@ -21,6 +21,8 @@ namespace TwoMoons
         public Sprite shelf;
         public Sprite box;
         public Sprite dirt;
+        public Sprite packTable;
+        public Sprite showcase;
 
         [Header("Oberfläche")]
         [Tooltip("Logo im Hauptmenü, beliebige Größe. Leer = Assets/Art/UI/Resources/logo.png")]
@@ -28,6 +30,12 @@ namespace TwoMoons
 
         [Header("Ware")]
         public Sprite packMonstera;
+        public Sprite cardIcon;
+
+        [Header("Kunden-Laune")]
+        public Sprite moodHappy;
+        public Sprite moodNeutral;
+        public Sprite moodAngry;
 
         [Header("Figuren")]
         public Sprite player1;
@@ -40,7 +48,9 @@ namespace TwoMoons
         public static readonly string[] Keys =
         {
             "floor", "wall", "street", "door", "sign", "counter", "register", "computer", "shelf", "box", "dirt",
-            "packMonstera",
+            "packTable", "showcase",
+            "packMonstera", "cardIcon",
+            "moodHappy", "moodNeutral", "moodAngry",
             "player1", "player2", "player3", "customer1", "customer2", "customer3",
         };
     }

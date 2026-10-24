@@ -42,9 +42,30 @@ Abrechnung, Ware bestellen und Schlafen, dann beginnt der nächste Tag.
 - **Spieltische und Turniere** – Kunden spielen im Laden, Turniere bringen Ruf und Einnahmen
 - **Zubehör** – Hüllen, Ordner, Spielmatten, Snacks und Getränke
 
+## Pack-Öffnen, Sammelbuch und Vitrine
+
+- **Pack-Tisch** hinter der Theke. Packs kommen aus dem eigenen Lager: ein Pack aus dem Regal nehmen
+  (leere Hände, [E] am Regal) oder einen Karton tragen, dann [E] am Pack-Tisch.
+- **10 Karten pro Pack**, zum Durchklicken (beste zuletzt): 7× Gewöhnlich, 2× Gewöhnlich/Selten (30 %),
+  1× Selten oder Ultra-Selten (33 % – etwa jedes 3. Pack).
+- **Ultra-Seltene sind shiny:** wandernder Regenbogen-Schimmer und Funkeln, eigener Sound.
+- **30 Monstera-Karten:** 20 Gewöhnlich (Wert 0,50 €), 7 Selten (3,00 €), 3 Ultra-Selten (25,00 €).
+  Namen sind Platzhalter. Eigene Kartenbilder (24×32 Pixel): `Assets/Art/Cards/Resources/Cards/monstera_01.png` …
+- **Sammelbuch** mit [C]: alle entdeckten Karten, Anzahl im Besitz, Details per Klick.
+- **Vitrine** (80 € am Computer, mit [B] aufstellen): bis zu 4 Karten mit eigenem Preis (10–300 % vom Wert).
+  30 % der Kunden sind Sammler und kaufen daraus, wenn eine Vitrine gefüllt ist.
+- Pack-Öffnen ist ab Tag 1 verfügbar (wird später an die Story angepasst).
+
+## Kunden-Laune und Schwierigkeit
+
+- In der Schlange zeigt jeder Kunde seine Laune: 🙂 → 😐 → 😠, jeweils ein Drittel der Geduld.
+  Nach 😠 geht er. Wer vorher bedient wird, zahlt den vollen Preis.
+- Geduld wächst mit dem Ruf: 15 s (Unbekannt) bis 35 s (Legendär). Jeder Fleck im Laden kostet 8 % Geduld (max. −50 %).
+- Startgeld 60 €, Display 36 € (3,00 € pro Pack), jeden Tag 1–3 neue Flecken, Kunden nehmen meist 1–2 Packs.
+
 ## Seltenheiten
 
-Drei Stufen: **Gewöhnlich**, **Selten**, **Ultra-Selten**.
+Drei Stufen: **Gewöhnlich**, **Selten**, **Ultra-Selten** (shiny).
 
 ## Story
 
@@ -128,7 +149,6 @@ Nach dem Finale kann man weiterspielen.
 
 ## Offen
 
-- Kartenwerte und Pack-Wahrscheinlichkeiten je Seltenheit
 
 ## Prototyp starten (Kapitel 1)
 
@@ -142,7 +162,7 @@ Nach dem Finale kann man weiterspielen.
 
 **Steuerung:** WASD/Pfeiltasten laufen · E benutzen · Q Karton abstellen · B Bau-Modus
 (Linksklick aufstellen, Rechtsklick abbrechen) · Esc öffnet die Einstellungen bzw. schließt Menüs
-· Tab klappt die Aufgabenliste auf/zu · F11 Vollbild (im fertigen Spiel). Controller geht auch.
+· Tab klappt die Aufgabenliste auf/zu · C Sammelbuch · F11 Vollbild (im fertigen Spiel). Controller geht auch.
 
 **Eigene Bilder:** Die PNGs in `Assets/Art/Sprites` mit gleichem Dateinamen durch eigene
 16×16-Pixelbilder ersetzen. Neue Bilder in `Assets/Art` bekommen automatisch die richtigen

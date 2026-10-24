@@ -24,6 +24,7 @@ namespace TwoMoons
         public int PacksSold;
         public int CustomersServed;
         public int CustomersUnhappy;
+        public int CardsSold;
     }
 
     public class Toast
@@ -35,7 +36,7 @@ namespace TwoMoons
     /// <summary>Spielstand und Tagesablauf.</summary>
     public class GameManager : MonoBehaviour
     {
-        public const int StartMoney = 10000;
+        public const int StartMoney = 6000;
         public const float DayLengthSeconds = 600f;
         public const int OpenMinute = 9 * 60;
         public const int CloseMinute = 18 * 60;
@@ -51,6 +52,8 @@ namespace TwoMoons
         public CashRegister Register;
         public PlayerController Player;
         public readonly List<Shelf> Shelves = new List<Shelf>();
+        public readonly List<Showcase> Showcases = new List<Showcase>();
+        public readonly Collection Collection = new Collection();
 
         public GamePhase Phase { get; private set; } = GamePhase.MainMenu;
         /// <summary>Speicherplatz des laufenden Spiels (0–2).</summary>
@@ -61,6 +64,7 @@ namespace TwoMoons
         public int MoneyCents { get; private set; } = StartMoney;
         public int Reputation { get; private set; }
         public int ShelvesToPlace;
+        public int ShowcasesToPlace;
         public float DayTime { get; private set; }
         public DayStats Today { get; private set; } = new DayStats();
 
@@ -70,6 +74,14 @@ namespace TwoMoons
         /// <summary>Esc-Menü im Spiel.</summary>
         public bool PauseOpen;
         public bool BuildMode;
+        public bool CollectionOpen;
+        /// <summary>Vitrine, deren Menü gerade offen ist.</summary>
+        public Showcase OpenShowcase;
+
+        /// <summary>Karten des gerade geöffneten Packs (beste zuletzt), null wenn keins offen ist.</summary>
+        public List<CardDef> OpenedPack { get; private set; }
+        /// <summary>Welche Karten im geöffneten Pack zum ersten Mal gezogen wurden.</summary>
+        public List<bool> OpenedPackNew { get; } = new List<bool>();
 
         public string[] DialogLines { get; private set; }
         public int DialogIndex { get; private set; }
@@ -87,7 +99,19 @@ namespace TwoMoons
 
         public bool InputLocked =>
             Phase == GamePhase.MainMenu || Phase == GamePhase.CharacterSelect || Phase == GamePhase.Summary ||
-            DialogLines != null || ComputerOpen || PauseOpen || BuildMode;
+            DialogLines != null || ComputerOpen || PauseOpen || BuildMode ||
+            CollectionOpen || OpenShowcase != null || OpenedPack != null;
+
+        /// <summary>Menüs, die das Spiel anhalten.</summary>
+        bool Paused =>
+            DialogLines != null || ComputerOpen || PauseOpen || CollectionOpen || OpenShowcase != null || OpenedPack != null;
+
+        /// <summary>
+        /// Wie lange ein Kunde in der Schlange wartet (alle drei Launen zusammen).
+        /// Mit besserem Ruf geduldiger, Schmutz im Laden macht ungeduldig.
+        /// </summary>
+        public float CustomerPatience =>
+            (15f + 5f * ReputationStage) * Mathf.Max(0.5f, 1f - 0.08f * DirtSpot.Existing.Count);
 
         bool IsDemo => Phase == GamePhase.MainMenu;
 
@@ -122,8 +146,8 @@ namespace TwoMoons
         {
             Toasts.RemoveAll(t => t.Until < Time.unscaledTime);
 
-            // Dialoge, Bestellmenü und Esc-Menü halten das Spiel an.
-            Time.timeScale = DialogLines != null || ComputerOpen || PauseOpen ? 0f : 1f;
+            // Dialoge und Menüs halten das Spiel an.
+            Time.timeScale = Paused ? 0f : 1f;
 
             if (IsDemo)
             {
@@ -139,9 +163,26 @@ namespace TwoMoons
                 return;
             }
 
-            if (ComputerOpen)
+            if (OpenedPack != null)
+            {
+                // Das Pack-Menü kümmert sich selbst um Tasten.
+            }
+            else if (CollectionOpen || OpenShowcase != null)
+            {
+                if (GameInput.ConsumeCancel())
+                {
+                    CollectionOpen = false;
+                    OpenShowcase = null;
+                }
+            }
+            else if (ComputerOpen)
             {
                 if (GameInput.ConsumeCancel()) ComputerOpen = false;
+            }
+            else if (!InputLocked && GameInput.CollectionPressed)
+            {
+                CollectionOpen = true;
+                SoundManager.Play(Sfx.UiClick);
             }
             else if (PauseOpen)
             {
@@ -195,6 +236,8 @@ namespace TwoMoons
             MoneyCents = data.money;
             Reputation = data.reputation;
             ShelvesToPlace = data.shelvesToPlace;
+            ShowcasesToPlace = data.showcasesToPlace;
+            Collection.LoadFrom(data);
 
             foreach (var price in data.prices) prices[(ProductId)price.product] = price.cents;
             foreach (var saved in data.shelves)
@@ -205,6 +248,15 @@ namespace TwoMoons
             foreach (var box in data.boxes)
                 WorldFactory.SpawnBox(new Vector2Int(box.x, box.y), Catalog.Get((ProductId)box.product), box.amount);
             foreach (var cell in data.dirt) WorldFactory.SpawnDirt(new Vector2Int(cell.x, cell.y));
+            foreach (var saved in data.showcases)
+            {
+                var showcase = WorldFactory.SpawnShowcase(new Vector2Int(saved.x, saved.y));
+                for (int i = 0; i < Showcase.SlotCount && i < saved.cards.Length; i++)
+                {
+                    var card = CardDatabase.Get(saved.cards[i]);
+                    if (card != null) showcase.Put(i, card, saved.prices[i]);
+                }
+            }
             GetComponent<ChapterOne>().RestoreProgress(data.questProgress);
 
             // Geladen wird immer am Morgen, vor dem Öffnen.
@@ -222,6 +274,7 @@ namespace TwoMoons
                 money = MoneyCents,
                 reputation = Reputation,
                 shelvesToPlace = ShelvesToPlace,
+                showcasesToPlace = ShowcasesToPlace,
                 questProgress = GetComponent<ChapterOne>().SaveProgress(),
             };
             foreach (var price in prices) data.prices.Add(new SavedPrice { product = (int)price.Key, cents = price.Value });
@@ -242,7 +295,18 @@ namespace TwoMoons
                 if (!box.enabled) cell = ShopGrid.WorldToCell(Player.transform.position);
                 data.boxes.Add(new SavedBox { x = cell.x, y = cell.y, product = (int)box.Product.Id, amount = box.Amount });
             }
-            foreach (var dirt in WorldFactory.Root.GetComponentsInChildren<DirtSpot>())
+            Collection.SaveTo(data);
+            foreach (var showcase in Showcases)
+            {
+                data.showcases.Add(new SavedShowcase
+                {
+                    x = showcase.Cell.x,
+                    y = showcase.Cell.y,
+                    cards = (int[])showcase.Cards.Clone(),
+                    prices = (int[])showcase.Prices.Clone(),
+                });
+            }
+            foreach (var dirt in DirtSpot.Existing)
             {
                 var cell = ShopGrid.WorldToCell(dirt.transform.position);
                 data.dirt.Add(new SavedCell { x = cell.x, y = cell.y });
@@ -334,6 +398,11 @@ namespace TwoMoons
                 ShelvesToPlace++;
                 ShowToast($"Regal geliefert! Drücke [B], um es aufzustellen ({ShelvesToPlace} übrig).");
             }
+            else if (option.Kind == OrderKind.Showcase)
+            {
+                ShowcasesToPlace++;
+                ShowToast("Vitrine geliefert! Drücke [B], um sie aufzustellen.");
+            }
             else
             {
                 WorldFactory.SpawnBox(WorldFactory.FreeDeliveryCell(), Catalog.Get(option.Product), option.Amount);
@@ -365,6 +434,28 @@ namespace TwoMoons
             prices[product.Id] = Mathf.Clamp(cents, MinPrice, MaxPrice);
 
         /// <summary>Schnäppchen freuen die Kunden besonders.</summary>
+        public void RegisterCardSale(CardDef card, int cents)
+        {
+            if (IsDemo) return;
+            MoneyCents += cents;
+            Today.Income += cents;
+            Today.CardsSold++;
+            Today.CustomersServed++;
+            ShowToast($"{card.Name} verkauft: +{Money.Format(cents)}", 3f);
+            SoundManager.Play(Sfx.Register);
+            CustomerServed?.Invoke();
+        }
+
+        /// <summary>Ein Pack öffnen: Karten ziehen und sofort in die Sammlung legen.</summary>
+        public void OpenPack()
+        {
+            OpenedPack = CardDatabase.RollPack();
+            OpenedPackNew.Clear();
+            foreach (var card in OpenedPack) OpenedPackNew.Add(Collection.Add(card.Id));
+        }
+
+        public void ClosePack() => OpenedPack = null;
+
         public void CustomerLeftHappy(bool bargain)
         {
             if (!IsDemo) ChangeReputation(bargain ? 3 : 2);
@@ -394,9 +485,9 @@ namespace TwoMoons
             Today = new DayStats();
             DayTime = 0f;
             Phase = GamePhase.Preparation;
-            if (ShelvesToPlace > 0) ShowToast($"Regale zum Aufstellen: {ShelvesToPlace} – drücke [B].");
+            if (ShelvesToPlace + ShowcasesToPlace > 0) ShowToast("Es stehen noch Möbel zum Aufstellen bereit – drücke [B].");
 
-            int dirt = UnityEngine.Random.Range(0, 3);
+            int dirt = UnityEngine.Random.Range(1, 4);
             for (int i = 0; i < dirt; i++) WorldFactory.SpawnDirtSomewhere();
 
             // Automatisch speichern, jeden Morgen nach dem Schlafen.

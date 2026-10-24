@@ -22,7 +22,7 @@ namespace TwoMoons
         public override string GetPrompt(PlayerController player)
         {
             var box = player.Carried;
-            if (box == null) return $"Regal: {Stock}/{Capacity} Packs";
+            if (box == null) return Stock > 0 ? $"1 Pack herausnehmen ({Stock}/{Capacity})" : $"Regal: {Stock}/{Capacity} Packs";
             if (Stock >= Capacity) return "Regal ist voll";
             if (Product != null && Product != box.Product) return $"Hier liegt schon {Product.Name}";
             return $"{box.Product.Name} einräumen";
@@ -31,12 +31,22 @@ namespace TwoMoons
         public override bool CanInteract(PlayerController player)
         {
             var box = player.Carried;
-            return box != null && Stock < Capacity && (Product == null || Product == box.Product);
+            if (box == null) return Stock > 0;
+            return Stock < Capacity && (Product == null || Product == box.Product);
         }
 
         public override void Interact(PlayerController player)
         {
             var box = player.Carried;
+            if (box == null)
+            {
+                // Ein Pack in die Hand nehmen, z. B. um es am Pack-Tisch zu öffnen.
+                var product = Product;
+                Take(1);
+                player.PickUp(WorldFactory.SpawnBox(Cell, product, 1));
+                return;
+            }
+
             int moved = Mathf.Min(Capacity - Stock, box.Amount);
             Product = box.Product;
             Stock += moved;

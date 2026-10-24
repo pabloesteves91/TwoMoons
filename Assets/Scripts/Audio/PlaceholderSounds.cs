@@ -148,6 +148,22 @@ namespace TwoMoons
                     s.Note(0.2f, 0.2f, Midi(76), Wave.Triangle, 0.4f);
                     s.Note(0.4f, 0.5f, Midi(72), Wave.Triangle, 0.4f);
                     break;
+                case Sfx.CardFlip:
+                    s = new Synth(0.12f);
+                    s.Note(0f, 0.1f, 3000f, Wave.Noise, 0.12f, 6000f);
+                    s.Note(0f, 0.05f, Midi(84), Wave.Pulse, 0.08f);
+                    break;
+                case Sfx.RareCard:
+                    s = new Synth(0.5f);
+                    s.Note(0f, 0.1f, Midi(79), Wave.Pulse, 0.18f, decay: false);
+                    s.Note(0.1f, 0.35f, Midi(86), Wave.Pulse, 0.18f);
+                    break;
+                case Sfx.ShinyCard:
+                    s = new Synth(1.2f);
+                    for (int i = 0; i < 8; i++)
+                        s.Note(i * 0.07f, 0.3f, Midi(84 + i * 2), Wave.Triangle, 0.22f);
+                    s.Note(0.56f, 0.6f, Midi(96), Wave.Square, 0.12f);
+                    break;
                 case Sfx.UiClick:
                     s = new Synth(0.04f);
                     s.Note(0f, 0.04f, 1100f, Wave.Pulse, 0.15f);

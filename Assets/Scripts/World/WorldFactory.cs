@@ -111,6 +111,24 @@ namespace TwoMoons
             return shelf;
         }
 
+        public static Showcase SpawnShowcase(Vector2Int cell)
+        {
+            var go = CreateSolid("Vitrine", "showcase", cell, null);
+            var icons = new SpriteRenderer[Showcase.SlotCount];
+            for (int i = 0; i < icons.Length; i++)
+            {
+                var position = ShopGrid.CellToWorld(cell) + new Vector3(-0.22f + (i % 2) * 0.44f, 0.18f - (i / 2) * 0.38f, 0f);
+                icons[i] = CreateSprite("Karte", "cardIcon", position, 1 + i, go.transform);
+                icons[i].transform.localScale = Vector3.one * 0.4f;
+            }
+            go.GetComponent<YSort>().Collect();
+
+            var showcase = go.AddComponent<Showcase>();
+            showcase.Init(cell, icons);
+            Game.Showcases.Add(showcase);
+            return showcase;
+        }
+
         public static bool HasBoxAt(Vector2Int cell)
         {
             foreach (var box in DeliveryBox.Existing)

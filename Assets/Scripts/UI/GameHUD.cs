@@ -208,7 +208,11 @@ namespace TwoMoons
 
             if (Game.BuildMode)
             {
-                line = $"Bau-Modus: Linksklick = Regal aufstellen   Rechtsklick / [B] = Abbrechen   (noch {Game.ShelvesToPlace})";
+                bool shelf = BuildController.Current == BuildController.Furniture.Shelf;
+                string item = shelf ? $"Regal ({Game.ShelvesToPlace})" : $"Vitrine ({Game.ShowcasesToPlace})";
+                bool canSwitch = shelf ? Game.ShowcasesToPlace > 0 : Game.ShelvesToPlace > 0;
+                line = $"Bau-Modus: {item}   Linksklick = Aufstellen   " +
+                       (canSwitch ? "[B] = Wechseln   Rechtsklick = Abbrechen" : "Rechtsklick / [B] = Abbrechen");
             }
             else if (!Game.InputLocked)
             {
@@ -220,8 +224,10 @@ namespace TwoMoons
                 }
                 if (player.Carried != null)
                     line = (line != null ? line + "      " : "") + $"Trägst: {player.Carried.Amount}× {player.Carried.Product.Name}   [Q] abstellen";
-                else if (Game.ShelvesToPlace > 0 && line == null)
-                    line = $"[B] Regal aufstellen ({Game.ShelvesToPlace} übrig)";
+                else if (Game.ShelvesToPlace + Game.ShowcasesToPlace > 0 && line == null)
+                    line = $"[B] Möbel aufstellen ({Game.ShelvesToPlace + Game.ShowcasesToPlace} übrig)";
+                else if (line == null)
+                    line = $"[C] Sammelbuch ({Game.Collection.DiscoveredCount}/{CardDatabase.Monstera.Count})";
             }
 
             if (line == null) return;
