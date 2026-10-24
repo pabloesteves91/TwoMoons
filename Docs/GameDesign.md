@@ -1,5 +1,7 @@
 # TwoMoons – Game Design
 
+> Ausbau-Plan mit Store-Level 1–7, Turnieren, 3D-Druck, Couch-Ecke und Fähigkeiten: siehe [Roadmap.md](Roadmap.md).
+
 ## Idee
 
 Ein 2D-Top-Down-Spiel, in dem man den TCG-Laden **TwoMoons** von Grund auf aufbaut:
@@ -163,7 +165,7 @@ Nach dem Finale kann man weiterspielen.
 - Figurenauswahl (3 Figuren) und Namenseingabe beim Start
 - Ware wird am Computer hinter der Theke bestellt und kommt sofort als Karton an den Eingang
 - Kassieren: zur Kasse gehen und mit [E] jeden Kunden selbst bedienen
-- Tagesablauf: Vorbereitung → Laden öffnen (Schild an der Tür) → 9–18 Uhr (10 Minuten Echtzeit) → Abrechnung → Schlafen
+- Tagesablauf: Vorbereitung → Laden öffnen (Schild an der Tür) → 9–18 Uhr (7 Minuten Echtzeit) → Abrechnung → Schlafen
 
 ## Offen
 
