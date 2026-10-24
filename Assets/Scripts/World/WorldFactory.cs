@@ -93,9 +93,10 @@ namespace TwoMoons
             }
         }
 
-        public static Shelf SpawnShelf(Vector2Int cell)
+        public static Shelf SpawnShelf(Vector2Int cell, ProductCategory category = ProductCategory.Pack)
         {
-            var go = CreateSolid("Regal", "shelf", cell, null);
+            bool accessories = category == ProductCategory.Accessory;
+            var go = CreateSolid(accessories ? "Zubehör-Ständer" : "Regal", accessories ? "accessoryStand" : "shelf", cell, null);
             var icons = new SpriteRenderer[3];
             for (int i = 0; i < icons.Length; i++)
             {
@@ -106,7 +107,7 @@ namespace TwoMoons
             go.GetComponent<YSort>().Collect();
 
             var shelf = go.AddComponent<Shelf>();
-            shelf.Init(cell, icons);
+            shelf.Init(cell, icons, category);
             Game.Shelves.Add(shelf);
             return shelf;
         }

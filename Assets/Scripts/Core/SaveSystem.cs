@@ -11,6 +11,8 @@ namespace TwoMoons
         public int x, y;
         public int stock;
         public int product = -1;
+        /// <summary>0 = Regal für Packs, 1 = Zubehör-Ständer.</summary>
+        public int category;
     }
 
     [Serializable]

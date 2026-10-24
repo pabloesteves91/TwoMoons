@@ -15,6 +15,7 @@ namespace TwoMoons
         List<CardDef> currentPack;
 
         int selectedCard = -1;
+        TcgGame collectionGame = TcgGame.Monstera;
         Vector2 collectionScroll;
 
         int pickingSlot = -1;
@@ -81,8 +82,9 @@ namespace TwoMoons
 
             if (revealIndex < 0)
             {
-                GUI.Label(new Rect(0f, 24f, width, 36f), "Monstera-Booster", UiKit.BigTitle);
-                UiKit.DrawSprite(Art.Get(Catalog.MonsteraPack.SpriteKey), new Rect(center.x - 20f, center.y, center.width + 40f, center.height + 40f));
+                var product = Game.OpenedPackProduct ?? Catalog.MonsteraPack;
+                GUI.Label(new Rect(0f, 24f, width, 36f), product.Name, UiKit.BigTitle);
+                UiKit.DrawSprite(Art.Get(product.SpriteKey), new Rect(center.x - 20f, center.y, center.width + 40f, center.height + 40f));
                 GUI.Label(new Rect(0f, center.yMax + 60f, width, 24f), "Klicken oder [Leertaste] zum Aufreißen", UiKit.Hint);
                 return;
             }
@@ -129,7 +131,8 @@ namespace TwoMoons
             GUILayout.Label("Dein Pack", UiKit.Title);
             int fresh = 0;
             foreach (bool isNew in Game.OpenedPackNew) if (isNew) fresh++;
-            GUILayout.Label($"{fresh} neue Karte(n) im Sammelbuch · Sammelbuch: {Game.Collection.DiscoveredCount}/{CardDatabase.Monstera.Count}", UiKit.Text);
+            var game = pack[0].Game;
+            GUILayout.Label($"{fresh} neue Karte(n) · {Catalog.GameName(game)}: {Game.Collection.DiscoveredIn(game)}/{CardDatabase.CardsPerGame} im Sammelbuch", UiKit.Text);
             GUILayout.Space(6f);
 
             var grid = GUILayoutUtility.GetRect(area.width - 36f, 250f);
@@ -162,14 +165,24 @@ namespace TwoMoons
             UiKit.BeginWindow(area);
             var collection = Game.Collection;
             GUILayout.BeginHorizontal();
-            GUILayout.Label("Sammelbuch – Monstera", UiKit.Title);
+            GUILayout.Label("Sammelbuch", UiKit.Title);
+            foreach (var tab in CardDatabase.Games)
+            {
+                GUI.color = collectionGame == tab ? Color.white : UiKit.Dimmed;
+                if (UiKit.Button(Catalog.GameName(tab), GUILayout.Width(110f), GUILayout.Height(28f)))
+                {
+                    collectionGame = tab;
+                    selectedCard = -1;
+                }
+                GUI.color = Color.white;
+            }
             GUILayout.FlexibleSpace();
-            GUILayout.Label($"{collection.DiscoveredCount}/{CardDatabase.Monstera.Count} entdeckt", UiKit.Bold);
+            GUILayout.Label($"{collection.DiscoveredIn(collectionGame)}/{CardDatabase.CardsPerGame} entdeckt", UiKit.Bold);
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             collectionScroll = GUILayout.BeginScrollView(collectionScroll, GUILayout.Width(480f));
-            var cards = CardDatabase.Monstera;
+            var cards = CardDatabase.ForGame(collectionGame);
             const int columns = 6;
             float cardWidth = 66f, cardHeight = 88f, gap = 8f;
             var grid = GUILayoutUtility.GetRect(columns * (cardWidth + gap), Mathf.Ceil(cards.Count / (float)columns) * (cardHeight + gap));
@@ -287,7 +300,9 @@ namespace TwoMoons
             UiKit.BeginWindow(area);
             GUILayout.Label($"Karte für Fach {pickingSlot + 1} wählen", UiKit.Title);
 
-            var owned = CardDatabase.Monstera.FindAll(c => Game.Collection.Count(c.Id) > 0);
+            var owned = new List<CardDef>();
+            foreach (var card in CardDatabase.All)
+                if (Game.Collection.Count(card.Id) > 0) owned.Add(card);
             owned.Sort((a, b) => b.Rarity != a.Rarity ? b.Rarity.CompareTo(a.Rarity) : a.Number.CompareTo(b.Number));
             if (owned.Count == 0)
             {

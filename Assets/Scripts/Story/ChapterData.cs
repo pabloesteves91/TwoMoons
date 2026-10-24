@@ -39,6 +39,11 @@ namespace TwoMoons
         static Quest OpenPacks(int packs) => new Quest { Text = "Packs am Pack-Tisch öffnen", Target = packs, Key = "packOpened" };
         static Quest SellCards(int cards) => new Quest { Text = "Karten aus der Vitrine verkaufen", Target = cards, Key = "cardSold" };
         static Quest PullUltra(int cards) => new Quest { Text = "Ultra-Seltene ziehen", Target = cards, Key = "ultraPulled" };
+        static Quest SellProduct(Product product, int count) =>
+            new Quest { Text = $"{product.Name} verkaufen", Target = count, Key = $"sold:{product.Id}" };
+        static Quest SellAccessories(int count) => new Quest { Text = "Zubehör verkaufen", Target = count, Key = "accessorySold" };
+        static Quest AccessoryStands(int count) =>
+            new Quest { Text = "Zubehör-Ständer im Laden", Target = count, Poll = () => Game.Shelves.FindAll(s => s.Category == ProductCategory.Accessory).Count };
         static Quest BestDay(int packs) => new Quest { Text = "An einem Tag Packs verkaufen", Target = packs, Key = "bestDay" };
 
         // Zustands-Aufgaben
@@ -47,6 +52,8 @@ namespace TwoMoons
         static Quest Decos(int count) => new Quest { Text = "Deko im Laden", Target = count, Poll = () => Game.Decos.Count };
         static Quest Cozy(int value) => new Quest { Text = "Gemütlichkeit erreichen", Target = value, Poll = () => Game.Coziness };
         static Quest Cards(int count) => new Quest { Text = "Karten im Sammelbuch", Target = count, Poll = () => Game.Collection.DiscoveredCount };
+        static Quest CardsIn(TcgGame game, int count) =>
+            new Quest { Text = $"{Catalog.GameName(game)}-Karten im Sammelbuch", Target = count, Poll = () => Game.Collection.DiscoveredIn(game) };
         static Quest Money(int euros) => new Quest { Text = "Euro auf dem Konto", Target = euros, Poll = () => Game.MoneyCents / 100 };
 
         static Quest Reputation(int stage, string name) =>
@@ -110,7 +117,7 @@ namespace TwoMoons
                         new QuestStage
                         {
                             Title = "Neue Ideen",
-                            Quests = new List<Quest> { Showcases(1), OpenPacks(5), Cards(10) },
+                            Quests = new List<Quest> { Showcases(1), AccessoryStands(1), OpenPacks(5), Cards(10) },
                             Outro = new[]
                             {
                                 "Papa ruft an: „Sammler sind die treuesten Kunden. Zeig ihnen, was du hast.“",
@@ -119,13 +126,13 @@ namespace TwoMoons
                         new QuestStage
                         {
                             Title = "Sammler entdecken TwoMoons",
-                            Quests = new List<Quest> { SellCards(3), Reputation(1, "Geheimtipp"), Sell(100) },
+                            Quests = new List<Quest> { SellCards(3), Reputation(1, "Geheimtipp"), SellProduct(Catalog.SpellforgePack, 20), Sell(100) },
                             Outro = new[] { "{0}: Immer mehr Gesichter kenne ich schon beim Namen. Das sind meine ersten Stammkunden!" },
                         },
                         new QuestStage
                         {
                             Title = "Stammkunden",
-                            Quests = new List<Quest> { Serve(80), Cozy(10), ProfitDays(3) },
+                            Quests = new List<Quest> { Serve(80), SellAccessories(10), Cozy(10), ProfitDays(3) },
                         },
                     };
 
@@ -204,7 +211,7 @@ namespace TwoMoons
                         new QuestStage
                         {
                             Title = "Das komplette Sammelbuch",
-                            Quests = new List<Quest> { Cards(CardDatabase.Monstera.Count), ProfitDays(8) },
+                            Quests = new List<Quest> { CardsIn(TcgGame.Monstera, CardDatabase.CardsPerGame), ProfitDays(8) },
                         },
                     };
 

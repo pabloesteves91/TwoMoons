@@ -1,6 +1,7 @@
 namespace TwoMoons
 {
-    public enum Furniture { Shelf, Showcase, Plant, Poster, Rug, WallClock, FairyLights }
+    /// <summary>Neue Einträge immer hinten anhängen – die Nummern stehen in Spielständen.</summary>
+    public enum Furniture { Shelf, Showcase, Plant, Poster, Rug, WallClock, FairyLights, AccessoryStand }
 
     /// <summary>Wo ein Möbelstück hinkommt.</summary>
     public enum Placement
@@ -34,6 +35,7 @@ namespace TwoMoons
             new FurnitureDef { Id = Furniture.Rug, Name = "Teppich", SpriteKey = "rug", Placement = Placement.Rug, Cozy = 3 },
             new FurnitureDef { Id = Furniture.WallClock, Name = "Wanduhr", SpriteKey = "wallClock", Placement = Placement.Wall, Cozy = 1 },
             new FurnitureDef { Id = Furniture.FairyLights, Name = "Lichterkette", SpriteKey = "fairyLights", Placement = Placement.Wall, Cozy = 3 },
+            new FurnitureDef { Id = Furniture.AccessoryStand, Name = "Zubehör-Ständer", SpriteKey = "accessoryStand", Placement = Placement.Floor },
         };
 
         public static FurnitureDef Get(Furniture id) => All[(int)id];

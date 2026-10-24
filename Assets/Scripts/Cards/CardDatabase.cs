@@ -7,7 +7,10 @@ namespace TwoMoons
 
     public class CardDef
     {
+        /// <summary>Eindeutig über alle Spiele (steht im Spielstand).</summary>
         public int Id;
+        public TcgGame Game;
+        /// <summary>Nummer innerhalb des eigenen Spiels (#01–#30).</summary>
         public int Number;
         public string Name;
         public Rarity Rarity;
@@ -17,52 +20,92 @@ namespace TwoMoons
         public string ArtKey;
     }
 
-    /// <summary>Alle Karten der erfundenen Kartenspiele. Zum Start: 30 Monstera-Karten.</summary>
+    /// <summary>
+    /// Alle Karten der erfundenen Kartenspiele: je 30 Karten (20 Gewöhnlich, 7 Selten, 3 Ultra-Selten).
+    /// Ids: Monstera 0–29, Spellforge 30–59, Soul Clash 60–89.
+    /// </summary>
     public static class CardDatabase
     {
         public const int CardsPerPack = 10;
+        public const int CardsPerGame = 30;
 
-        static readonly string[] CommonNames =
+        static readonly string[][] MonsteraNames =
         {
-            "Mooskröte", "Funkelfink", "Kieselkauz", "Pilzling", "Blubberfisch",
-            "Glimmwurm", "Zapfenzwerg", "Nebelmotte", "Rindenraupe", "Tümpeltroll",
-            "Sandschnecke", "Brisenbiber", "Dornigel", "Pfützenpups", "Laubläufer",
-            "Wurzelwicht", "Schlammsalamander", "Distelfuchs", "Krümelkrabbe", "Sternenmaus",
+            new[]
+            {
+                "Mooskröte", "Funkelfink", "Kieselkauz", "Pilzling", "Blubberfisch",
+                "Glimmwurm", "Zapfenzwerg", "Nebelmotte", "Rindenraupe", "Tümpeltroll",
+                "Sandschnecke", "Brisenbiber", "Dornigel", "Pfützenpups", "Laubläufer",
+                "Wurzelwicht", "Schlammsalamander", "Distelfuchs", "Krümelkrabbe", "Sternenmaus",
+            },
+            new[] { "Donnerdachs", "Kristallkäfer", "Flammfalke", "Frostfuchs", "Schattenluchs", "Sturmschildkröte", "Glutlöwe" },
+            new[] { "Mondwal", "Sonnenphönix", "Zwielichtdrache" },
         };
 
-        static readonly string[] RareNames =
+        static readonly string[][] SpellforgeNames =
         {
-            "Donnerdachs", "Kristallkäfer", "Flammfalke", "Frostfuchs",
-            "Schattenluchs", "Sturmschildkröte", "Glutlöwe",
+            new[]
+            {
+                "Lehrling der Flamme", "Schildknappe", "Kräuterhexe", "Wandernder Barde", "Steinwächter",
+                "Runenschreiber", "Nebelpfad", "Heiltrank", "Funkenregen", "Eiserne Rüstung",
+                "Waldläuferin", "Zwergenschmied", "Irrlicht", "Wächterturm", "Feuerball",
+                "Elfenbogen", "Burgtor", "Mondbrunnen", "Schattendolch", "Glückstaler",
+            },
+            new[] { "Erzmagierin Lyra", "Drachenritter", "Kristallgolem", "Sturmzauber", "Königin der Dornen", "Arkanes Siegel", "Phönixfeder" },
+            new[] { "Uralter Wyrm", "Krone der Zwei Monde", "Meister der Schmiede" },
         };
 
-        static readonly string[] UltraNames = { "Mondwal", "Sonnenphönix", "Zwielichtdrache" };
+        static readonly List<CardDef> all = new List<CardDef>();
 
-        public static readonly List<CardDef> Monstera = Build();
+        public static readonly List<CardDef> Monstera = Build(TcgGame.Monstera, MonsteraNames, "monstera");
+        public static readonly List<CardDef> Spellforge = Build(TcgGame.Spellforge, SpellforgeNames, "spellforge");
 
-        static List<CardDef> Build()
+        /// <summary>Alle Karten aller Spiele, nach Id.</summary>
+        public static IReadOnlyList<CardDef> All => all;
+
+        /// <summary>Spiele, die es schon als Karten gibt (Soul Clash folgt).</summary>
+        public static readonly TcgGame[] Games = { TcgGame.Monstera, TcgGame.Spellforge };
+
+        static List<CardDef> Build(TcgGame game, string[][] names, string artPrefix)
         {
             var cards = new List<CardDef>();
-            void Add(string name, Rarity rarity, int value)
+            int[] values = { 50, 300, 2500 };
+            for (int rarity = 0; rarity < names.Length; rarity++)
             {
-                int number = cards.Count + 1;
-                cards.Add(new CardDef
+                foreach (var name in names[rarity])
                 {
-                    Id = cards.Count,
-                    Number = number,
-                    Name = name,
-                    Rarity = rarity,
-                    Value = value,
-                    ArtKey = $"monstera_{number:00}",
-                });
+                    int number = cards.Count + 1;
+                    var card = new CardDef
+                    {
+                        Id = (int)game * CardsPerGame + cards.Count,
+                        Game = game,
+                        Number = number,
+                        Name = name,
+                        Rarity = (Rarity)rarity,
+                        Value = values[rarity],
+                        ArtKey = $"{artPrefix}_{number:00}",
+                    };
+                    cards.Add(card);
+                    all.Add(card);
+                }
             }
-            foreach (var name in CommonNames) Add(name, Rarity.Common, 50);
-            foreach (var name in RareNames) Add(name, Rarity.Rare, 300);
-            foreach (var name in UltraNames) Add(name, Rarity.Ultra, 2500);
             return cards;
         }
 
-        public static CardDef Get(int id) => id >= 0 && id < Monstera.Count ? Monstera[id] : null;
+        public static List<CardDef> ForGame(TcgGame game)
+        {
+            switch (game)
+            {
+                case TcgGame.Spellforge: return Spellforge;
+                default: return Monstera;
+            }
+        }
+
+        public static CardDef Get(int id)
+        {
+            foreach (var card in all) if (card.Id == id) return card;
+            return null;
+        }
 
         public static string RarityName(Rarity rarity)
         {
@@ -88,19 +131,19 @@ namespace TwoMoons
         /// Ein Pack mit 10 Karten, die beste zuletzt (großzügig):
         /// 7× Gewöhnlich, 2× Gewöhnlich oder Selten (30 %), 1× Selten oder Ultra-Selten (33 %).
         /// </summary>
-        public static List<CardDef> RollPack()
+        public static List<CardDef> RollPack(TcgGame game)
         {
             var pack = new List<CardDef>();
-            for (int i = 0; i < 7; i++) pack.Add(Random(Rarity.Common));
-            for (int i = 0; i < 2; i++) pack.Add(Random(UnityEngine.Random.value < 0.3f ? Rarity.Rare : Rarity.Common));
-            pack.Add(Random(UnityEngine.Random.value < 0.33f ? Rarity.Ultra : Rarity.Rare));
+            for (int i = 0; i < 7; i++) pack.Add(Random(game, Rarity.Common));
+            for (int i = 0; i < 2; i++) pack.Add(Random(game, UnityEngine.Random.value < 0.3f ? Rarity.Rare : Rarity.Common));
+            pack.Add(Random(game, UnityEngine.Random.value < 0.33f ? Rarity.Ultra : Rarity.Rare));
             pack.Sort((a, b) => a.Rarity.CompareTo(b.Rarity));
             return pack;
         }
 
-        static CardDef Random(Rarity rarity)
+        static CardDef Random(TcgGame game, Rarity rarity)
         {
-            var options = Monstera.FindAll(c => c.Rarity == rarity);
+            var options = ForGame(game).FindAll(c => c.Rarity == rarity);
             return options[UnityEngine.Random.Range(0, options.Count)];
         }
     }

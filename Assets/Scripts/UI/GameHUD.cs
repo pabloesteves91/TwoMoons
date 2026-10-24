@@ -302,7 +302,7 @@ namespace TwoMoons
                 else if (Game.TotalToPlace > 0 && line == null)
                     line = $"[B] Möbel aufstellen ({Game.TotalToPlace} übrig)";
                 else if (line == null)
-                    line = $"[C] Sammelbuch ({Game.Collection.DiscoveredCount}/{CardDatabase.Monstera.Count})";
+                    line = $"[C] Sammelbuch ({Game.Collection.DiscoveredCount}/{CardDatabase.All.Count})";
             }
 
             if (line == null) return;
@@ -410,6 +410,7 @@ namespace TwoMoons
             GUILayout.Space(4f);
             foreach (var product in Catalog.Products)
             {
+                if (product.MinLevel > Game.StoreLevel) continue;
                 int price = Game.GetPrice(product);
                 int profit = price - product.BuyPrice;
 

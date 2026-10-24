@@ -222,6 +222,33 @@ namespace TwoMoons
                 case "moodHappy": Face(new Color32(120, 220, 110, 255), true, false); break;
                 case "moodNeutral": Face(new Color32(250, 215, 80, 255), false, false); break;
                 case "moodAngry": Face(new Color32(240, 90, 70, 255), false, true); break;
+                case "packSpellforge":
+                    Rect(3, 1, 10, 14, new Color32(90, 60, 170, 255));
+                    Frame(3, 1, 10, 14, new Color32(45, 25, 90, 255));
+                    Rect(7, 5, 2, 7, new Color32(200, 220, 255, 255));
+                    Rect(6, 7, 4, 1, new Color32(240, 200, 80, 255));
+                    break;
+                case "sleeves":
+                    Rect(4, 2, 8, 12, new Color32(30, 30, 40, 255));
+                    Rect(5, 3, 6, 10, new Color32(220, 60, 60, 255));
+                    Rect(5, 10, 6, 2, new Color32(250, 250, 250, 255));
+                    break;
+                case "binder":
+                    Rect(3, 2, 10, 12, new Color32(40, 70, 140, 255));
+                    Rect(3, 2, 2, 12, new Color32(25, 45, 90, 255));
+                    Rect(7, 7, 4, 3, new Color32(240, 200, 80, 255));
+                    break;
+                case "playmat":
+                    Rect(1, 5, 14, 7, new Color32(40, 120, 90, 255));
+                    Frame(1, 5, 14, 7, new Color32(20, 60, 45, 255));
+                    Rect(4, 7, 3, 3, new Color32(240, 200, 80, 255));
+                    Rect(9, 7, 3, 3, new Color32(240, 200, 80, 255));
+                    break;
+                case "accessoryStand":
+                    Rect(2, 0, 12, 16, new Color32(70, 80, 95, 255));
+                    Rect(3, 1, 10, 14, new Color32(45, 50, 60, 255));
+                    for (int y = 4; y < 15; y += 4) Rect(3, y, 10, 1, new Color32(150, 160, 175, 255));
+                    break;
                 case "packMonstera":
                     Rect(3, 1, 10, 14, new Color32(60, 170, 90, 255));
                     Frame(3, 1, 10, 14, new Color32(30, 100, 50, 255));

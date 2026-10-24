@@ -35,6 +35,11 @@ namespace TwoMoons
             game.ShopOpened += () => Advance("open", 1);
             game.CustomerServed += () => Advance("served", 1);
             game.PacksSold += packs => Advance("packsSold", packs);
+            game.ProductSold += (product, count) =>
+            {
+                Advance($"sold:{product.Id}", count);
+                if (product.Category == ProductCategory.Accessory) Advance("accessorySold", count);
+            };
             game.DecoPlaced += () => Advance("decoPlaced", 1);
             game.PackOpened += ultras =>
             {

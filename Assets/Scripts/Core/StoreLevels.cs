@@ -22,7 +22,7 @@ namespace TwoMoons
         {
             new string[0],
             new[] { "Regal, Kasse, Computer, Pack-Tisch", "Monstera-Booster", "Deko: Topfpflanze, Poster" },
-            new[] { "Vitrine für Einzelkarten", "Deko: Teppich, Wanduhr, Lichterkette", "Bald: Spellforge und Zubehör" },
+            new[] { "Spellforge-Booster und Spellforge-Karten", "Zubehör-Ständer: Hüllen, Ordner, Spielmatten", "Vitrine für Einzelkarten", "Deko: Teppich, Wanduhr, Lichterkette" },
             new[] { "Bald: Turniere mit Spieltischen und Prizepool", "Bald: Soul Clash", "Bald: Couch-&-TV-Ecke und Getränke", "Bald: dein erster Mitarbeiter" },
             new[] { "Bald: 3D-Drucker und Ankauf von Karten" },
             new[] { "Bald: Karten-Grading", "Bald: Ladenerweiterung (zweiter Raum)" },

@@ -7,17 +7,20 @@ namespace TwoMoons
         {
             var carried = player.Carried;
             if (carried == null) return "Pack-Tisch – bring ein Pack aus dem Regal oder einen Karton";
-            return $"Pack öffnen ({carried.Amount}× {carried.Product.Name} dabei)";
+            if (carried.Product.Category != ProductCategory.Pack) return "Hier werden nur Boosterpacks geöffnet";
+            return $"{carried.Product.Name} öffnen ({carried.Amount} dabei)";
         }
 
-        public override bool CanInteract(PlayerController player) => player.Carried != null && player.Carried.Amount > 0;
+        public override bool CanInteract(PlayerController player) =>
+            player.Carried != null && player.Carried.Amount > 0 && player.Carried.Product.Category == ProductCategory.Pack;
 
         public override void Interact(PlayerController player)
         {
             var carried = player.Carried;
+            var product = carried.Product;
             carried.Amount--;
             if (carried.Amount <= 0) player.DestroyCarried();
-            GameManager.Instance.OpenPack();
+            GameManager.Instance.OpenPack(product);
         }
     }
 }

@@ -90,6 +90,9 @@ namespace TwoMoons
                     WorldFactory.SpawnShelf(cell);
                     game.NotifyShelfPlaced();
                     break;
+                case Furniture.AccessoryStand:
+                    WorldFactory.SpawnShelf(cell, ProductCategory.Accessory);
+                    break;
                 case Furniture.Showcase:
                     WorldFactory.SpawnShowcase(cell);
                     break;

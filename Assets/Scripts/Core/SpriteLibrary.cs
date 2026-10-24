@@ -25,6 +25,7 @@ namespace TwoMoons
         public Sprite dirt;
         public Sprite packTable;
         public Sprite showcase;
+        public Sprite accessoryStand;
 
         [Header("Deko")]
         public Sprite plant;
@@ -39,6 +40,10 @@ namespace TwoMoons
 
         [Header("Ware")]
         public Sprite packMonstera;
+        public Sprite packSpellforge;
+        public Sprite sleeves;
+        public Sprite binder;
+        public Sprite playmat;
         public Sprite cardIcon;
 
         [Header("Kunden-Laune")]
@@ -59,7 +64,7 @@ namespace TwoMoons
             "floor", "wall", "street", "door", "sign", "signBoard", "counter", "register", "computer", "shelf", "box", "package", "dirt",
             "packTable", "showcase",
             "plant", "poster", "rug", "wallClock", "fairyLights",
-            "packMonstera", "cardIcon",
+            "packMonstera", "packSpellforge", "sleeves", "binder", "playmat", "accessoryStand", "cardIcon",
             "moodHappy", "moodNeutral", "moodAngry",
             "player1", "player2", "player3", "customer1", "customer2", "customer3",
         };

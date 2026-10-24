@@ -58,7 +58,10 @@ namespace TwoMoons
 
             Color32 frame = CardDatabase.RarityColor(card.Rarity);
             var dark = new Color32(30, 22, 18, 255);
-            Color.RGBToHSV(Color.HSVToRGB((float)random.NextDouble(), 0.35f, 0.9f), out float h, out _, out _);
+            // Jedes Spiel hat seine eigene Farbwelt: Monstera bunt, Spellforge violett-blau, Soul Clash rot-orange.
+            float h = card.Game == TcgGame.Spellforge ? 0.62f + (float)random.NextDouble() * 0.18f
+                : card.Game == TcgGame.SoulClash ? (float)random.NextDouble() * 0.1f
+                : (float)random.NextDouble();
             Color32 sky = Color.HSVToRGB(h, 0.3f, 0.95f);
             Color32 body = Color.HSVToRGB((h + 0.5f) % 1f, 0.65f, 0.8f);
             Color32 belly = Color.HSVToRGB((h + 0.5f) % 1f, 0.3f, 1f);

@@ -117,6 +117,7 @@ namespace TwoMoons
         public event Action ShopOpened;
         public event Action CustomerServed;
         public event Action<int> PacksSold;
+        public event Action<Product, int> ProductSold;
         /// <summary>Ein Pack wurde geöffnet; Wert = Anzahl gezogener Ultra-Seltener.</summary>
         public event Action<int> PackOpened;
         public event Action CardSold;
@@ -377,7 +378,7 @@ namespace TwoMoons
             foreach (var price in data.prices) prices[(ProductId)price.product] = price.cents;
             foreach (var saved in data.shelves)
             {
-                var shelf = WorldFactory.SpawnShelf(new Vector2Int(saved.x, saved.y));
+                var shelf = WorldFactory.SpawnShelf(new Vector2Int(saved.x, saved.y), (ProductCategory)saved.category);
                 if (saved.product >= 0) shelf.SetStock(Catalog.Get((ProductId)saved.product), saved.stock);
             }
             foreach (var box in data.boxes)
@@ -429,6 +430,7 @@ namespace TwoMoons
                     x = shelf.Cell.x,
                     y = shelf.Cell.y,
                     stock = shelf.Stock,
+                    category = (int)shelf.Category,
                     product = shelf.Product != null ? (int)shelf.Product.Id : -1,
                 });
             }
@@ -576,17 +578,18 @@ namespace TwoMoons
             return true;
         }
 
-        public void RegisterSale(int cents, int packs)
+        public void RegisterSale(int cents, int count, Product product)
         {
             if (IsDemo) return;
             MoneyCents += cents;
             Today.Income += cents;
-            Today.PacksSold += packs;
+            if (product.Category == ProductCategory.Pack) Today.PacksSold += count;
             Today.CustomersServed++;
             ShowToast($"+{Money.Format(cents)}", 2f);
             SoundManager.Play(Sfx.Register);
             AddXp(cents / 100);
-            PacksSold?.Invoke(packs);
+            if (product.Category == ProductCategory.Pack) PacksSold?.Invoke(count);
+            ProductSold?.Invoke(product, count);
             CustomerServed?.Invoke();
         }
 
@@ -616,9 +619,13 @@ namespace TwoMoons
         }
 
         /// <summary>Ein Pack öffnen: Karten ziehen und sofort in die Sammlung legen.</summary>
-        public void OpenPack()
+        /// <summary>Welches Pack gerade geöffnet wird (für Bild und Titel).</summary>
+        public Product OpenedPackProduct { get; private set; }
+
+        public void OpenPack(Product product)
         {
-            OpenedPack = CardDatabase.RollPack();
+            OpenedPackProduct = product;
+            OpenedPack = CardDatabase.RollPack(product.Game);
             OpenedPackNew.Clear();
             foreach (var card in OpenedPack) OpenedPackNew.Add(Collection.Add(card.Id));
             PackOpened?.Invoke(OpenedPack.FindAll(c => c.Rarity == Rarity.Ultra).Count);

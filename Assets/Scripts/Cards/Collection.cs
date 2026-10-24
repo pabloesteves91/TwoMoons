@@ -10,6 +10,14 @@ namespace TwoMoons
 
         public int DiscoveredCount => discovered.Count;
 
+        public int DiscoveredIn(TcgGame game)
+        {
+            int count = 0;
+            foreach (int id in discovered)
+                if (CardDatabase.Get(id)?.Game == game) count++;
+            return count;
+        }
+
         public bool IsDiscovered(int cardId) => discovered.Contains(cardId);
 
         public int Count(int cardId) => owned.TryGetValue(cardId, out int count) ? count : 0;
@@ -32,7 +40,7 @@ namespace TwoMoons
         public void SaveTo(SaveData data)
         {
             data.cards.Clear();
-            foreach (var card in CardDatabase.Monstera)
+            foreach (var card in CardDatabase.All)
             {
                 if (!IsDiscovered(card.Id)) continue;
                 data.cards.Add(new SavedCard { card = card.Id, count = Count(card.Id) });

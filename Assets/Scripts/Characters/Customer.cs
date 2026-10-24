@@ -78,7 +78,10 @@ namespace TwoMoons
 
         void PickShelf()
         {
-            var withStock = Game.Shelves.FindAll(s => s.Stock > 0);
+            // Etwa jeder Vierte schaut nach Zubehör, wenn es welches gibt.
+            var accessories = Game.Shelves.FindAll(s => s.Stock > 0 && s.Category == ProductCategory.Accessory);
+            var packs = Game.Shelves.FindAll(s => s.Stock > 0 && s.Category == ProductCategory.Pack);
+            List<Shelf> withStock = accessories.Count > 0 && (packs.Count == 0 || Random.value < 0.25f) ? accessories : packs;
             var candidates = withStock.Count > 0 ? withStock : Game.Shelves;
             if (candidates.Count == 0)
             {
@@ -156,8 +159,9 @@ namespace TwoMoons
                         break;
                     }
                     bargain = ratio <= BargainRatio;
-                    // Meist 1–2 Packs, bei einem Schnäppchen eins mehr.
-                    itemCount = shelf.Take(Random.Range(1, 3) + (bargain ? 1 : 0));
+                    // Meist 1–2 Packs (Zubehör: 1 Stück), bei einem Schnäppchen eins mehr.
+                    int wanted = product.Category == ProductCategory.Accessory ? 1 : Random.Range(1, 3);
+                    itemCount = shelf.Take(wanted + (bargain ? 1 : 0));
 
                     if (itemCount == 0) Leave(false, "Ein Kunde ist gegangen: Das Regal war leer.");
                     else JoinQueue();
@@ -240,7 +244,7 @@ namespace TwoMoons
         public void Pay()
         {
             if (card != null) Game.RegisterCardSale(card, unitPrice);
-            else Game.RegisterSale(Total, itemCount);
+            else Game.RegisterSale(Total, itemCount, product);
             itemCount = 0;
             card = null;
             Leave(true, null);
