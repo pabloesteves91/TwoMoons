@@ -244,6 +244,52 @@ namespace TwoMoons
                     Rect(4, 7, 3, 3, new Color32(240, 200, 80, 255));
                     Rect(9, 7, 3, 3, new Color32(240, 200, 80, 255));
                     break;
+                case "white":
+                    Rect(0, 0, 16, 16, new Color32(255, 255, 255, 255));
+                    break;
+                case "filament":
+                    Rect(4, 3, 8, 10, new Color32(60, 60, 70, 255));
+                    Rect(5, 4, 6, 8, new Color32(225, 85, 40, 255));
+                    Rect(7, 7, 2, 2, new Color32(60, 60, 70, 255));
+                    break;
+                case "printSmall":
+                    Rect(5, 1, 6, 2, new Color32(80, 80, 90, 255));
+                    Rect(5, 3, 6, 6, new Color32(90, 170, 90, 255));
+                    Rect(6, 6, 1, 1, new Color32(30, 30, 30, 255));
+                    Rect(9, 6, 1, 1, new Color32(30, 30, 30, 255));
+                    break;
+                case "printMedium":
+                    Rect(4, 1, 8, 2, new Color32(80, 80, 90, 255));
+                    Rect(6, 3, 4, 8, new Color32(225, 120, 40, 255));
+                    Rect(3, 8, 3, 2, new Color32(240, 170, 60, 255));
+                    Rect(10, 8, 3, 2, new Color32(240, 170, 60, 255));
+                    break;
+                case "printLarge":
+                    Rect(3, 1, 10, 2, new Color32(80, 80, 90, 255));
+                    Rect(5, 3, 6, 8, new Color32(110, 70, 160, 255));
+                    Rect(2, 7, 4, 3, new Color32(140, 100, 190, 255));
+                    Rect(10, 7, 4, 3, new Color32(140, 100, 190, 255));
+                    Rect(6, 11, 4, 3, new Color32(110, 70, 160, 255));
+                    break;
+                case "printer3d":
+                    Rect(1, 0, 14, 15, new Color32(50, 50, 60, 255));
+                    Rect(2, 3, 12, 10, new Color32(200, 210, 220, 255));
+                    Rect(3, 10, 10, 1, new Color32(80, 80, 90, 255));
+                    Rect(6, 8, 3, 2, new Color32(225, 85, 40, 255));
+                    Rect(4, 4, 8, 1, new Color32(120, 120, 130, 255));
+                    break;
+                case "printShelf":
+                    Rect(1, 0, 14, 16, new Color32(230, 230, 235, 255));
+                    Rect(2, 1, 12, 14, new Color32(180, 190, 200, 255));
+                    Rect(2, 5, 12, 1, new Color32(230, 230, 235, 255));
+                    Rect(2, 10, 12, 1, new Color32(230, 230, 235, 255));
+                    break;
+                case "neonSign":
+                    Rect(1, 5, 14, 7, new Color32(30, 20, 40, 255));
+                    Rect(2, 7, 4, 3, new Color32(255, 90, 160, 255));
+                    Rect(7, 7, 3, 3, new Color32(90, 220, 255, 255));
+                    Rect(11, 7, 3, 3, new Color32(255, 220, 90, 255));
+                    break;
                 case "packSoulClash":
                     Rect(3, 1, 10, 14, new Color32(200, 50, 40, 255));
                     Frame(3, 1, 10, 14, new Color32(90, 20, 20, 255));

@@ -71,6 +71,7 @@ namespace TwoMoons
             game.gameObject.AddComponent<Chapters>();
             game.gameObject.AddComponent<TournamentManager>();
             game.gameObject.AddComponent<TournamentUI>();
+            game.gameObject.AddComponent<WorkshopUI>();
             game.gameObject.AddComponent<GameHUD>();
             game.gameObject.AddComponent<MainMenuUI>();
             game.gameObject.AddComponent<CardScreensUI>();

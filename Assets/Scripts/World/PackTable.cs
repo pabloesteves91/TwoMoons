@@ -8,6 +8,7 @@ namespace TwoMoons
             var carried = player.Carried;
             if (carried == null) return "Pack-Tisch – bring ein Pack aus dem Regal oder einen Karton";
             if (carried.Product.Category == ProductCategory.Promo) return "Turnier-Packs gehören zum Turnier-Counter";
+            if (carried.Product.Category == ProductCategory.Supply) return "Filament gehört in den 3D-Drucker";
             if (carried.Product.Category != ProductCategory.Pack) return "Hier werden nur Boosterpacks geöffnet";
             return $"{carried.Product.Name} öffnen ({carried.Amount} dabei)";
         }

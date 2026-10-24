@@ -19,7 +19,9 @@ namespace TwoMoons
 
             if (Customer.Active.Count < MaxCustomers)
             {
-                WorldFactory.SpawnCustomer();
+                var customer = WorldFactory.SpawnCustomer();
+                // Ab Level 4 will ab und zu jemand Karten verkaufen.
+                if (game.Phase == GamePhase.Open && game.StoreLevel >= 4 && Random.value < 0.12f) customer.IsSeller = true;
                 if (game.Phase != GamePhase.MainMenu) SoundManager.Play(Sfx.Doorbell);
             }
             float reputationFactor = Mathf.Lerp(1f, 0.5f, game.ReputationStage / 4f);

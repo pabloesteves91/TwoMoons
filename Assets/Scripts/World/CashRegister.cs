@@ -27,7 +27,7 @@ namespace TwoMoons
         Customer Front => queue.Count > 0 && queue[0].IsWaitingAtRegister ? queue[0] : null;
 
         /// <summary>Wartet vorne ein Kunde, der kassiert werden kann?</summary>
-        public bool CanServe => Front != null;
+        public bool CanServe => Front != null && !Front.IsSeller;
 
         public void ServeFront()
         {
@@ -54,6 +54,7 @@ namespace TwoMoons
         public override string GetPrompt(PlayerController player)
         {
             var front = Front;
+            if (front != null && front.IsSeller) return "Ankauf: Angebot ansehen";
             return front != null ? $"Abkassieren ({Money.Format(front.Total)})" : "Kasse – kein Kunde wartet";
         }
 

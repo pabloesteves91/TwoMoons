@@ -437,7 +437,7 @@ namespace TwoMoons
             GUILayout.Space(4f);
             foreach (var product in Catalog.Products)
             {
-                if (product.MinLevel > Game.StoreLevel || product.Category == ProductCategory.Promo) continue;
+                if (product.MinLevel > Game.StoreLevel || product.Category == ProductCategory.Promo || product.Category == ProductCategory.Supply) continue;
                 int price = Game.GetPrice(product);
                 int profit = price - product.BuyPrice;
 

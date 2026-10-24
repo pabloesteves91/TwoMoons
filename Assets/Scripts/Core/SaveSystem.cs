@@ -68,6 +68,16 @@ namespace TwoMoons
     }
 
     [Serializable]
+    public class SavedPrinter
+    {
+        public int x, y;
+        public int filament;
+        public int model = -1;
+        public float progress;
+        public bool jammed;
+    }
+
+    [Serializable]
     public class SavedDeco
     {
         public int type;
@@ -115,6 +125,7 @@ namespace TwoMoons
         public SavedTournament tournament;
         /// <summary>Rolle des Mitarbeiters (Employee.Role), -1 = keiner.</summary>
         public int employee = -1;
+        public List<SavedPrinter> printers = new List<SavedPrinter>();
         public long savedAtTicks;
 
         public DateTime SavedAt => new DateTime(savedAtTicks);

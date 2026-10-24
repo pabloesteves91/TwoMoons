@@ -33,6 +33,9 @@ namespace TwoMoons
         public Sprite couch;
         public Sprite tv;
         public Sprite console;
+        public Sprite printer3d;
+        public Sprite printShelf;
+        public Sprite neonSign;
 
         [Header("Deko")]
         public Sprite plant;
@@ -51,6 +54,10 @@ namespace TwoMoons
         public Sprite packSoulClash;
         public Sprite soda;
         public Sprite energyDrink;
+        public Sprite filament;
+        public Sprite printSmall;
+        public Sprite printMedium;
+        public Sprite printLarge;
         public Sprite sleeves;
         public Sprite binder;
         public Sprite playmat;
@@ -75,7 +82,7 @@ namespace TwoMoons
             "floor", "wall", "street", "door", "sign", "signBoard", "counter", "register", "computer", "shelf", "box", "package", "dirt",
             "packTable", "showcase",
             "plant", "poster", "rug", "wallClock", "fairyLights",
-            "packMonstera", "packSpellforge", "sleeves", "binder", "playmat", "accessoryStand", "gameTable", "prizeCounter", "tournamentBoard", "fridge", "couch", "tv", "console", "packSoulClash", "soda", "energyDrink", "employee", "cardIcon",
+            "packMonstera", "packSpellforge", "sleeves", "binder", "playmat", "accessoryStand", "gameTable", "prizeCounter", "tournamentBoard", "fridge", "couch", "tv", "console", "packSoulClash", "soda", "energyDrink", "employee", "printer3d", "printShelf", "neonSign", "filament", "printSmall", "printMedium", "printLarge", "cardIcon",
             "moodHappy", "moodNeutral", "moodAngry",
             "player1", "player2", "player3", "customer1", "customer2", "customer3",
         };

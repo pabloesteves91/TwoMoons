@@ -49,6 +49,12 @@ namespace TwoMoons
         /// <summary>Kommt nur, um sich fürs Turnier anzumelden (zahlt Startgeld an der Kasse).</summary>
         public bool IsTournamentEntrant;
 
+        /// <summary>Will dir Karten verkaufen (Ankauf ab Level 4).</summary>
+        public bool IsSeller;
+        public readonly List<CardDef> OfferCards = new List<CardDef>();
+        public int AskingPrice { get; private set; }
+        public bool CounterTried { get; private set; }
+
         public Sprite Sprite => spriteRenderer != null ? spriteRenderer.sprite : GetComponent<SpriteRenderer>().sprite;
 
         public bool IsWaitingAtRegister => state == State.Queued && queueIndex == 0 && Arrived;
@@ -83,6 +89,13 @@ namespace TwoMoons
                 return;
             }
 
+            if (IsSeller)
+            {
+                PrepareOffer();
+                JoinQueue();
+                return;
+            }
+
             var showcases = Game.Showcases.FindAll(s => s.HasCards);
             if (showcases.Count > 0 && Random.value < CollectorChance) PickShowcase(showcases);
             else PickShelf();
@@ -101,9 +114,11 @@ namespace TwoMoons
             var packs = Game.Shelves.FindAll(s => s.Stock > 0 && s.Category == ProductCategory.Pack);
             var accessories = Game.Shelves.FindAll(s => s.Stock > 0 && s.Category == ProductCategory.Accessory);
             var drinks = Game.Shelves.FindAll(s => s.Stock > 0 && s.Category == ProductCategory.Drink);
+            var prints = Game.Shelves.FindAll(s => s.Stock > 0 && s.Category == ProductCategory.Print);
             float roll = Random.value;
             List<Shelf> withStock = packs;
             if (accessories.Count > 0 && (roll < 0.25f || packs.Count == 0)) withStock = accessories;
+            else if (prints.Count > 0 && roll < 0.38f) withStock = prints;
             else if (drinks.Count > 0 && (roll > 0.83f || packs.Count == 0)) withStock = drinks;
             var candidates = withStock.Count > 0 ? withStock : Game.Shelves.FindAll(s => s.Category == ProductCategory.Pack);
             if (candidates.Count == 0)
@@ -183,7 +198,7 @@ namespace TwoMoons
                     }
                     bargain = ratio <= BargainRatio;
                     // Meist 1–2 Packs (Zubehör: 1 Stück), bei einem Schnäppchen eins mehr.
-                    int wanted = product.Category == ProductCategory.Accessory ? 1 : Random.Range(1, 3);
+                    int wanted = product.Category == ProductCategory.Accessory || product.Category == ProductCategory.Print ? 1 : Random.Range(1, 3);
                     // Nach dem Zocken: nur ein Getränk.
                     if (hasGamed) wanted = 1;
                     itemCount = shelf.Take(wanted + (bargain ? 1 : 0));
@@ -284,6 +299,48 @@ namespace TwoMoons
 
         static Vector2Int DecoCell(DecoItem deco) => deco.Cell;
 
+        /// <summary>3–5 Karten aus seiner Sammlung, meist Gewöhnliche, manchmal etwas Seltenes.</summary>
+        void PrepareOffer()
+        {
+            int count = Random.Range(3, 6);
+            int value = 0;
+            for (int i = 0; i < count; i++)
+            {
+                var game = CardDatabase.Games[Random.Range(0, CardDatabase.Games.Length)];
+                float roll = Random.value;
+                var rarity = roll < 0.08f ? Rarity.Ultra : roll < 0.38f ? Rarity.Rare : Rarity.Common;
+                var options = CardDatabase.ForGame(game).FindAll(c => c.Rarity == rarity);
+                var card = options[Random.Range(0, options.Count)];
+                OfferCards.Add(card);
+                value += card.Value;
+            }
+            AskingPrice = Mathf.RoundToInt(value * Random.Range(0.6f, 0.9f) / 10f) * 10;
+        }
+
+        /// <summary>Gegenangebot (15 % weniger). Gibt true zurück, wenn der Verkäufer annimmt.</summary>
+        public bool TryCounterOffer()
+        {
+            CounterTried = true;
+            if (Random.value > 0.6f) return false;
+            AskingPrice = Mathf.RoundToInt(AskingPrice * 0.85f / 10f) * 10;
+            return true;
+        }
+
+        /// <summary>Ankauf abgeschlossen oder abgelehnt – der Verkäufer geht.</summary>
+        public void ResolveOffer(bool bought)
+        {
+            itemCount = 0;
+            if (bought)
+            {
+                Game.BuyCards(OfferCards, AskingPrice);
+                Leave(true, null);
+            }
+            else
+            {
+                Leave(true, null, alreadyRewarded: true);
+            }
+        }
+
         /// <summary>Freie Couch, wenn die Couch-Ecke komplett ist (Couch + Fernseher + Konsole).</summary>
         static DecoItem FreeCouch()
         {
@@ -320,6 +377,12 @@ namespace TwoMoons
         /// <summary>Bezahlt immer den vollen Preis, egal wie die Laune ist.</summary>
         public void Pay()
         {
+            if (IsSeller)
+            {
+                // Statt zu bezahlen zeigt der Verkäufer sein Angebot.
+                Game.SellerOffer = this;
+                return;
+            }
             if (IsTournamentEntrant)
             {
                 // Startgeld bezahlt: weiter an den Spieltisch.

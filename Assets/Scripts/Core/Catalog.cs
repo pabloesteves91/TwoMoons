@@ -4,10 +4,11 @@ namespace TwoMoons
     public enum TcgGame { Monstera, Spellforge, SoulClash }
 
     /// <summary>Neue Waren immer hinten anhängen – die Nummern stehen in Spielständen.</summary>
-    public enum ProductId { MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat, TournamentPack, SoulClashPack, Soda, EnergyDrink }
+    public enum ProductId { MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat, TournamentPack, SoulClashPack, Soda, EnergyDrink,
+        Filament, PrintSmall, PrintMedium, PrintLarge }
 
     /// <summary>Wo eine Ware im Laden steht: Packs ins Regal, Zubehör in den Zubehör-Ständer.</summary>
-    public enum ProductCategory { Pack, Accessory, Promo, Drink }
+    public enum ProductCategory { Pack, Accessory, Promo, Drink, Supply, Print }
 
     public enum OrderKind { ProductBox, Furniture }
 
@@ -98,9 +99,28 @@ namespace TwoMoons
             Category = ProductCategory.Drink, BuyPrice = 120, MarketValue = 300, MinLevel = 3,
         };
 
+        /// <summary>Filament-Spulen für den 3D-Drucker (nicht zum Verkaufen).</summary>
+        public static readonly Product Filament = new Product
+        {
+            Id = ProductId.Filament, Name = "Filament", SpriteKey = "filament",
+            Category = ProductCategory.Supply, BuyPrice = 1500, MinLevel = 4,
+        };
+
+        public static readonly Product PrintSmall = Print(ProductId.PrintSmall, "Mooskröte-Figur", "printSmall", 800);
+        public static readonly Product PrintMedium = Print(ProductId.PrintMedium, "Flammfalke-Figur", "printMedium", 1800);
+        public static readonly Product PrintLarge = Print(ProductId.PrintLarge, "Zwielichtdrache-Statue", "printLarge", 4500);
+
+        static Product Print(ProductId id, string name, string sprite, int value) => new Product
+        {
+            Id = id, Name = name, SpriteKey = sprite, Category = ProductCategory.Print, MarketValue = value, MinLevel = 4,
+        };
+
         /// <summary>Alle Waren, in der Reihenfolge von <see cref="ProductId"/>.</summary>
         public static readonly Product[] Products =
-            { MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat, TournamentPack, SoulClashPack, Soda, EnergyDrink };
+        {
+            MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat, TournamentPack, SoulClashPack, Soda, EnergyDrink,
+            Filament, PrintSmall, PrintMedium, PrintLarge,
+        };
 
         /// <summary>Tab „Ware“ am Computer.</summary>
         public static readonly OrderOption[] Orders =
@@ -113,6 +133,7 @@ namespace TwoMoons
             Box(SoulClashPack, "Soul-Clash-Display", "Karton mit 12 Soul-Clash-Boosterpacks", 12),
             Box(Soda, "Limo", "Kiste mit 12 Flaschen · für den Kühlschrank", 12),
             Box(EnergyDrink, "Energy-Drinks", "Kiste mit 12 Dosen · für den Kühlschrank", 12),
+            Box(Filament, "Filament-Spulen", "5 Spulen für den 3D-Drucker · zum Drucker tragen", 5),
         };
 
         /// <summary>Tab „Einrichtung“ am Computer: Möbel und Deko, nach Store-Level freigeschaltet.</summary>
@@ -133,6 +154,9 @@ namespace TwoMoons
             Furnishing(Furniture.Couch, "Couch-Ecke: Couch + TV + Konsole · Gemütlichkeit +3", 20000, 3),
             Furnishing(Furniture.Tv, "Für die Wand · Couch-Ecke", 25000, 3),
             Furnishing(Furniture.Console, "Spielkonsole · Couch-Ecke", 18000, 3),
+            Furnishing(Furniture.Printer3D, "Druckt Figuren aus Filament", 30000, 4),
+            Furnishing(Furniture.PrintShelf, "Regal für 3D-Drucke", 7000, 4),
+            Furnishing(Furniture.NeonSign, "Für die Wand, leuchtet · Gemütlichkeit +5", 9000, 4),
         };
 
         /// <summary>Ein Karton Ware zum Großhandelspreis.</summary>

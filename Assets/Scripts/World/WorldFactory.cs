@@ -95,7 +95,10 @@ namespace TwoMoons
 
         public static Shelf SpawnShelf(Vector2Int cell, ProductCategory category = ProductCategory.Pack)
         {
-            string sprite = category == ProductCategory.Accessory ? "accessoryStand" : category == ProductCategory.Drink ? "fridge" : "shelf";
+            string sprite = category == ProductCategory.Accessory ? "accessoryStand"
+                : category == ProductCategory.Drink ? "fridge"
+                : category == ProductCategory.Print ? "printShelf"
+                : "shelf";
             var go = CreateSolid(Shelf.LabelFor(category), sprite, cell, null);
             var icons = new SpriteRenderer[3];
             for (int i = 0; i < icons.Length; i++)
@@ -151,6 +154,7 @@ namespace TwoMoons
             deco.Init(type, cell);
             if (type == Furniture.GameTable) go.AddComponent<GameTable>().Init(cell);
             if (type == Furniture.PrizeCounter) go.AddComponent<PrizeCounter>().Init(cell);
+            if (type == Furniture.Printer3D) go.AddComponent<Printer3D>().Init(cell);
             Game.Decos.Add(deco);
             return deco;
         }

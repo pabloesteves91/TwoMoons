@@ -50,6 +50,8 @@ namespace TwoMoons
         static Quest Hire() => new Quest { Text = "Einen Mitarbeiter einstellen", Key = "hired", Poll = () => Game.Staff != null ? 1 : 0 };
         static Quest SellCategory(ProductCategory category, string text, int count) =>
             new Quest { Text = text, Target = count, Key = $"category:{category}" };
+        static Quest Prints(int count) => new Quest { Text = "3D-Drucke fertigstellen", Target = count, Key = "printed" };
+        static Quest BuyCollections(int count) => new Quest { Text = "Karten ankaufen", Target = count, Key = "cardsBought" };
         static Quest BestDay(int packs) => new Quest { Text = "An einem Tag Packs verkaufen", Target = packs, Key = "bestDay" };
 
         // Zustands-Aufgaben
@@ -180,8 +182,14 @@ namespace TwoMoons
                     {
                         new QuestStage
                         {
+                            Title = "Die Werkstatt",
+                            Quests = new List<Quest> { Furnished(Furniture.Printer3D, 1), Prints(3), SellCategory(ProductCategory.Print, "3D-Drucke verkaufen", 3) },
+                            Outro = new[] { "{0}: Die Figuren sehen fantastisch aus! Papa hätte das geliebt." },
+                        },
+                        new QuestStage
+                        {
                             Title = "Für Sammler",
-                            Quests = new List<Quest> { Cards(20), SellCards(10), Money(500) },
+                            Quests = new List<Quest> { Cards(20), SellCards(10), BuyCollections(3), Money(500) },
                             Outro = new[] { "In einer Kiste findet {0} Papas altes Notizbuch. Auf der letzten Seite: zwei gezeichnete Monde." },
                         },
                         new QuestStage

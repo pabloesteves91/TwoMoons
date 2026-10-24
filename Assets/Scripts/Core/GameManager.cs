@@ -98,6 +98,10 @@ namespace TwoMoons
         public bool CollectionOpen;
         /// <summary>Prizepool- bzw. Siegerehrungs-Fenster am Turnier-Counter.</summary>
         public bool PrizeCounterOpen;
+        /// <summary>Modellwahl am 3D-Drucker.</summary>
+        public Printer3D OpenPrinter;
+        /// <summary>Ankauf-Angebot eines Verkäufers an der Kasse.</summary>
+        public Customer SellerOffer;
 
         /// <summary>Der Mitarbeiter, wenn einer eingestellt ist.</summary>
         public Employee Staff { get; private set; }
@@ -132,6 +136,8 @@ namespace TwoMoons
         public event Action CardSold;
         public event Action TournamentHeld;
         public event Action EmployeeHired;
+        public event Action Printed;
+        public event Action CardsBought;
         public event Action DecoPlaced;
         /// <summary>Abends bei der Abrechnung, mit den Zahlen des Tages.</summary>
         public event Action<DayStats> DayEnded;
@@ -139,12 +145,13 @@ namespace TwoMoons
         public bool InputLocked =>
             Phase == GamePhase.MainMenu || Phase == GamePhase.CharacterSelect || Phase == GamePhase.Intro || Phase == GamePhase.Summary ||
             DialogLines != null || ComputerOpen || PauseOpen || BuildMode ||
-            CollectionOpen || OpenShowcase != null || OpenedPack != null || LevelUpShown > 0 || CutscenePlaying || PrizeCounterOpen;
+            CollectionOpen || OpenShowcase != null || OpenedPack != null || LevelUpShown > 0 || CutscenePlaying || PrizeCounterOpen ||
+            OpenPrinter != null || SellerOffer != null;
 
         /// <summary>Menüs, die das Spiel anhalten.</summary>
         bool Paused =>
             DialogLines != null || ComputerOpen || PauseOpen || CollectionOpen || OpenShowcase != null || OpenedPack != null ||
-            LevelUpShown > 0 || CutscenePlaying || PrizeCounterOpen;
+            LevelUpShown > 0 || CutscenePlaying || PrizeCounterOpen || OpenPrinter != null || SellerOffer != null;
 
         public int ToPlace(Furniture furniture) => toPlace.TryGetValue(furniture, out int count) ? count : 0;
 
@@ -303,13 +310,14 @@ namespace TwoMoons
             {
                 // Das Pack-Menü kümmert sich selbst um Tasten.
             }
-            else if (CollectionOpen || OpenShowcase != null || PrizeCounterOpen)
+            else if (CollectionOpen || OpenShowcase != null || PrizeCounterOpen || OpenPrinter != null)
             {
                 if (GameInput.ConsumeCancel())
                 {
                     CollectionOpen = false;
                     OpenShowcase = null;
                     PrizeCounterOpen = false;
+                    OpenPrinter = null;
                 }
             }
             else if (ComputerOpen)
@@ -415,6 +423,11 @@ namespace TwoMoons
             ChapterProgress.Restore(StoreLevel, data.chapter == StoreLevel ? data.questProgress : null);
             if (data.seenStories != null) foreach (var id in data.seenStories) seenStories.Add(id);
             Tournament.LoadFrom(data.tournament);
+            foreach (var saved in data.printers)
+            {
+                var deco = Decos.Find(d => d.Type == Furniture.Printer3D && d.Cell == new Vector2Int(saved.x, saved.y));
+                if (deco != null) deco.GetComponent<Printer3D>().Restore(saved.filament, saved.model, saved.progress, saved.jammed);
+            }
             if (data.employee >= 0) Staff = WorldFactory.SpawnEmployee(ShopGrid.StaffCells[0], (Employee.Role)data.employee);
 
             // Weiter mit der gespeicherten Tageszeit. Kunden, die gerade im Laden waren, kommen nicht mit.
@@ -464,6 +477,16 @@ namespace TwoMoons
             Collection.SaveTo(data);
             data.seenStories.AddRange(seenStories);
             data.tournament = Tournament.Save();
+            foreach (var deco in Decos)
+            {
+                if (deco.Type != Furniture.Printer3D) continue;
+                var printer = deco.GetComponent<Printer3D>();
+                data.printers.Add(new SavedPrinter
+                {
+                    x = deco.Cell.x, y = deco.Cell.y, filament = printer.Filament,
+                    model = printer.ModelIndex, progress = printer.Progress, jammed = printer.Jammed,
+                });
+            }
             data.employee = Staff != null ? (int)Staff.Job : -1;
             foreach (var pair in toPlace)
                 if (pair.Value > 0) data.toPlace.Add(new SavedCount { type = (int)pair.Key, count = pair.Value });
@@ -718,6 +741,19 @@ namespace TwoMoons
         public void NotifyDecoPlaced() => DecoPlaced?.Invoke();
 
         public void NotifyTournamentHeld() => TournamentHeld?.Invoke();
+
+        public void NotifyPrinted() => Printed?.Invoke();
+
+        /// <summary>Ankauf: Karten vom Verkäufer übernehmen und bezahlen.</summary>
+        public void BuyCards(List<CardDef> cards, int price)
+        {
+            MoneyCents -= price;
+            Today.Expenses += price;
+            foreach (var card in cards) Collection.Add(card.Id);
+            ShowToast($"{cards.Count} Karten angekauft für {Money.Format(price)}.", 4f);
+            SoundManager.Play(Sfx.Order);
+            CardsBought?.Invoke();
+        }
 
         public void Hire(Employee.Role role)
         {
