@@ -19,7 +19,7 @@ namespace TwoMoons
         GUIStyle panel, text, bold, title, prompt, hint, button;
         Vector2 orderScroll;
         bool questsExpanded;
-        /// <summary>Computer-Tab: 0 = Ware, 1 = Einrichtung, 2 = Preise.</summary>
+        /// <summary>Computer-Tab: 0 = Ware, 1 = Einrichtung, 2 = Preise, 3 = Level.</summary>
         int computerTab;
         PauseScreen pauseScreen;
 
@@ -329,7 +329,7 @@ namespace TwoMoons
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            string[] tabs = { "Ware", "Einrichtung", "Preise" };
+            string[] tabs = { "Ware", "Einrichtung", "Preise", "Level" };
             for (int i = 0; i < tabs.Length; i++)
             {
                 GUI.color = computerTab == i ? Color.white : UiKit.Dimmed;
@@ -341,6 +341,7 @@ namespace TwoMoons
 
             orderScroll = GUILayout.BeginScrollView(orderScroll);
             if (computerTab == 2) DrawPriceList();
+            else if (computerTab == 3) DrawLevelList();
             else DrawOrderList(computerTab == 0 ? Catalog.Orders : Catalog.Furnishings);
             GUILayout.EndScrollView();
 
@@ -377,6 +378,34 @@ namespace TwoMoons
                 }
                 GUILayout.EndHorizontal();
                 GUILayout.Space(8f);
+            }
+        }
+
+        /// <summary>Alle Store-Level mit ihren Freischaltungen: erreicht, aktuell, noch gesperrt.</summary>
+        void DrawLevelList()
+        {
+            int current = Game.StoreLevel;
+            GUILayout.Label($"Laden-Erfahrung: {Game.Xp} XP", hint);
+            for (int level = 1; level <= StoreLevels.Max; level++)
+            {
+                bool reached = level <= current;
+                string status;
+                if (level == current) status = "aktuelles Level";
+                else if (reached) status = "erreicht";
+                else status = $"ab {StoreLevels.XpFor(level)} XP + Kapitel {level - 1}";
+
+                GUILayout.BeginVertical(panel);
+                GUI.color = level == current ? UiKit.Gold : reached ? UiKit.Good : UiKit.Dimmed;
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"Level {level}: {StoreLevels.Title(level)}", bold);
+                GUILayout.FlexibleSpace();
+                GUILayout.Label(status, text);
+                GUILayout.EndHorizontal();
+                foreach (string unlock in StoreLevels.UnlocksFor(level))
+                    GUILayout.Label($"{(reached ? "[x]" : "[  ]")}  {unlock}", text);
+                GUI.color = Color.white;
+                GUILayout.EndVertical();
+                GUILayout.Space(4f);
             }
         }
 
