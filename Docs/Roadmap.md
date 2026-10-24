@@ -219,7 +219,7 @@ Mit jedem Level-Aufstieg gibt es **1 Fähigkeitspunkt** (insgesamt 6), einzulös
 | Verhandlungsgeschick | Ankauf 15 % günstiger, Sammler zahlen 10 % mehr |
 | Turnier-Organisator | Mehr Turnierspieler, Hersteller schickt 4 Packs mehr |
 | Tüftler | 3D-Drucke und Grading 25 % schneller, halb so viele Druckfehler |
-| Ordnungsfanatiker | Höchstens ein neuer Fleck pro Tag |
+| Ordnungsfanatiker | Höchstens ein neuer Fleck am Morgen, Kunden kleckern halb so oft |
 | Glückspilz | Etwas mehr „NEU!“-Karten beim Pack-Öffnen |
 
 ---

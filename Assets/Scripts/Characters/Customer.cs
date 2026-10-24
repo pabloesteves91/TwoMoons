@@ -17,6 +17,11 @@ namespace TwoMoons
         const float BrowseSeconds = 2f;
         /// <summary>Anteil der Kunden, die Einzelkarten aus der Vitrine suchen (wenn eine gefüllt ist).</summary>
         const float CollectorChance = 0.3f;
+        /// <summary>So oft lässt ein Kunde beim Gehen etwas fallen oder verschüttet etwas (tagsüber).</summary>
+        const float MessChance = 0.12f;
+        /// <summary>Höchstens so viele Flecken auf einmal – sonst wird es unspielbar.</summary>
+        const int MaxDirt = 8;
+
         /// <summary>Anteil der Kunden, die nach dem Bezahlen noch eine Runde auf der Couch zocken.</summary>
         const float CouchChance = 0.35f;
 
@@ -482,8 +487,27 @@ namespace TwoMoons
                 else Game.CustomerLeftUnhappy(reason);
             }
 
+            MaybeMakeMess();
             state = State.Leaving;
             if (!WalkTo(ShopGrid.SpawnCell)) Destroy(gameObject);
+        }
+
+        /// <summary>Ab und zu hinterlässt ein Kunde einen Fleck (Krümel, verschüttete Limo …), den man aufwischen muss.</summary>
+        void MaybeMakeMess()
+        {
+            var phase = Game.Phase;
+            if (phase != GamePhase.Open && phase != GamePhase.Closing) return;
+            if (DirtSpot.Existing.Count >= MaxDirt) return;
+            // Mit Getränk oder nach dem Zocken kleckert man öfter; Ordnungsfanatiker halbiert das.
+            float chance = MessChance * (hasGamed ? 2f : 1f) * (Game.Skills.Has(Skill.Tidy) ? 0.5f : 1f);
+            if (Random.value > chance) return;
+
+            var cell = ShopGrid.WorldToCell(transform.position);
+            if (!ShopGrid.IsInterior(cell) || !Game.Grid.IsWalkable(cell)) return;
+            if (DirtSpot.Existing.Exists(d => ShopGrid.WorldToCell(d.transform.position) == cell)) return;
+            WorldFactory.SpawnDirt(cell);
+            if (speech == null || Time.time >= speechUntil) Say("Ups …", 2f);
+            Game.ShowToast("Ein Kunde hat gekleckert – wisch den Fleck auf ([E]), sonst werden alle ungeduldiger.", 4f);
         }
 
         /// <summary>Nicht gekaufte Karte zurück in die Vitrine, oder in die Sammlung, falls das Fach inzwischen belegt ist.</summary>

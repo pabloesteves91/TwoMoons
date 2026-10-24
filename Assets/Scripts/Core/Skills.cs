@@ -23,7 +23,7 @@ namespace TwoMoons
             new SkillDef { Id = Skill.Negotiator, Name = "Verhandlungsgeschick", Description = "Ankauf 15 % günstiger, Sammler zahlen bis zu 10 % mehr." },
             new SkillDef { Id = Skill.Organizer, Name = "Turnier-Organisator", Description = "Mehr Turnierspieler, der Hersteller schickt 4 Packs mehr." },
             new SkillDef { Id = Skill.Tinkerer, Name = "Tüftler", Description = "3D-Drucke und Grading 25 % schneller, halb so viele Druckfehler." },
-            new SkillDef { Id = Skill.Tidy, Name = "Ordnungsfanatiker", Description = "Höchstens ein neuer Fleck pro Tag." },
+            new SkillDef { Id = Skill.Tidy, Name = "Ordnungsfanatiker", Description = "Höchstens ein neuer Fleck am Morgen, Kunden kleckern halb so oft." },
             new SkillDef { Id = Skill.Lucky, Name = "Glückspilz", Description = "Beim Pack-Öffnen öfter Karten, die noch im Sammelbuch fehlen." },
         };
 
