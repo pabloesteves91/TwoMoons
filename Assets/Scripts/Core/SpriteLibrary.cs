@@ -29,6 +29,10 @@ namespace TwoMoons
         public Sprite gameTable;
         public Sprite prizeCounter;
         public Sprite tournamentBoard;
+        public Sprite fridge;
+        public Sprite couch;
+        public Sprite tv;
+        public Sprite console;
 
         [Header("Deko")]
         public Sprite plant;
@@ -44,6 +48,9 @@ namespace TwoMoons
         [Header("Ware")]
         public Sprite packMonstera;
         public Sprite packSpellforge;
+        public Sprite packSoulClash;
+        public Sprite soda;
+        public Sprite energyDrink;
         public Sprite sleeves;
         public Sprite binder;
         public Sprite playmat;
@@ -61,13 +68,14 @@ namespace TwoMoons
         public Sprite customer1;
         public Sprite customer2;
         public Sprite customer3;
+        public Sprite employee;
 
         public static readonly string[] Keys =
         {
             "floor", "wall", "street", "door", "sign", "signBoard", "counter", "register", "computer", "shelf", "box", "package", "dirt",
             "packTable", "showcase",
             "plant", "poster", "rug", "wallClock", "fairyLights",
-            "packMonstera", "packSpellforge", "sleeves", "binder", "playmat", "accessoryStand", "gameTable", "prizeCounter", "tournamentBoard", "cardIcon",
+            "packMonstera", "packSpellforge", "sleeves", "binder", "playmat", "accessoryStand", "gameTable", "prizeCounter", "tournamentBoard", "fridge", "couch", "tv", "console", "packSoulClash", "soda", "energyDrink", "employee", "cardIcon",
             "moodHappy", "moodNeutral", "moodAngry",
             "player1", "player2", "player3", "customer1", "customer2", "customer3",
         };

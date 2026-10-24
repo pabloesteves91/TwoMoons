@@ -11,12 +11,14 @@ namespace TwoMoons
     {
         public static readonly List<Customer> Active = new List<Customer>();
 
-        enum State { ToShelf, Browsing, ToQueue, Queued, Leaving }
+        enum State { ToShelf, Browsing, ToQueue, Queued, Leaving, ToCouch, Gaming }
 
         const float Speed = 2.2f;
         const float BrowseSeconds = 2f;
         /// <summary>Anteil der Kunden, die Einzelkarten aus der Vitrine suchen (wenn eine gefüllt ist).</summary>
         const float CollectorChance = 0.3f;
+        /// <summary>Anteil der Kunden, die nach dem Bezahlen noch eine Runde auf der Couch zocken.</summary>
+        const float CouchChance = 0.35f;
 
         /// <summary>Bis zu diesem Anteil vom Marktwert gilt der Preis als Schnäppchen.</summary>
         const float BargainRatio = 0.85f;
@@ -50,6 +52,10 @@ namespace TwoMoons
         public Sprite Sprite => spriteRenderer != null ? spriteRenderer.sprite : GetComponent<SpriteRenderer>().sprite;
 
         public bool IsWaitingAtRegister => state == State.Queued && queueIndex == 0 && Arrived;
+
+        /// <summary>Sitzt gerade auf dieser Couch (für „Couch frei?“).</summary>
+        public DecoItem Couch { get; private set; }
+        bool hasGamed;
 
         bool Arrived => path == null || pathIndex >= path.Count;
 
@@ -91,11 +97,15 @@ namespace TwoMoons
 
         void PickShelf()
         {
-            // Etwa jeder Vierte schaut nach Zubehör, wenn es welches gibt.
-            var accessories = Game.Shelves.FindAll(s => s.Stock > 0 && s.Category == ProductCategory.Accessory);
+            // Meist Boosterpacks; etwa jeder Vierte schaut nach Zubehör, jeder Sechste nach Getränken.
             var packs = Game.Shelves.FindAll(s => s.Stock > 0 && s.Category == ProductCategory.Pack);
-            List<Shelf> withStock = accessories.Count > 0 && (packs.Count == 0 || Random.value < 0.25f) ? accessories : packs;
-            var candidates = withStock.Count > 0 ? withStock : Game.Shelves;
+            var accessories = Game.Shelves.FindAll(s => s.Stock > 0 && s.Category == ProductCategory.Accessory);
+            var drinks = Game.Shelves.FindAll(s => s.Stock > 0 && s.Category == ProductCategory.Drink);
+            float roll = Random.value;
+            List<Shelf> withStock = packs;
+            if (accessories.Count > 0 && (roll < 0.25f || packs.Count == 0)) withStock = accessories;
+            else if (drinks.Count > 0 && (roll > 0.83f || packs.Count == 0)) withStock = drinks;
+            var candidates = withStock.Count > 0 ? withStock : Game.Shelves.FindAll(s => s.Category == ProductCategory.Pack);
             if (candidates.Count == 0)
             {
                 Leave(false, "Ein Kunde ist gegangen: Es gibt noch keine Regale.");
@@ -174,6 +184,8 @@ namespace TwoMoons
                     bargain = ratio <= BargainRatio;
                     // Meist 1–2 Packs (Zubehör: 1 Stück), bei einem Schnäppchen eins mehr.
                     int wanted = product.Category == ProductCategory.Accessory ? 1 : Random.Range(1, 3);
+                    // Nach dem Zocken: nur ein Getränk.
+                    if (hasGamed) wanted = 1;
                     itemCount = shelf.Take(wanted + (bargain ? 1 : 0));
 
                     if (itemCount == 0) Leave(false, "Ein Kunde ist gegangen: Das Regal war leer.");
@@ -190,6 +202,23 @@ namespace TwoMoons
 
                 case State.Leaving:
                     if (Arrived) Destroy(gameObject);
+                    break;
+
+                case State.ToCouch:
+                    if (!Arrived) break;
+                    // Auf die Couch setzen und zocken.
+                    transform.position = ShopGrid.CellToWorld(DecoCell(Couch)) + new Vector3(0f, 0.1f, 0f);
+                    state = State.Gaming;
+                    timer = Random.Range(20f, 40f);
+                    moodIcon.enabled = true;
+                    moodIcon.sprite = Art.Get("moodHappy");
+                    break;
+
+                case State.Gaming:
+                    timer -= Time.deltaTime;
+                    moodIcon.enabled = Mathf.Repeat(timer, 3f) < 1.5f;
+                    if (timer > 0f) break;
+                    FinishGaming();
                     break;
             }
         }
@@ -253,6 +282,41 @@ namespace TwoMoons
             if ((transform.position - target).sqrMagnitude < 0.0001f) pathIndex++;
         }
 
+        static Vector2Int DecoCell(DecoItem deco) => deco.Cell;
+
+        /// <summary>Freie Couch, wenn die Couch-Ecke komplett ist (Couch + Fernseher + Konsole).</summary>
+        static DecoItem FreeCouch()
+        {
+            var decos = Game.Decos;
+            if (!decos.Exists(d => d.Type == Furniture.Tv) || !decos.Exists(d => d.Type == Furniture.Console)) return null;
+            foreach (var deco in decos)
+                if (deco.Type == Furniture.Couch && !Active.Exists(c => c.Couch == deco)) return deco;
+            return null;
+        }
+
+        /// <summary>Nach dem Zocken: glücklich, Ruf-Bonus, und gern noch ein Getränk.</summary>
+        void FinishGaming()
+        {
+            var seat = Couch;
+            Couch = null;
+            moodIcon.enabled = false;
+            transform.position = ShopGrid.CellToWorld(DecoCell(seat));
+            Game.ChangeReputation(1);
+            var drinks = Game.Shelves.FindAll(s => s.Stock > 0 && s.Category == ProductCategory.Drink);
+            if (drinks.Count > 0 && Random.value < 0.7f)
+            {
+                shelf = drinks[Random.Range(0, drinks.Count)];
+                product = null;
+                if (WalkNextTo(shelf.Cell))
+                {
+                    state = State.ToShelf;
+                    return;
+                }
+            }
+            state = State.Queued; // nur, damit Leave() nicht übersprungen wird
+            Leave(true, null, alreadyRewarded: true);
+        }
+
         /// <summary>Bezahlt immer den vollen Preis, egal wie die Laune ist.</summary>
         public void Pay()
         {
@@ -270,12 +334,33 @@ namespace TwoMoons
             else Game.RegisterSale(Total, itemCount, product);
             itemCount = 0;
             card = null;
+
+            // Ab und zu noch eine Runde auf der Couch.
+            var couch = !hasGamed && Random.value < CouchChance ? FreeCouch() : null;
+            if (couch != null)
+            {
+                Game.Register.Remove(this);
+                Game.CustomerLeftHappy(bargain);
+                hasGamed = true;
+                Couch = couch;
+                moodIcon.enabled = false;
+                if (WalkNextTo(couch.Cell))
+                {
+                    state = State.ToCouch;
+                    return;
+                }
+                Couch = null;
+                state = State.Queued;
+                Leave(true, null, alreadyRewarded: true);
+                return;
+            }
             Leave(true, null);
         }
 
-        void Leave(bool happy, string reason)
+        void Leave(bool happy, string reason, bool alreadyRewarded = false)
         {
             if (state == State.Leaving) return;
+            Couch = null;
 
             Game.Register.Remove(this);
             if (itemCount > 0 && shelf != null) shelf.PutBack(product, itemCount);
@@ -283,8 +368,11 @@ namespace TwoMoons
             ReturnCard();
             if (moodIcon != null) moodIcon.enabled = false;
 
-            if (happy) Game.CustomerLeftHappy(bargain);
-            else Game.CustomerLeftUnhappy(reason);
+            if (!alreadyRewarded)
+            {
+                if (happy) Game.CustomerLeftHappy(bargain);
+                else Game.CustomerLeftUnhappy(reason);
+            }
 
             state = State.Leaving;
             if (!WalkTo(ShopGrid.SpawnCell)) Destroy(gameObject);

@@ -12,7 +12,10 @@ namespace TwoMoons
         /// <summary>Regal für Boosterpacks oder Zubehör-Ständer für Hüllen, Ordner und Matten.</summary>
         public ProductCategory Category { get; private set; }
 
-        public string Label => Category == ProductCategory.Accessory ? "Zubehör-Ständer" : "Regal";
+        public string Label => LabelFor(Category);
+
+        public static string LabelFor(ProductCategory category) =>
+            category == ProductCategory.Accessory ? "Zubehör-Ständer" : category == ProductCategory.Drink ? "Kühlschrank" : "Regal";
 
         SpriteRenderer[] stockIcons;
 
@@ -29,7 +32,7 @@ namespace TwoMoons
             var box = player.Carried;
             if (box == null) return Stock > 0 ? $"1× {Product.Name} herausnehmen ({Stock}/{Capacity})" : $"{Label}: leer";
             if (box.Product.Category == ProductCategory.Promo) return "Turnier-Packs gehören zum Turnier-Counter";
-            if (box.Product.Category != Category) return box.Product.Category == ProductCategory.Accessory ? "Zubehör gehört in den Zubehör-Ständer" : "Boosterpacks gehören ins Regal";
+            if (box.Product.Category != Category) return $"{box.Product.Name} gehört in: {LabelFor(box.Product.Category)}";
             if (Stock >= Capacity) return $"{Label} ist voll";
             if (Product != null && Product != box.Product) return $"Hier liegt schon {Product.Name}";
             return $"{box.Product.Name} einräumen";
@@ -62,6 +65,22 @@ namespace TwoMoons
             Refresh();
             SoundManager.Play(Sfx.Stock);
             GameManager.Instance.NotifyShelfStocked(moved);
+        }
+
+        /// <summary>Passt diese Ware hier hinein (richtige Sorte und noch Platz)?</summary>
+        public bool CanTake(Product product) =>
+            product.Category == Category && Stock < Capacity && (Product == null || Product == product);
+
+        /// <summary>Für den Mitarbeiter: so viel wie möglich aus einem Karton einräumen.</summary>
+        public void StockFrom(DeliveryBox box)
+        {
+            if (!CanTake(box.Product)) return;
+            int moved = Mathf.Min(Capacity - Stock, box.Amount);
+            Product = box.Product;
+            Stock += moved;
+            box.Amount -= moved;
+            Refresh();
+            SoundManager.Play(Sfx.Stock);
         }
 
         /// <summary>Bestand direkt setzen (Spielstand laden, Hauptmenü).</summary>

@@ -95,8 +95,8 @@ namespace TwoMoons
 
         public static Shelf SpawnShelf(Vector2Int cell, ProductCategory category = ProductCategory.Pack)
         {
-            bool accessories = category == ProductCategory.Accessory;
-            var go = CreateSolid(accessories ? "Zubehör-Ständer" : "Regal", accessories ? "accessoryStand" : "shelf", cell, null);
+            string sprite = category == ProductCategory.Accessory ? "accessoryStand" : category == ProductCategory.Drink ? "fridge" : "shelf";
+            var go = CreateSolid(Shelf.LabelFor(category), sprite, cell, null);
             var icons = new SpriteRenderer[3];
             for (int i = 0; i < icons.Length; i++)
             {
@@ -163,6 +163,15 @@ namespace TwoMoons
             var player = renderer.gameObject.AddComponent<TournamentPlayer>();
             player.Name = name;
             return player;
+        }
+
+        public static Employee SpawnEmployee(Vector2Int cell, Employee.Role role)
+        {
+            var renderer = CreateSprite("Mitarbeiter", "employee", ShopGrid.CellToWorld(cell));
+            renderer.gameObject.AddComponent<YSort>();
+            var employee = renderer.gameObject.AddComponent<Employee>();
+            employee.Job = role;
+            return employee;
         }
 
         public static FurniturePackage SpawnPackage(Vector2Int cell)

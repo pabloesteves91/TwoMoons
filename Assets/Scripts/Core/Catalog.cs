@@ -4,10 +4,10 @@ namespace TwoMoons
     public enum TcgGame { Monstera, Spellforge, SoulClash }
 
     /// <summary>Neue Waren immer hinten anhängen – die Nummern stehen in Spielständen.</summary>
-    public enum ProductId { MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat, TournamentPack }
+    public enum ProductId { MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat, TournamentPack, SoulClashPack, Soda, EnergyDrink }
 
     /// <summary>Wo eine Ware im Laden steht: Packs ins Regal, Zubehör in den Zubehör-Ständer.</summary>
-    public enum ProductCategory { Pack, Accessory, Promo }
+    public enum ProductCategory { Pack, Accessory, Promo, Drink }
 
     public enum OrderKind { ProductBox, Furniture }
 
@@ -80,8 +80,27 @@ namespace TwoMoons
             Category = ProductCategory.Promo, Game = TcgGame.Monstera, MinLevel = 3,
         };
 
+        public static readonly Product SoulClashPack = new Product
+        {
+            Id = ProductId.SoulClashPack, Name = "Soul-Clash-Booster", SpriteKey = "packSoulClash",
+            Category = ProductCategory.Pack, Game = TcgGame.SoulClash, BuyPrice = 400, MarketValue = 600, MinLevel = 3,
+        };
+
+        public static readonly Product Soda = new Product
+        {
+            Id = ProductId.Soda, Name = "Limo", SpriteKey = "soda",
+            Category = ProductCategory.Drink, BuyPrice = 80, MarketValue = 200, MinLevel = 3,
+        };
+
+        public static readonly Product EnergyDrink = new Product
+        {
+            Id = ProductId.EnergyDrink, Name = "Energy-Drink", SpriteKey = "energyDrink",
+            Category = ProductCategory.Drink, BuyPrice = 120, MarketValue = 300, MinLevel = 3,
+        };
+
         /// <summary>Alle Waren, in der Reihenfolge von <see cref="ProductId"/>.</summary>
-        public static readonly Product[] Products = { MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat, TournamentPack };
+        public static readonly Product[] Products =
+            { MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat, TournamentPack, SoulClashPack, Soda, EnergyDrink };
 
         /// <summary>Tab „Ware“ am Computer.</summary>
         public static readonly OrderOption[] Orders =
@@ -91,6 +110,9 @@ namespace TwoMoons
             Box(Sleeves, "Kartenhüllen", "Karton mit 10 Packungen Hüllen · für den Zubehör-Ständer", 10),
             Box(Binder, "Sammelordner", "Karton mit 5 Ordnern · für den Zubehör-Ständer", 5),
             Box(Playmat, "Spielmatten", "Karton mit 4 Matten · für den Zubehör-Ständer", 4),
+            Box(SoulClashPack, "Soul-Clash-Display", "Karton mit 12 Soul-Clash-Boosterpacks", 12),
+            Box(Soda, "Limo", "Kiste mit 12 Flaschen · für den Kühlschrank", 12),
+            Box(EnergyDrink, "Energy-Drinks", "Kiste mit 12 Dosen · für den Kühlschrank", 12),
         };
 
         /// <summary>Tab „Einrichtung“ am Computer: Möbel und Deko, nach Store-Level freigeschaltet.</summary>
@@ -107,6 +129,10 @@ namespace TwoMoons
             Furnishing(Furniture.GameTable, "4 Plätze für Turniere", 12000, 3),
             Furnishing(Furniture.PrizeCounter, "Prizepool vorbereiten und Preise verteilen", 15000, 3),
             Furnishing(Furniture.TournamentBoard, "Für die Wand · zeigt das nächste Turnier", 4000, 3),
+            Furnishing(Furniture.Fridge, "Getränkekühlschrank für Limo und Energy-Drinks", 16000, 3),
+            Furnishing(Furniture.Couch, "Couch-Ecke: Couch + TV + Konsole · Gemütlichkeit +3", 20000, 3),
+            Furnishing(Furniture.Tv, "Für die Wand · Couch-Ecke", 25000, 3),
+            Furnishing(Furniture.Console, "Spielkonsole · Couch-Ecke", 18000, 3),
         };
 
         /// <summary>Ein Karton Ware zum Großhandelspreis.</summary>

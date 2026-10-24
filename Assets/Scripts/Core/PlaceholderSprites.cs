@@ -244,6 +244,50 @@ namespace TwoMoons
                     Rect(4, 7, 3, 3, new Color32(240, 200, 80, 255));
                     Rect(9, 7, 3, 3, new Color32(240, 200, 80, 255));
                     break;
+                case "packSoulClash":
+                    Rect(3, 1, 10, 14, new Color32(200, 50, 40, 255));
+                    Frame(3, 1, 10, 14, new Color32(90, 20, 20, 255));
+                    Rect(6, 4, 1, 8, new Color32(230, 230, 240, 255));
+                    Rect(9, 4, 1, 8, new Color32(230, 230, 240, 255));
+                    Rect(5, 7, 6, 1, new Color32(240, 200, 80, 255));
+                    break;
+                case "soda":
+                    Rect(6, 1, 4, 10, new Color32(90, 190, 90, 255));
+                    Rect(7, 11, 2, 3, new Color32(90, 190, 90, 255));
+                    Rect(6, 5, 4, 3, new Color32(250, 240, 200, 255));
+                    break;
+                case "energyDrink":
+                    Rect(5, 1, 6, 11, new Color32(40, 40, 50, 255));
+                    Rect(5, 4, 6, 5, new Color32(120, 230, 60, 255));
+                    break;
+                case "fridge":
+                    Rect(1, 0, 14, 16, new Color32(220, 225, 235, 255));
+                    Rect(2, 1, 12, 14, new Color32(150, 200, 230, 255));
+                    for (int y = 4; y < 15; y += 4) Rect(2, y, 12, 1, new Color32(220, 225, 235, 255));
+                    Rect(12, 6, 1, 4, new Color32(120, 120, 130, 255));
+                    break;
+                case "couch":
+                    Rect(0, 2, 16, 9, new Color32(150, 60, 50, 255));
+                    Rect(0, 8, 16, 5, new Color32(120, 45, 40, 255));
+                    Rect(0, 2, 2, 9, new Color32(110, 40, 35, 255));
+                    Rect(14, 2, 2, 9, new Color32(110, 40, 35, 255));
+                    Rect(3, 5, 4, 3, new Color32(240, 200, 80, 255));
+                    break;
+                case "tv":
+                    Rect(1, 4, 14, 10, new Color32(25, 25, 30, 255));
+                    Rect(2, 5, 12, 8, new Color32(90, 160, 230, 255));
+                    Rect(7, 2, 2, 2, new Color32(25, 25, 30, 255));
+                    break;
+                case "console":
+                    Rect(3, 3, 10, 5, new Color32(40, 40, 50, 255));
+                    Rect(4, 6, 2, 1, new Color32(120, 220, 140, 255));
+                    Rect(2, 9, 5, 3, new Color32(60, 60, 70, 255));
+                    Rect(9, 9, 5, 3, new Color32(60, 60, 70, 255));
+                    break;
+                case "employee":
+                    Person(new Color32(60, 140, 90, 255), new Color32(30, 30, 35, 255));
+                    Rect(5, 3, 6, 5, new Color32(240, 200, 80, 255));
+                    break;
                 case "gameTable":
                     Rect(1, 3, 14, 11, new Color32(120, 80, 50, 255));
                     Rect(2, 4, 12, 9, new Color32(40, 110, 80, 255));

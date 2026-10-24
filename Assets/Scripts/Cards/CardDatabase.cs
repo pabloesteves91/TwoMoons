@@ -55,16 +55,29 @@ namespace TwoMoons
             new[] { "Uralter Wyrm", "Krone der Zwei Monde", "Meister der Schmiede" },
         };
 
+        static readonly string[][] SoulClashNames =
+        {
+            new[]
+            {
+                "Klingenläufer", "Funkenkämpferin", "Schattenschüler", "Eisenfaust", "Windtänzerin",
+                "Seelenfunke", "Kampfschrei", "Bannkreis", "Gegenschlag", "Doppelschwert",
+                "Ninja-Rekrut", "Feuerfaust", "Donnerkick", "Schutzaura", "Kettenblitz",
+                "Geisterfuchs", "Mondklinge", "Duellarena", "Kriegsbanner", "Seelenstein",
+            },
+            new[] { "Drachenseele Kaito", "Sturmherrin Yuna", "Titanenwächter", "Phantomkrieger", "Blutmond-Ritter", "Himmelsschwert", "Ewige Flamme" },
+            new[] { "Seelenkaiser", "Zwillingsmond-Drache", "Göttin des Duells" },
+        };
+
         static readonly List<CardDef> all = new List<CardDef>();
 
         public static readonly List<CardDef> Monstera = Build(TcgGame.Monstera, MonsteraNames, "monstera");
         public static readonly List<CardDef> Spellforge = Build(TcgGame.Spellforge, SpellforgeNames, "spellforge");
+        public static readonly List<CardDef> SoulClash = Build(TcgGame.SoulClash, SoulClashNames, "soulclash");
 
         /// <summary>Alle Karten aller Spiele, nach Id.</summary>
         public static IReadOnlyList<CardDef> All => all;
 
-        /// <summary>Spiele, die es schon als Karten gibt (Soul Clash folgt).</summary>
-        public static readonly TcgGame[] Games = { TcgGame.Monstera, TcgGame.Spellforge };
+        public static readonly TcgGame[] Games = { TcgGame.Monstera, TcgGame.Spellforge, TcgGame.SoulClash };
 
         static List<CardDef> Build(TcgGame game, string[][] names, string artPrefix)
         {
@@ -97,6 +110,7 @@ namespace TwoMoons
             switch (game)
             {
                 case TcgGame.Spellforge: return Spellforge;
+                case TcgGame.SoulClash: return SoulClash;
                 default: return Monstera;
             }
         }

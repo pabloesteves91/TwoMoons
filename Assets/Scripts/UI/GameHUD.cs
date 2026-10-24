@@ -326,7 +326,7 @@ namespace TwoMoons
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            string[] tabs = { "Ware", "Einrichtung", "Preise", "Level" };
+            string[] tabs = { "Ware", "Einrichtung", "Preise", "Team", "Level" };
             for (int i = 0; i < tabs.Length; i++)
             {
                 GUI.color = computerTab == i ? Color.white : UiKit.Dimmed;
@@ -338,7 +338,8 @@ namespace TwoMoons
 
             orderScroll = GUILayout.BeginScrollView(orderScroll);
             if (computerTab == 2) DrawPriceList();
-            else if (computerTab == 3) DrawLevelList();
+            else if (computerTab == 3) DrawTeam();
+            else if (computerTab == 4) DrawLevelList();
             else DrawOrderList(computerTab == 0 ? Catalog.Orders : Catalog.Furnishings);
             GUILayout.EndScrollView();
 
@@ -375,6 +376,30 @@ namespace TwoMoons
                 }
                 GUILayout.EndHorizontal();
                 GUILayout.Space(8f);
+            }
+        }
+
+        void DrawTeam()
+        {
+            if (Game.StoreLevel < 3)
+            {
+                GUILayout.Label("Ab Store-Level 3 kannst du einen Mitarbeiter einstellen.", text);
+                return;
+            }
+            var staff = Game.Staff;
+            GUILayout.Label(staff == null
+                ? $"{Employee.Name} sucht einen Job! Lohn: {Money.Format(Employee.DailyWage)} pro Tag (wird abends abgezogen)."
+                : $"{Employee.Name} arbeitet bei dir · Lohn {Money.Format(Employee.DailyWage)} pro Tag", text);
+            GUILayout.Space(8f);
+            GUILayout.Label("Aufgabe:", bold);
+            if (Button(staff != null && staff.Job == Employee.Role.Register ? "[x] An der Kasse kassieren" : "An der Kasse kassieren", GUILayout.Height(32f)))
+                Game.Hire(Employee.Role.Register);
+            if (Button(staff != null && staff.Job == Employee.Role.Restock ? "[x] Regale aus Kartons auffüllen" : "Regale aus Kartons auffüllen", GUILayout.Height(32f)))
+                Game.Hire(Employee.Role.Restock);
+            if (staff != null)
+            {
+                GUILayout.Space(8f);
+                if (Button("Entlassen", GUILayout.Height(28f))) Game.Fire();
             }
         }
 
@@ -457,7 +482,7 @@ namespace TwoMoons
             GUILayout.Label($"Tag {Game.Day} – Abrechnung", title);
             GUILayout.Space(8f);
             SummaryRow("Einnahmen", Money.Format(stats.Income));
-            SummaryRow("Ausgaben (Bestellungen)", Money.Format(stats.Expenses));
+            SummaryRow("Ausgaben (Bestellungen, Lohn)", Money.Format(stats.Expenses));
             SummaryRow("Gewinn", Money.Format(stats.Income - stats.Expenses));
             GUILayout.Space(6f);
             SummaryRow("Verkaufte Packs", stats.PacksSold.ToString());

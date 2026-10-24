@@ -39,6 +39,7 @@ namespace TwoMoons
             {
                 Advance($"sold:{product.Id}", count);
                 if (product.Category == ProductCategory.Accessory) Advance("accessorySold", count);
+                Advance($"category:{product.Category}", count);
             };
             game.DecoPlaced += () => Advance("decoPlaced", 1);
             game.PackOpened += ultras =>
@@ -48,6 +49,7 @@ namespace TwoMoons
             };
             game.CardSold += () => Advance("cardSold", 1);
             game.TournamentHeld += () => Advance("tournament", 1);
+            game.EmployeeHired += () => Advance("hired", 1);
             game.DayEnded += stats =>
             {
                 if (stats.Income - stats.Expenses > 0) Advance("profitDay", 1);

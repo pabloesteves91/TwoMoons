@@ -113,6 +113,8 @@ namespace TwoMoons
         public List<string> seenStories = new List<string>();
         public SavedPackage package;
         public SavedTournament tournament;
+        /// <summary>Rolle des Mitarbeiters (Employee.Role), -1 = keiner.</summary>
+        public int employee = -1;
         public long savedAtTicks;
 
         public DateTime SavedAt => new DateTime(savedAtTicks);

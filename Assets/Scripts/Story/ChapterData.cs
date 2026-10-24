@@ -47,6 +47,9 @@ namespace TwoMoons
         static Quest Tournaments(int count) => new Quest { Text = "Turniere ausrichten", Target = count, Key = "tournament" };
         static Quest Furnished(Furniture furniture, int count) =>
             new Quest { Text = $"{FurnitureCatalog.Get(furniture).Name} im Laden", Target = count, Poll = () => Game.Decos.FindAll(d => d.Type == furniture).Count };
+        static Quest Hire() => new Quest { Text = "Einen Mitarbeiter einstellen", Key = "hired", Poll = () => Game.Staff != null ? 1 : 0 };
+        static Quest SellCategory(ProductCategory category, string text, int count) =>
+            new Quest { Text = text, Target = count, Key = $"category:{category}" };
         static Quest BestDay(int packs) => new Quest { Text = "An einem Tag Packs verkaufen", Target = packs, Key = "bestDay" };
 
         // Zustands-Aufgaben
@@ -158,6 +161,17 @@ namespace TwoMoons
                         {
                             Title = "Ein Name in der Stadt",
                             Quests = new List<Quest> { Tournaments(2), Reputation(2, "Beliebt"), Serve(120), PullUltra(1) },
+                            Outro = new[] { "{0}: Die Turnierspieler bleiben gern noch länger. Eine gemütliche Ecke wäre perfekt!" },
+                        },
+                        new QuestStage
+                        {
+                            Title = "Die Couch-Ecke",
+                            Quests = new List<Quest>
+                            {
+                                Furnished(Furniture.Couch, 1), Furnished(Furniture.Tv, 1), Furnished(Furniture.Console, 1),
+                                SellCategory(ProductCategory.Drink, "Getränke verkaufen", 15), Hire(),
+                                SellProduct(Catalog.SoulClashPack, 20),
+                            },
                         },
                     };
 

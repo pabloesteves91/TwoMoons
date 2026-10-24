@@ -93,6 +93,9 @@ namespace TwoMoons
                 case Furniture.AccessoryStand:
                     WorldFactory.SpawnShelf(cell, ProductCategory.Accessory);
                     break;
+                case Furniture.Fridge:
+                    WorldFactory.SpawnShelf(cell, ProductCategory.Drink);
+                    break;
                 case Furniture.Showcase:
                     WorldFactory.SpawnShowcase(cell);
                     break;

@@ -28,6 +28,7 @@ namespace TwoMoons
         public int CustomersServed;
         public int CustomersUnhappy;
         public int CardsSold;
+        public int Wages;
     }
 
     public class Toast
@@ -98,6 +99,9 @@ namespace TwoMoons
         /// <summary>Prizepool- bzw. Siegerehrungs-Fenster am Turnier-Counter.</summary>
         public bool PrizeCounterOpen;
 
+        /// <summary>Der Mitarbeiter, wenn einer eingestellt ist.</summary>
+        public Employee Staff { get; private set; }
+
         TournamentManager tournament;
         public TournamentManager Tournament => tournament != null ? tournament : tournament = GetComponent<TournamentManager>();
         /// <summary>Vitrine, deren Menü gerade offen ist.</summary>
@@ -127,6 +131,7 @@ namespace TwoMoons
         public event Action<int> PackOpened;
         public event Action CardSold;
         public event Action TournamentHeld;
+        public event Action EmployeeHired;
         public event Action DecoPlaced;
         /// <summary>Abends bei der Abrechnung, mit den Zahlen des Tages.</summary>
         public event Action<DayStats> DayEnded;
@@ -339,6 +344,12 @@ namespace TwoMoons
             else if (Phase == GamePhase.Closing && Customer.Active.Count == 0 && !Tournament.Busy)
             {
                 Phase = GamePhase.Summary;
+                if (Staff != null)
+                {
+                    MoneyCents -= Employee.DailyWage;
+                    Today.Expenses += Employee.DailyWage;
+                    Today.Wages += Employee.DailyWage;
+                }
                 DayEnded?.Invoke(Today);
                 ComputerOpen = false;
                 PauseOpen = false;
@@ -404,6 +415,7 @@ namespace TwoMoons
             ChapterProgress.Restore(StoreLevel, data.chapter == StoreLevel ? data.questProgress : null);
             if (data.seenStories != null) foreach (var id in data.seenStories) seenStories.Add(id);
             Tournament.LoadFrom(data.tournament);
+            if (data.employee >= 0) Staff = WorldFactory.SpawnEmployee(ShopGrid.StaffCells[0], (Employee.Role)data.employee);
 
             // Weiter mit der gespeicherten Tageszeit. Kunden, die gerade im Laden waren, kommen nicht mit.
             var phase = (GamePhase)data.phase;
@@ -452,6 +464,7 @@ namespace TwoMoons
             Collection.SaveTo(data);
             data.seenStories.AddRange(seenStories);
             data.tournament = Tournament.Save();
+            data.employee = Staff != null ? (int)Staff.Job : -1;
             foreach (var pair in toPlace)
                 if (pair.Value > 0) data.toPlace.Add(new SavedCount { type = (int)pair.Key, count = pair.Value });
             foreach (var deco in Decos) data.decos.Add(new SavedDeco { type = (int)deco.Type, x = deco.Cell.x, y = deco.Cell.y });
@@ -705,6 +718,29 @@ namespace TwoMoons
         public void NotifyDecoPlaced() => DecoPlaced?.Invoke();
 
         public void NotifyTournamentHeld() => TournamentHeld?.Invoke();
+
+        public void Hire(Employee.Role role)
+        {
+            if (Staff != null)
+            {
+                Staff.Job = role;
+                ShowToast($"{Employee.Name} kümmert sich jetzt um: {(role == Employee.Role.Register ? "die Kasse" : "die Regale")}");
+                return;
+            }
+            if (StoreLevel < 3) return;
+            Staff = WorldFactory.SpawnEmployee(ShopGrid.StaffCells[0], role);
+            ShowToast($"{Employee.Name} arbeitet jetzt bei TwoMoons! Lohn: {Money.Format(Employee.DailyWage)} pro Tag.", 5f);
+            SoundManager.Play(Sfx.Quest);
+            EmployeeHired?.Invoke();
+        }
+
+        public void Fire()
+        {
+            if (Staff == null) return;
+            Destroy(Staff.gameObject);
+            Staff = null;
+            ShowToast($"{Employee.Name} arbeitet nicht mehr bei dir.");
+        }
 
         /// <summary>Startgeld eines Turnierspielers an der Kasse.</summary>
         public void RegisterEntryFee()
