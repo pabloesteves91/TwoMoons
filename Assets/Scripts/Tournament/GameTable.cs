@@ -7,6 +7,8 @@ namespace TwoMoons
     public class GameTable : MonoBehaviour
     {
         public Vector2Int Cell { get; private set; }
+        /// <summary>Nach dem Verschieben im Bau-Modus.</summary>
+        public void SetCell(Vector2Int cell) => Cell = cell;
 
         public void Init(Vector2Int cell) => Cell = cell;
 

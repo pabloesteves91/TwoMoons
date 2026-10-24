@@ -7,6 +7,8 @@ namespace TwoMoons
     {
         public Furniture Type { get; private set; }
         public Vector2Int Cell { get; private set; }
+        /// <summary>Nach dem Verschieben im Bau-Modus.</summary>
+        public void SetCell(Vector2Int cell) => Cell = cell;
 
         SpriteRenderer spriteRenderer;
         /// <summary>Pokale auf der Trophäenwand, einer pro Turnier (höchstens 6).</summary>

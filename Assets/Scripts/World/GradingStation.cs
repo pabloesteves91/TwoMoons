@@ -11,6 +11,8 @@ namespace TwoMoons
         static float SecondsPerHour => GameManager.DayLengthSeconds / 9f;
 
         public Vector2Int Cell { get; private set; }
+        /// <summary>Nach dem Verschieben im Bau-Modus.</summary>
+        public void SetCell(Vector2Int cell) => Cell = cell;
         /// <summary>Karte in der Prüfung, -1 = leer.</summary>
         public int CardId { get; private set; } = -1;
         public float Progress { get; private set; }

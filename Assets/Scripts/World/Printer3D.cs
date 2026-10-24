@@ -28,6 +28,8 @@ namespace TwoMoons
         const float JamChancePerPrint = 0.12f;
 
         public Vector2Int Cell { get; private set; }
+        /// <summary>Nach dem Verschieben im Bau-Modus.</summary>
+        public void SetCell(Vector2Int cell) => Cell = cell;
         public int Filament;
         public Model Printing { get; private set; }
         public float Progress { get; private set; }

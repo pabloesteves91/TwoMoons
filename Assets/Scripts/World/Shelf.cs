@@ -7,6 +7,8 @@ namespace TwoMoons
         public const int Capacity = 24;
 
         public Vector2Int Cell { get; private set; }
+        /// <summary>Nach dem Verschieben im Bau-Modus.</summary>
+        public void SetCell(Vector2Int cell) => Cell = cell;
         public int Stock { get; private set; }
         public Product Product { get; private set; }
         /// <summary>Regal für Boosterpacks oder Zubehör-Ständer für Hüllen, Ordner und Matten.</summary>

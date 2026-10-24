@@ -14,6 +14,8 @@ namespace TwoMoons
         public const float PremiumBonus = 1.1f;
 
         public Vector2Int Cell { get; private set; }
+        /// <summary>Nach dem Verschieben im Bau-Modus.</summary>
+        public void SetCell(Vector2Int cell) => Cell = cell;
         public bool Premium { get; private set; }
         public int SlotCount => Cards.Length;
 

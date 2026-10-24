@@ -281,14 +281,23 @@ namespace TwoMoons
             var player = Game.Player;
             string line = null;
 
-            if (Game.BuildMode)
+            if (Game.BuildMode && BuildController.IsMoving)
+            {
+                line = "Verschieben: Linksklick = Hier hinstellen   Rechtsklick = Zurück an den alten Platz";
+            }
+            else if (Game.BuildMode && BuildController.MoveOnly)
+            {
+                line = "Bau-Modus: Möbelstück anklicken, um es zu verschieben   Rechtsklick / [B] = Fertig";
+            }
+            else if (Game.BuildMode)
             {
                 var current = BuildController.Current;
                 var def = FurnitureCatalog.Get(current);
                 string item = $"{def.Name} ({Game.ToPlace(current)})";
                 bool canSwitch = Game.TotalToPlace > Game.ToPlace(current);
                 string where = def.Placement == Placement.Wall ? " an die hintere Wand" : "";
-                line = $"Bau-Modus: {item}{where}   Linksklick = Aufstellen   " +
+                string move = BuildController.CanMoveNow ? "Klick auf Möbel = Verschieben   " : "";
+                line = $"Bau-Modus: {item}{where}   Linksklick = Aufstellen   {move}" +
                        (canSwitch ? "[B] = Wechseln   Rechtsklick = Abbrechen" : "Rechtsklick / [B] = Abbrechen");
             }
             else if (!Game.InputLocked)
