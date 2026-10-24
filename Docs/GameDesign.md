@@ -74,8 +74,20 @@ Drei Stufen: **Gewöhnlich**, **Selten**, **Ultra-Selten** (shiny).
   sie ziehen sich durch die Story. Gefunden wird sie im Finale (Kapitel 7) beim großen Turnier.
 - **Aufbau:** Kapitel mit Aufgaben und Belohnungen bilden den roten Faden. Der Ruf des
   Ladens steigt mit zufriedenen Kunden und zeigt den Fortschritt.
-- **Anfang:** Die Hauptfigur erfüllt sich einen Kindheitstraum: Sie kündigt ihren Job
-  und eröffnet mit wenig Geld ihren eigenen TCG-Laden TwoMoons.
+- **Anfang (Intro-Geschichte, nur zum Durchklicken, [Esc] überspringt):**
+  1. *Sternennacht* – Ein Kind liegt nachts wach im Bett, vor dem Fenster gehen ein roter und ein goldener
+     Mond auf. In einer Traumblase: ein eigener Laden voller Sammelkarten.
+  2. *Papa kommt herein* – Die Tür geht auf, warmes Licht fällt ins Zimmer, Papa setzt sich ans Bett.
+  3. *Die Legende* – Papa erzählt von der Karte „Two Moons“, die nur gedruckt wurde, wenn beide Monde am
+     Himmel standen. Sie findet ihren Weg zu dem, der seinen Traum nie aufgibt. Licht aus.
+  4. *Jahre vergehen* – Monde ziehen über den Himmel, das Kind wächst heran.
+  5. *18. Geburtstag* – Kuchen mit flackernden Kerzen. Papa schenkt einen alten Schlüssel mit
+     Zwei-Monde-Anhänger.
+  6. *Die Ladenfront* – Ein verbretterter alter Laden: früher Papas Laden, „ab heute gehört er dir“.
+  7. *Der leere Laden* – Staub, Spinnweben, ein schiefes Regal und ein Karton Monstera-Packs.
+     „Er ist perfekt. Ich nenne ihn … TwoMoons.“ Dann beginnt Kapitel 1.
+  Eigene Szenenbilder (160×90 Pixel) können als `Assets/Art/Intro/Resources/Intro/<name>.png` die Platzhalter ersetzen
+  (bedroom, nightSky, kitchen, shopFront, shopEmpty, father, door, thought, cake, key, moonRed, moonGold).
 - **Ziel/Ende:** TwoMoons wird zum besten Laden der Stadt – Höhepunkt ist ein großes
   Turnier/Event, das der Laden ausrichtet.
 

@@ -72,6 +72,7 @@ namespace TwoMoons
             game.gameObject.AddComponent<GameHUD>();
             game.gameObject.AddComponent<MainMenuUI>();
             game.gameObject.AddComponent<CardScreensUI>();
+            game.gameObject.AddComponent<IntroCutscene>();
 
             init(game);
         }

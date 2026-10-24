@@ -326,5 +326,11 @@ namespace TwoMoons
     {
         public static GUIStyle WithAlignment(this GUIStyle style, TextAnchor alignment) =>
             new GUIStyle(style) { alignment = alignment };
+
+        public static GUIStyle WithFontSize(this GUIStyle style, int size) =>
+            new GUIStyle(style) { fontSize = size };
+
+        public static GUIStyle WithItalic(this GUIStyle style) =>
+            new GUIStyle(style) { fontStyle = FontStyle.Italic };
     }
 }

@@ -15,6 +15,8 @@ namespace TwoMoons
         /// <summary>18 Uhr vorbei, die letzten Kunden werden noch bedient.</summary>
         Closing,
         Summary,
+        /// <summary>Die Geschichte vor dem ersten Tag (steht am Ende, damit gespeicherte Phasen gleich bleiben).</summary>
+        Intro,
     }
 
     [Serializable]
@@ -99,7 +101,7 @@ namespace TwoMoons
         public event Action CustomerServed;
 
         public bool InputLocked =>
-            Phase == GamePhase.MainMenu || Phase == GamePhase.CharacterSelect || Phase == GamePhase.Summary ||
+            Phase == GamePhase.MainMenu || Phase == GamePhase.CharacterSelect || Phase == GamePhase.Intro || Phase == GamePhase.Summary ||
             DialogLines != null || ComputerOpen || PauseOpen || BuildMode ||
             CollectionOpen || OpenShowcase != null || OpenedPack != null;
 
@@ -323,7 +325,7 @@ namespace TwoMoons
 
         public void SaveGame()
         {
-            if (CurrentSlot < 0 || Phase == GamePhase.MainMenu || Phase == GamePhase.CharacterSelect) return;
+            if (CurrentSlot < 0 || Phase == GamePhase.MainMenu || Phase == GamePhase.CharacterSelect || Phase == GamePhase.Intro) return;
             try
             {
                 SaveSystem.Save(CurrentSlot, CreateSaveData());
@@ -342,15 +344,20 @@ namespace TwoMoons
             PlayerName = playerName.Trim();
             Figure = figure;
             Player.SetFigure(figure);
+            Phase = GamePhase.Intro;
+        }
+
+        /// <summary>Nach der Intro-Geschichte (oder beim Überspringen): erster Tag im leeren Laden.</summary>
+        public void FinishIntro()
+        {
+            if (Phase != GamePhase.Intro) return;
             Phase = GamePhase.Preparation;
             SaveGame();
             ShowDialog(new[]
             {
-                $"{PlayerName}: Da ist er also… mein eigener Laden. TwoMoons.",
-                "Seit ich klein bin, träume ich davon, Sammelkarten zu verkaufen. Heute habe ich meinen Job gekündigt – jetzt gibt es kein Zurück mehr!",
-                "Viel Geld habe ich nicht mehr. Aber es ist ein Anfang: ein Karton Monstera-Packs und ein altes Regal.",
-                "Und vielleicht finde ich ja eines Tages die sagenumwobene Karte „Two Moons“, nach der mein Laden benannt ist …",
-                "Erst mal aufräumen. Dann Regal aufstellen, Packs einräumen und das Schild an der Tür umdrehen!",
+                $"{PlayerName}: Mein eigener Laden. TwoMoons. Papa, ich mach dich stolz.",
+                "Viel Geld habe ich nicht. Aber es ist ein Anfang: ein Karton Monstera-Packs und Papas altes Regal.",
+                "Erst mal aufräumen. Dann das Regal aufstellen, Packs einräumen und das Schild an der Tür umdrehen!",
             });
         }
 

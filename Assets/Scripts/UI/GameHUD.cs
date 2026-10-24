@@ -21,7 +21,8 @@ namespace TwoMoons
 
         static GameManager Game => GameManager.Instance;
 
-        static bool InGame => Game.Phase != GamePhase.MainMenu && Game.Phase != GamePhase.CharacterSelect;
+        static bool InGame =>
+            Game.Phase != GamePhase.MainMenu && Game.Phase != GamePhase.CharacterSelect && Game.Phase != GamePhase.Intro;
 
         void Update()
         {
