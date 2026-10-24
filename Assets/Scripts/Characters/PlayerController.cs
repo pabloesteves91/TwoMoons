@@ -34,6 +34,8 @@ namespace TwoMoons
             }
 
             Focus = FindFocus();
+            // Getragene Kartons laufen nicht selbst (sind deaktiviert): Aussehen hier aktualisieren.
+            if (Carried != null) Carried.RefreshLook();
 
             // Die Taste, die gerade einen Dialog geschlossen hat, soll nicht sofort noch etwas auslösen.
             if (Time.frameCount == game.DialogClosedFrame) return;

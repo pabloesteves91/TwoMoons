@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace TwoMoons
 {
@@ -10,12 +11,30 @@ namespace TwoMoons
         public Product Product;
         public int Amount;
 
+        /// <summary>Einzelstück (z. B. ein Booster aus dem Regal) statt eines ganzen Kartons.</summary>
+        public bool IsSingle => Amount == 1;
+
+        SpriteRenderer look;
+        bool? shownSingle;
+
         void Awake() => Existing.Add(this);
 
         void OnDestroy() => Existing.Remove(this);
 
+        void Update() => RefreshLook();
+
+        /// <summary>Ein einzelnes Stück sieht aus wie die Ware selbst, mehrere wie ein Karton.</summary>
+        public void RefreshLook()
+        {
+            if (Product == null || shownSingle == IsSingle) return;
+            if (look == null) look = GetComponent<SpriteRenderer>();
+            shownSingle = IsSingle;
+            look.sprite = Art.Get(IsSingle ? Product.SpriteKey : "box");
+            transform.localScale = Vector3.one * (IsSingle ? 0.7f : 1f);
+        }
+
         public override string GetPrompt(PlayerController player) =>
-            player.Carried == null ? $"Karton aufheben ({Amount}× {Product.Name})" : null;
+            player.Carried == null ? $"{(IsSingle ? Product.Name : "Karton")} aufheben ({Amount}× {Product.Name})" : null;
 
         public override void Interact(PlayerController player) => player.PickUp(this);
     }

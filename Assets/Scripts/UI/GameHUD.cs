@@ -92,7 +92,7 @@ namespace TwoMoons
             {
                 foreach (var box in DeliveryBox.Existing)
                     if (box.enabled && ShopGrid.WorldToCell(box.transform.position) == cell)
-                        info = $"Karton: {box.Amount}× {box.Product.Name}";
+                        info = box.IsSingle ? $"1× {box.Product.Name}" : $"Karton: {box.Amount}× {box.Product.Name}";
             }
             if (info == null) return;
 
