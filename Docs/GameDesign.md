@@ -82,12 +82,17 @@ Drei Stufen: **Gewöhnlich**, **Selten**, **Ultra-Selten** (shiny).
      Himmel standen. Sie findet ihren Weg zu dem, der seinen Traum nie aufgibt. Licht aus.
   4. *Jahre vergehen* – Monde ziehen über den Himmel, das Kind wächst heran.
   5. *18. Geburtstag* – Kuchen mit flackernden Kerzen. Papa schenkt einen alten Schlüssel mit
-     Zwei-Monde-Anhänger.
-  6. *Die Ladenfront* – Ein verbretterter alter Laden: früher Papas Laden, „ab heute gehört er dir“.
+     Zwei-Monde-Anhänger. Er sieht müde aus, auf dem Küchenschrank stehen viele Tablettendosen.
+  6. *Die Ladenfront* – Ein verbretterter alter Laden: früher Papas Laden. Papa ist krank und muss kürzertreten –
+     er möchte nur noch erleben, wie dort wieder Licht brennt. „Ab heute gehört er dir.“
   7. *Der leere Laden* – Staub, Spinnweben, ein schiefes Regal und ein Karton Monstera-Packs.
      „Er ist perfekt. Ich nenne ihn … TwoMoons.“ Dann beginnt Kapitel 1.
   Eigene Szenenbilder (160×90 Pixel) können als `Assets/Art/Intro/Resources/Intro/<name>.png` die Platzhalter ersetzen
   (bedroom, nightSky, kitchen, shopFront, shopEmpty, father, door, thought, cake, key, moonRed, moonGold).
+- **Ton:** leise und hoffnungsvoll – ein berührender Moment, aber das Ende bleibt warm und motivierend.
+- **Roter Faden: Papa** – Papas Krankheit begleitet die Story leise weiter, z. B. durch Besuche im Laden,
+  Briefe oder alte Fotos und Notizen aus seiner Ladenzeit, die man in späteren Kapiteln findet.
+  Im Finale schließt sich der Kreis: Papa erlebt den vollen Laden beim großen Turnier – und die Two-Moons-Karte.
 - **Ziel/Ende:** TwoMoons wird zum besten Laden der Stadt – Höhepunkt ist ein großes
   Turnier/Event, das der Laden ausrichtet.
 

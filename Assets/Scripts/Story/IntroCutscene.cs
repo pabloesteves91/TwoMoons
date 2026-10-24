@@ -5,7 +5,8 @@ namespace TwoMoons
 {
     /// <summary>
     /// Die Geschichte vor dem ersten Tag: ein Kind träumt von einem Laden, Papa erzählt die Legende der zwei Monde,
-    /// und zum 18. Geburtstag bekommt es den alten, leeren Laden geschenkt.
+    /// und zum 18. Geburtstag bekommt es Papas alten, leeren Laden – Papa ist krank und will noch erleben,
+    /// wie dort wieder Licht brennt.
     /// Nur zum Durchklicken (Klick / Leertaste), [Esc] überspringt.
     /// </summary>
     public class IntroCutscene : MonoBehaviour
@@ -74,6 +75,7 @@ namespace TwoMoons
                     ((string)null, "Am Morgen des 18. Geburtstags."),
                     (Papa, "Alles Gute, {0}! Ich hab da etwas für dich."),
                     (null, "Ein alter Schlüssel. Am Anhänger baumeln zwei kleine Monde – ein roter und ein goldener."),
+                    (null, "Papa lächelt. Aber {0} sieht, wie müde er in letzter Zeit aussieht. Und die vielen Tablettendosen auf dem Küchenschrank."),
                 },
             },
             new Scene
@@ -82,8 +84,9 @@ namespace TwoMoons
                 Lines = new[]
                 {
                     (Papa, "Das hier war einmal mein Laden. Als du klein warst, musste ich ihn schließen."),
-                    (Papa, "Seitdem stand er leer. Verkauft habe ich ihn nie – ich habe auf dich gewartet."),
-                    (Papa, "Ab heute gehört er dir."),
+                    (Papa, "Ich wollte ihn immer wieder aufmachen. Aber die Ärzte sagen, ich muss jetzt kürzertreten."),
+                    (Kid, "Papa …"),
+                    (Papa, "Schon gut. Ich möchte nur noch erleben, wie hier drin wieder Licht brennt. Ab heute gehört er dir."),
                 },
             },
             new Scene
@@ -93,8 +96,8 @@ namespace TwoMoons
                 {
                     ((string)null, "Drinnen: Staub, Spinnweben und ein schiefes, altes Regal. Sonst nichts."),
                     (Papa, "Er ist leer, ich weiß. Einen Karton Monstera-Packs habe ich dir noch besorgt. Den Rest schaffst du."),
-                    (Kid, "Er ist perfekt, Papa."),
-                    (Kid, "Und ich weiß auch schon, wie er heißen wird … TwoMoons."),
+                    (Kid, "Er ist perfekt, Papa. Und du wirst sehen, wie er sich füllt. Versprochen."),
+                    (Kid, "Ich weiß auch schon, wie er heißen wird … TwoMoons."),
                 },
             },
         };

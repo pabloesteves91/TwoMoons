@@ -258,6 +258,13 @@ namespace TwoMoons
                 c.Rect(x, 72 - (x / 8 % 2), 6, 1, new Color32(120, 90, 60, 255));
                 c.Rect(x + 2, 66 - (x / 8 % 2), 3, 5, x / 8 % 2 == 0 ? new Color32(225, 85, 40, 255) : new Color32(245, 200, 80, 255));
             }
+            // Küchenschrank mit Tablettendosen
+            c.Rect(128, 40, 28, 3, new Color32(150, 95, 55, 255));
+            for (int x = 131; x < 154; x += 5)
+            {
+                c.Rect(x, 43, 3, 5, new Color32(235, 140, 60, 255));
+                c.Rect(x, 48, 3, 1, new Color32(250, 250, 250, 255));
+            }
             // Tisch
             c.Rect(50, 30, 70, 4, new Color32(150, 95, 55, 255));
             c.Rect(50, 26, 70, 4, new Color32(240, 240, 245, 255));

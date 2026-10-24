@@ -356,6 +356,7 @@ namespace TwoMoons
             ShowDialog(new[]
             {
                 $"{PlayerName}: Mein eigener Laden. TwoMoons. Papa, ich mach dich stolz.",
+                "Und eines Tages finde ich die Two-Moons-Karte. Für dich.",
                 "Viel Geld habe ich nicht. Aber es ist ein Anfang: ein Karton Monstera-Packs und Papas altes Regal.",
                 "Erst mal aufräumen. Dann das Regal aufstellen, Packs einräumen und das Schild an der Tür umdrehen!",
             });
