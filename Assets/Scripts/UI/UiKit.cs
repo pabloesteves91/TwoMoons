@@ -99,7 +99,7 @@ namespace TwoMoons
         /// Ein Bild aus einem Resources-Ordner, dessen Name „logo“ oder „twomoons“ enthält
         /// (z. B. logo.png oder twomoonspixel.png). Andere Bilder, etwa aus Unity-Paketen, werden ignoriert.
         /// </summary>
-        static Texture2D LoadLogoTexture()
+        public static Texture2D LoadLogoTexture()
         {
             foreach (var texture in Resources.LoadAll<Texture2D>(""))
             {
@@ -109,7 +109,7 @@ namespace TwoMoons
             return null;
         }
 
-                static Rect Fit(Rect box, float width, float height)
+        static Rect Fit(Rect box, float width, float height)
         {
             float scale = Mathf.Min(box.width / width, box.height / height);
             var size = new Vector2(width * scale, height * scale);

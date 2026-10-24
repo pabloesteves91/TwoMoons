@@ -13,6 +13,9 @@ namespace TwoMoons
         /// <summary>Was gerade aufgestellt wird.</summary>
         public static Furniture Current { get; private set; }
 
+        /// <summary>Nach dem Auspacken eines Pakets: Bau-Modus sofort öffnen.</summary>
+        public static bool StartRequested;
+
         static readonly Color ValidColor = new Color(0.5f, 1f, 0.5f, 0.7f);
         static readonly Color InvalidColor = new Color(1f, 0.4f, 0.4f, 0.7f);
 
@@ -33,7 +36,9 @@ namespace TwoMoons
             if (!game.BuildMode)
             {
                 ghost.enabled = false;
-                if (GameInput.BuildPressed && !game.InputLocked && game.Phase != GamePhase.Summary)
+                bool requested = StartRequested;
+                StartRequested = false;
+                if ((GameInput.BuildPressed || requested) && !game.InputLocked && game.Phase != GamePhase.Summary)
                 {
                     if (game.TotalToPlace > 0)
                     {
@@ -42,7 +47,9 @@ namespace TwoMoons
                     }
                     else
                     {
-                        game.ShowToast("Nichts zum Aufstellen – kauf Möbel und Deko am Computer (Tab „Einrichtung“).");
+                        game.ShowToast(game.Package != null
+                            ? "Erst das Paket am Eingang auspacken ([E])."
+                            : "Nichts zum Aufstellen – kauf Möbel und Deko am Computer (Tab „Einrichtung“).");
                         SoundManager.Play(Sfx.Error);
                     }
                 }

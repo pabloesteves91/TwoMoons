@@ -156,6 +156,31 @@ namespace TwoMoons
 
             WorldFactory.CreateSolid("Computer", "computer", ShopGrid.ComputerCell, root).AddComponent<Computer>();
             WorldFactory.CreateSolid("Pack-Tisch", "packTable", ShopGrid.PackTableCell, root).AddComponent<PackTable>();
+
+            CreateStoreSign(root);
+        }
+
+        /// <summary>Großes TwoMoons-Schild außen an der Ladenfront, rechts neben der Tür.</summary>
+        static void CreateStoreSign(Transform root)
+        {
+            // Bleibt in den beiden untersten Reihen (Straße und Außenwand), damit es nichts im Laden verdeckt.
+            const float width = 3.8f;
+            var center = new Vector3(ShopGrid.DoorCell.x + 4f, 1f, 0f);
+
+            var board = WorldFactory.CreateSprite("Ladenschild außen", "signBoard", center, -140, root);
+            board.transform.localScale = new Vector3(width + 0.4f, 2f, 1f);
+
+            var logo = Art.Logo;
+            if (logo == null)
+            {
+                var texture = UiKit.LoadLogoTexture();
+                if (texture == null) return;
+                logo = Sprite.Create(texture, new Rect(0f, 0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100f);
+            }
+            var logoRenderer = WorldFactory.CreateSprite("TwoMoons-Logo", "signBoard", center, -139, root);
+            logoRenderer.sprite = logo;
+            float logoWidth = logo.bounds.size.x;
+            logoRenderer.transform.localScale = Vector3.one * (width / logoWidth);
         }
     }
 }

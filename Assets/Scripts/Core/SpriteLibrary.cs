@@ -15,11 +15,13 @@ namespace TwoMoons
         public Sprite street;
         public Sprite door;
         public Sprite sign;
+        public Sprite signBoard;
         public Sprite counter;
         public Sprite register;
         public Sprite computer;
         public Sprite shelf;
         public Sprite box;
+        public Sprite package;
         public Sprite dirt;
         public Sprite packTable;
         public Sprite showcase;
@@ -54,7 +56,7 @@ namespace TwoMoons
 
         public static readonly string[] Keys =
         {
-            "floor", "wall", "street", "door", "sign", "counter", "register", "computer", "shelf", "box", "dirt",
+            "floor", "wall", "street", "door", "sign", "signBoard", "counter", "register", "computer", "shelf", "box", "package", "dirt",
             "packTable", "showcase",
             "plant", "poster", "rug", "wallClock", "fairyLights",
             "packMonstera", "cardIcon",

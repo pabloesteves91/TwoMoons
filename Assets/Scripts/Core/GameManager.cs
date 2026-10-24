@@ -57,6 +57,8 @@ namespace TwoMoons
         public readonly List<Shelf> Shelves = new List<Shelf>();
         public readonly List<Showcase> Showcases = new List<Showcase>();
         public readonly List<DecoItem> Decos = new List<DecoItem>();
+        /// <summary>Noch nicht ausgepacktes Möbel-Paket am Eingang (höchstens eins).</summary>
+        public FurniturePackage Package;
         public readonly Collection Collection = new Collection();
 
         public GamePhase Phase { get; private set; } = GamePhase.MainMenu;
@@ -345,6 +347,11 @@ namespace TwoMoons
             AddToPlace(Furniture.Showcase, data.showcasesToPlace);
             foreach (var saved in data.toPlace) AddToPlace((Furniture)saved.type, saved.count);
             foreach (var saved in data.decos) WorldFactory.SpawnDeco((Furniture)saved.type, new Vector2Int(saved.x, saved.y));
+            if (data.package != null && data.package.contents.Count > 0)
+            {
+                Package = WorldFactory.SpawnPackage(new Vector2Int(data.package.x, data.package.y));
+                foreach (var item in data.package.contents) Package.Add((Furniture)item.type, item.count);
+            }
             Collection.LoadFrom(data);
 
             foreach (var price in data.prices) prices[(ProductId)price.product] = price.cents;
@@ -415,6 +422,13 @@ namespace TwoMoons
             foreach (var pair in toPlace)
                 if (pair.Value > 0) data.toPlace.Add(new SavedCount { type = (int)pair.Key, count = pair.Value });
             foreach (var deco in Decos) data.decos.Add(new SavedDeco { type = (int)deco.Type, x = deco.Cell.x, y = deco.Cell.y });
+            if (Package != null)
+            {
+                var cell = ShopGrid.WorldToCell(Package.transform.position);
+                data.package = new SavedPackage { x = cell.x, y = cell.y };
+                foreach (var item in Package.Contents)
+                    data.package.contents.Add(new SavedCount { type = (int)item.Key, count = item.Value });
+            }
             foreach (var showcase in Showcases)
             {
                 data.showcases.Add(new SavedShowcase
@@ -527,8 +541,10 @@ namespace TwoMoons
 
             if (option.Kind == OrderKind.Furniture)
             {
-                AddToPlace(option.Furniture);
-                ShowToast($"{option.Name} geliefert! Drücke [B], um es aufzustellen.");
+                // Alle gekauften Möbel kommen ins selbe Paket am Eingang.
+                if (Package == null) Package = WorldFactory.SpawnPackage(WorldFactory.FreeDeliveryCell());
+                Package.Add(option.Furniture);
+                ShowToast($"{option.Name} ist im Paket am Eingang. Dort mit [E] auspacken und aufstellen.");
             }
             else
             {

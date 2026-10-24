@@ -161,6 +161,13 @@ Nach dem Finale kann man weiterspielen.
 - **Credits:** vorerst Platzhalter „TwoMoons – ein Spiel von …“
 - **Farben:** alle Menüs in den Logo-Farben – Dunkelbraun als Hintergrund, Rot-Orange und Gold für Knöpfe und Akzente
 
+## Lieferungen
+
+- **Ware** (Displays) kommt als Karton an den Eingang und wird getragen und eingeräumt.
+- **Möbel und Deko** kommen gesammelt in **einem Paket** an den Eingang. [E] am Paket packt alles aus und
+  startet direkt den Bau-Modus – nichts muss getragen werden. [B] wechselt zwischen den Teilen.
+- Außen an der Ladenfront hängt ein großes **TwoMoons-Schild** mit dem Pixel-Logo.
+
 ## Grafik-Vorgaben für eigene Bilder
 
 - Raster: 16×16 Pixel pro Bodenfeld (1 Unity-Einheit = 16 Pixel)

@@ -152,11 +152,19 @@ namespace TwoMoons
             return deco;
         }
 
+        public static FurniturePackage SpawnPackage(Vector2Int cell)
+        {
+            var renderer = CreateSprite("Möbel-Paket", "package", ShopGrid.CellToWorld(cell));
+            renderer.gameObject.AddComponent<YSort>();
+            return renderer.gameObject.AddComponent<FurniturePackage>();
+        }
+
         public static bool HasBoxAt(Vector2Int cell)
         {
             foreach (var box in DeliveryBox.Existing)
                 if (box.enabled && ShopGrid.WorldToCell(box.transform.position) == cell) return true;
-            return false;
+            var package = Game.Package;
+            return package != null && ShopGrid.WorldToCell(package.transform.position) == cell;
         }
 
         /// <summary>Freier Abstellplatz für eine Lieferung, notfalls irgendwo im Laden.</summary>

@@ -50,6 +50,13 @@ namespace TwoMoons
     }
 
     [Serializable]
+    public class SavedPackage
+    {
+        public int x, y;
+        public List<SavedCount> contents = new List<SavedCount>();
+    }
+
+    [Serializable]
     public class SavedDeco
     {
         public int type;
@@ -93,6 +100,7 @@ namespace TwoMoons
         public List<SavedCount> toPlace = new List<SavedCount>();
         public List<SavedDeco> decos = new List<SavedDeco>();
         public List<string> seenStories = new List<string>();
+        public SavedPackage package;
         public long savedAtTicks;
 
         public DateTime SavedAt => new DateTime(savedAtTicks);

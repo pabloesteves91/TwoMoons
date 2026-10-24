@@ -149,6 +149,19 @@ namespace TwoMoons
                     Rect(7, 1, 2, 11, new Color32(230, 215, 170, 255));
                     Frame(2, 1, 12, 11, new Color32(140, 100, 55, 255));
                     break;
+                case "signBoard":
+                    Rect(0, 0, 16, 16, new Color32(70, 38, 26, 255));
+                    Rect(1, 1, 14, 14, new Color32(45, 24, 18, 255));
+                    break;
+                case "package":
+                    Rect(1, 1, 14, 11, new Color32(160, 115, 70, 255));
+                    Rect(1, 9, 14, 3, new Color32(185, 135, 85, 255));
+                    Rect(7, 1, 2, 11, new Color32(225, 85, 40, 255));
+                    Rect(1, 6, 14, 2, new Color32(225, 85, 40, 255));
+                    Rect(6, 12, 2, 2, new Color32(245, 200, 80, 255));
+                    Rect(8, 12, 2, 2, new Color32(245, 200, 80, 255));
+                    Frame(1, 1, 14, 11, new Color32(100, 70, 40, 255));
+                    break;
                 case "dirt":
                     Rect(3, 4, 6, 4, new Color32(90, 70, 40, 170));
                     Rect(7, 7, 5, 4, new Color32(90, 70, 40, 170));
