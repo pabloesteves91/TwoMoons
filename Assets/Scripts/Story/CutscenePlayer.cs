@@ -456,9 +456,7 @@ namespace TwoMoons
             Fill(97f, 18f, 12f, 30f, new Color(1f, 0.8f, 0.45f, 0.35f * glow));
 
             // Schild mit dem Namen
-            Fill(50f, 62f, 60f, 10f, new Color(0.18f, 0.1f, 0.08f));
-            var sign = ToScreen(50f, 62f, 60f, 10f);
-            GUI.Label(sign, "TwoMoons", UiKit.Title.WithAlignment(TextAnchor.MiddleCenter).WithFontSize(Mathf.RoundToInt(pixel * 6f)));
+            DrawShopSign();
 
             // Papa auf der anderen Straßenseite (vorne im Bild)
             var father = IntroArt.Get("father");
@@ -605,8 +603,7 @@ namespace TwoMoons
             Draw(IntroArt.Get("moonGold"), 128f, 68f + rise * 0.2f);
             float glow = 0.85f + 0.15f * Mathf.Sin(t * 1.5f);
             Fill(36f, 22f, 44f, 34f, new Color(1f, 0.8f, 0.45f, 0.85f * glow));
-            Fill(50f, 62f, 60f, 10f, new Color(0.18f, 0.1f, 0.08f));
-            GUI.Label(ToScreen(50f, 62f, 60f, 10f), "TwoMoons", UiKit.Title.WithAlignment(TextAnchor.MiddleCenter).WithFontSize(Mathf.RoundToInt(pixel * 6f)));
+            DrawShopSign();
             Draw(IntroArt.Get("father"), 98f, 2f);
             DrawPlayer(82f, 2f, 22f);
             if (IsLastLine)
@@ -614,6 +611,23 @@ namespace TwoMoons
                 float a = Mathf.Clamp01(LineTime / 2f);
                 Fill(0f, 0f, IntroArt.Width, IntroArt.Height, new Color(0f, 0f, 0f, a * 0.5f));
             }
+        }
+
+        Texture2D logo;
+        bool logoLoaded;
+
+        /// <summary>Ladenschild über der Tür: das TwoMoons-Pixel-Logo (ohne Logo-Datei der Schriftzug).</summary>
+        void DrawShopSign()
+        {
+            if (!logoLoaded)
+            {
+                logoLoaded = true;
+                logo = Art.Logo != null ? Art.Logo.texture : UiKit.LoadLogoTexture();
+            }
+            Fill(46f, 59f, 68f, 16f, new Color(0.18f, 0.1f, 0.08f));
+            var sign = ToScreen(47f, 60f, 66f, 14f);
+            if (logo != null) GUI.DrawTexture(sign, logo, ScaleMode.ScaleToFit);
+            else GUI.Label(sign, "TwoMoons", UiKit.Title.WithAlignment(TextAnchor.MiddleCenter).WithFontSize(Mathf.RoundToInt(pixel * 6f)));
         }
 
         void EnsureWhite()
