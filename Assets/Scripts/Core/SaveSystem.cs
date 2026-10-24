@@ -142,6 +142,7 @@ namespace TwoMoons
         /// <summary>Beste Note pro Karte (count = Note), fürs Sammelbuch.</summary>
         public List<SavedCard> bestGrades = new List<SavedCard>();
         public List<SavedGrader> graders = new List<SavedGrader>();
+        public List<int> skills = new List<int>();
         public long savedAtTicks;
 
         public DateTime SavedAt => new DateTime(savedAtTicks);

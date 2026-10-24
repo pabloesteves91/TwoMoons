@@ -55,7 +55,8 @@ namespace TwoMoons
         void Update()
         {
             if (!Busy || Done) return;
-            Progress = Mathf.Min(1f, Progress + Time.deltaTime / (Grading.Hours * SecondsPerHour));
+            float speed = GameManager.Instance.Skills.Has(Skill.Tinkerer) ? 1.25f : 1f;
+            Progress = Mathf.Min(1f, Progress + speed * Time.deltaTime / (Grading.Hours * SecondsPerHour));
             if (Done)
             {
                 GameManager.Instance.ShowToast($"Grading fertig: {CardDatabase.Get(CardId).Name} – [E] an der Grading-Station.", 4f);

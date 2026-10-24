@@ -109,7 +109,8 @@ namespace TwoMoons
             get
             {
                 if (IsCityTournament) return Seats;
-                int players = 2 + Game.ReputationStage + PrizePackTotal / 4 + (IsBig ? 3 : 0);
+                int players = 2 + Game.ReputationStage + PrizePackTotal / 4 + (IsBig ? 3 : 0) +
+                              (Game.Skills.Has(Skill.Organizer) ? 2 : 0);
                 var bonus = CardDatabase.Get(BonusCard);
                 if (bonus != null) players += 1 + (int)bonus.Rarity;
                 return Mathf.Clamp(players, 0, Seats);
@@ -176,7 +177,7 @@ namespace TwoMoons
                 return;
             }
 
-            int packs = IsCityTournament ? 40 : 8 + 4 * (Game.StoreLevel - 3);
+            int packs = (IsCityTournament ? 40 : 8 + 4 * (Game.StoreLevel - 3)) + (Game.Skills.Has(Skill.Organizer) ? 4 : 0);
             WorldFactory.SpawnBox(WorldFactory.FreeDeliveryCell(), Catalog.TournamentPack, packs);
             Game.ShowToast($"{Kind}! Der Hersteller schickt {packs} Turnier-Packs – bring sie zum Turnier-Counter.", 7f);
         }

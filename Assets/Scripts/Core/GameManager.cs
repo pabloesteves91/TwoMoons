@@ -61,6 +61,17 @@ namespace TwoMoons
         /// <summary>Noch nicht ausgepacktes Möbel-Paket am Eingang (höchstens eins).</summary>
         public FurniturePackage Package;
         public readonly Collection Collection = new Collection();
+        public readonly Skills Skills = new Skills();
+        public int SkillPoints => Skills.FreePoints(StoreLevel);
+
+        public bool LearnSkill(Skill skill)
+        {
+            if (!Skills.Learn(skill, StoreLevel)) return false;
+            SoundManager.Play(Sfx.Quest);
+            ShowToast($"Neue Fähigkeit: {Skills.All[(int)skill].Name}!", 4f);
+            return true;
+        }
+
         /// <summary>Bewertete Karten, die gerade nicht in einer Vitrine liegen.</summary>
         public readonly List<Slab> Slabs = new List<Slab>();
 
@@ -196,7 +207,11 @@ namespace TwoMoons
         /// </summary>
         public float CustomerPatience =>
             (15f + 5f * ReputationStage) * Mathf.Max(0.5f, 1f - 0.08f * DirtSpot.Existing.Count) *
-            (1f + Mathf.Min(0.3f, Coziness * 0.02f));
+            (1f + Mathf.Min(0.3f, Coziness * 0.02f)) * (Skills.Has(Skill.Charmer) ? 1.2f : 1f);
+
+        /// <summary>Einkaufspreis einer Bestellung, mit Lagerprofi-Rabatt auf Ware.</summary>
+        public int CostOf(OrderOption option) =>
+            option.Kind == OrderKind.ProductBox && Skills.Has(Skill.StockPro) ? Mathf.RoundToInt(option.Cost * 0.9f) : option.Cost;
 
         /// <summary>Kapitel-Aufgaben des aktuellen Levels erledigt? (Kapitel 2–7 folgen.)</summary>
         Chapters chapters;
@@ -217,6 +232,7 @@ namespace TwoMoons
             StoreLevel++;
             LevelUpShown = StoreLevel;
             SoundManager.Play(Sfx.Fanfare);
+            ShowToast("Neuer Fähigkeitspunkt! Am Computer unter „Talente“ einlösen.", 6f);
         }
 
         /// <summary>Nur zum Testen: nächstes Level sofort, ohne XP und Kapitel-Aufgaben.</summary>
@@ -461,6 +477,7 @@ namespace TwoMoons
                 foreach (var item in data.package.contents) Package.Add((Furniture)item.type, item.count);
             }
             Collection.LoadFrom(data);
+            Skills.LoadFrom(data);
 
             foreach (var price in data.prices) prices[(ProductId)price.product] = price.cents;
             foreach (var saved in data.shelves)
@@ -543,6 +560,7 @@ namespace TwoMoons
                 data.boxes.Add(new SavedBox { x = cell.x, y = cell.y, product = (int)box.Product.Id, amount = box.Amount });
             }
             Collection.SaveTo(data);
+            Skills.SaveTo(data);
             data.seenStories.AddRange(seenStories);
             data.tournament = Tournament.Save();
             foreach (var deco in Decos)
@@ -676,14 +694,15 @@ namespace TwoMoons
                 SoundManager.Play(Sfx.Error);
                 return false;
             }
-            if (MoneyCents < option.Cost)
+            int cost = CostOf(option);
+            if (MoneyCents < cost)
             {
                 ShowToast("Dafür reicht das Geld nicht.");
                 SoundManager.Play(Sfx.Error);
                 return false;
             }
-            MoneyCents -= option.Cost;
-            Today.Expenses += option.Cost;
+            MoneyCents -= cost;
+            Today.Expenses += cost;
             SoundManager.Play(Sfx.Order);
 
             if (option.Kind == OrderKind.Furniture)
@@ -805,12 +824,25 @@ namespace TwoMoons
         {
             OpenedPackProduct = product;
             OpenedPack = CardDatabase.RollPack(product.Game);
+            if (Skills.Has(Skill.Lucky)) SwapInMissingCards(OpenedPack);
             OpenedPackNew.Clear();
             foreach (var card in OpenedPack) OpenedPackNew.Add(Collection.Add(card.Id));
             PackOpened?.Invoke(OpenedPack.FindAll(c => c.Rarity == Rarity.Ultra).Count);
         }
 
         public void ClosePack() => OpenedPack = null;
+
+        /// <summary>Glückspilz: bekannte Karten werden manchmal gegen noch fehlende derselben Seltenheit getauscht.</summary>
+        void SwapInMissingCards(List<CardDef> pack)
+        {
+            for (int i = 0; i < pack.Count; i++)
+            {
+                var card = pack[i];
+                if (!Collection.IsDiscovered(card.Id) || UnityEngine.Random.value > 0.25f) continue;
+                var missing = CardDatabase.ForGame(card.Game).FindAll(c => c.Rarity == card.Rarity && !Collection.IsDiscovered(c.Id) && !pack.Contains(c));
+                if (missing.Count > 0) pack[i] = missing[UnityEngine.Random.Range(0, missing.Count)];
+            }
+        }
 
         public void CustomerLeftHappy(bool bargain)
         {
@@ -859,7 +891,7 @@ namespace TwoMoons
                 ShowToast($"Dein gemütlicher Laden spricht sich herum: Ruf +{cozyBonus}");
             }
 
-            int dirt = UnityEngine.Random.Range(1, 4);
+            int dirt = Skills.Has(Skill.Tidy) ? UnityEngine.Random.Range(0, 2) : UnityEngine.Random.Range(1, 4);
             for (int i = 0; i < dirt; i++) WorldFactory.SpawnDirtSomewhere();
 
             Tournament.OnNewDay();

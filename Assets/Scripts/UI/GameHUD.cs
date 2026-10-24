@@ -315,7 +315,7 @@ namespace TwoMoons
         {
             // Höchstens so hoch wie der Bildschirm; der Inhalt lässt sich scrollen.
             float height = Mathf.Min(VirtualHeight - 100f, 380f);
-            var area = new Rect((width - 500f) / 2f, 60f, 500f, height);
+            var area = new Rect((width - 580f) / 2f, 60f, 580f, height);
             GUI.Box(area, GUIContent.none, panel);
             GUILayout.BeginArea(new Rect(area.x + 16f, area.y + 12f, area.width - 32f, area.height - 24f));
 
@@ -326,7 +326,7 @@ namespace TwoMoons
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            string[] tabs = { "Ware", "Einrichtung", "Preise", "Team", "Level" };
+            string[] tabs = { "Ware", "Einrichtung", "Preise", "Team", "Level", Game.SkillPoints > 0 ? $"Talente ({Game.SkillPoints})" : "Talente" };
             for (int i = 0; i < tabs.Length; i++)
             {
                 GUI.color = computerTab == i ? Color.white : UiKit.Dimmed;
@@ -340,6 +340,7 @@ namespace TwoMoons
             if (computerTab == 2) DrawPriceList();
             else if (computerTab == 3) DrawTeam();
             else if (computerTab == 4) DrawLevelList();
+            else if (computerTab == 5) DrawSkills();
             else DrawOrderList(computerTab == 0 ? Catalog.Orders : Catalog.Furnishings);
             GUILayout.EndScrollView();
 
@@ -360,7 +361,7 @@ namespace TwoMoons
                 GUILayout.BeginHorizontal();
                 GUI.color = locked ? UiKit.Dimmed : Color.white;
                 GUILayout.BeginVertical();
-                GUILayout.Label($"{option.Name} – {Money.Format(option.Cost)}", bold);
+                GUILayout.Label($"{option.Name} – {Money.Format(Game.CostOf(option))}", bold);
                 GUILayout.Label(option.Description, text);
                 GUILayout.EndVertical();
                 GUI.color = Color.white;
@@ -371,7 +372,7 @@ namespace TwoMoons
                 }
                 else
                 {
-                    GUI.enabled = Game.MoneyCents >= option.Cost;
+                    GUI.enabled = Game.MoneyCents >= Game.CostOf(option);
                     if (Button("Kaufen", GUILayout.Width(90f), GUILayout.Height(36f))) Game.Order(option);
                     GUI.enabled = true;
                 }
@@ -429,6 +430,37 @@ namespace TwoMoons
             {
                 GUILayout.Space(8f);
                 if (Button("Entlassen", GUILayout.Height(28f))) Game.Fire();
+            }
+        }
+
+        /// <summary>Fähigkeiten: ein Punkt pro Level-Aufstieg, frei wählbar.</summary>
+        void DrawSkills()
+        {
+            int points = Game.SkillPoints;
+            GUILayout.Label(points > 0
+                ? $"Du hast {points} freie(n) Fähigkeitspunkt(e). Mit jedem Level-Aufstieg kommt einer dazu."
+                : "Mit jedem Level-Aufstieg bekommst du einen Fähigkeitspunkt.", hint);
+            foreach (var skill in Skills.All)
+            {
+                bool learned = Game.Skills.Has(skill.Id);
+                GUILayout.BeginHorizontal();
+                GUI.color = learned ? UiKit.Good : Color.white;
+                GUILayout.BeginVertical();
+                GUILayout.Label(skill.Name, bold);
+                GUILayout.Label(skill.Description, text);
+                GUILayout.EndVertical();
+                GUI.color = Color.white;
+                GUILayout.FlexibleSpace();
+                if (learned)
+                    GUILayout.Label("gelernt", hint, GUILayout.Width(90f), GUILayout.Height(36f));
+                else
+                {
+                    GUI.enabled = points > 0;
+                    if (Button("Lernen", GUILayout.Width(90f), GUILayout.Height(36f))) Game.LearnSkill(skill.Id);
+                    GUI.enabled = true;
+                }
+                GUILayout.EndHorizontal();
+                GUILayout.Space(6f);
             }
         }
 

@@ -209,17 +209,17 @@ Flecken ziehen Gemütlichkeit ab.
 
 ## 8. Fähigkeiten
 
-Mit jedem Level-Aufstieg gibt es **1 Fähigkeitspunkt** (insgesamt 6). Man wählt aus:
+Mit jedem Level-Aufstieg gibt es **1 Fähigkeitspunkt** (insgesamt 6), einzulösen am Computer im Tab **Talente**. Man wählt aus:
 
 | Fähigkeit | Wirkung |
 |---|---|
-| Flinke Finger | Kassieren und Einräumen doppelt so schnell |
+| Flinke Füße | Du läufst 40 % schneller durch den Laden |
 | Charmeur | Kunden +20 % Geduld |
-| Lagerprofi | 2 Kartons gleichzeitig tragen |
+| Lagerprofi | Ware beim Großhändler 10 % günstiger |
 | Verhandlungsgeschick | Ankauf 15 % günstiger, Sammler zahlen 10 % mehr |
-| Turnier-Organisator | +2 Plätze pro Turnier, Hersteller schickt mehr Packs |
-| Tüftler | 3D-Drucke und Grading 25 % schneller, weniger Druckfehler |
-| Ordnungsfanatiker | Weniger neue Flecken pro Tag |
+| Turnier-Organisator | Mehr Turnierspieler, Hersteller schickt 4 Packs mehr |
+| Tüftler | 3D-Drucke und Grading 25 % schneller, halb so viele Druckfehler |
+| Ordnungsfanatiker | Höchstens ein neuer Fleck pro Tag |
 | Glückspilz | Etwas mehr „NEU!“-Karten beim Pack-Öffnen |
 
 ---
@@ -247,6 +247,6 @@ Mit jedem Level-Aufstieg gibt es **1 Fähigkeitspunkt** (insgesamt 6). Man wähl
 | **D** ✅ | Kapitel 4 (Level 4): 3D-Drucker, Filament, Druck-Regal, Ankauf | Drucken & Handeln |
 | **E** ✅ | Kapitel 5 (Level 5): Karten-Grading, Ladenerweiterung | Laden wird groß |
 | **F** ✅ | Kapitel 6–7: Großturniere, Premium-Deko, Finale mit Papa und der Two-Moons-Karte | Story fertig |
-| **G** | Fähigkeiten-Menü, Feinschliff, Balance | Rund und fertig |
+| **G** | Fähigkeiten-Menü ✅ · Feinschliff und Balance nach dem Testen | Rund und fertig |
 
 Jeder Schritt ist für sich spielbar und wird einzeln getestet, bevor der nächste beginnt.

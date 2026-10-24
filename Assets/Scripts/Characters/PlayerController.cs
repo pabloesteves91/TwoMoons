@@ -45,7 +45,8 @@ namespace TwoMoons
         void FixedUpdate()
         {
             Vector2 move = GameManager.Instance.InputLocked ? Vector2.zero : GameInput.Move;
-            body.linearVelocity = move * Speed;
+            float speed = GameManager.Instance.Skills.Has(Skill.QuickHands) ? Speed * 1.4f : Speed;
+            body.linearVelocity = move * speed;
             if (Mathf.Abs(move.x) > 0.01f) spriteRenderer.flipX = move.x < 0;
         }
 

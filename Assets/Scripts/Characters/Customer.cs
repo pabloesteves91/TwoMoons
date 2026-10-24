@@ -259,7 +259,8 @@ namespace TwoMoons
             int slot = filled[Random.Range(0, filled.Count)];
             var wanted = CardDatabase.Get(showcase.Cards[slot]);
             int price = showcase.Prices[slot];
-            float fairValue = showcase.ValueAt(slot) * (showcase.Premium ? Showcase.PremiumBonus : 1f);
+            float fairValue = showcase.ValueAt(slot) * (showcase.Premium ? Showcase.PremiumBonus : 1f) *
+                              (Game.Skills.Has(Skill.Negotiator) ? 1.1f : 1f);
             float ratio = price / fairValue;
             if (Random.value < Mathf.Clamp01((ratio - 1f) / PainRange))
             {
@@ -324,7 +325,8 @@ namespace TwoMoons
                 OfferCards.Add(card);
                 value += card.Value;
             }
-            AskingPrice = Mathf.RoundToInt(value * Random.Range(0.6f, 0.9f) / 10f) * 10;
+            float discount = Game.Skills.Has(Skill.Negotiator) ? 0.85f : 1f;
+            AskingPrice = Mathf.RoundToInt(value * Random.Range(0.6f, 0.9f) * discount / 10f) * 10;
         }
 
         /// <summary>Gegenangebot (15 % weniger). Gibt true zurück, wenn der Verkäufer annimmt.</summary>

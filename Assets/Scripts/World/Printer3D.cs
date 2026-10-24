@@ -59,7 +59,8 @@ namespace TwoMoons
             Printing = model;
             Progress = 0f;
             Jammed = false;
-            jamAt = Random.value < JamChancePerPrint ? Random.Range(0.2f, 0.8f) : -1f;
+            float jamChance = GameManager.Instance.Skills.Has(Skill.Tinkerer) ? JamChancePerPrint / 2f : JamChancePerPrint;
+            jamAt = Random.value < jamChance ? Random.Range(0.2f, 0.8f) : -1f;
             SoundManager.Play(Sfx.Build);
             Refresh();
         }
@@ -80,7 +81,7 @@ namespace TwoMoons
         {
             if (Printing == null || Jammed || Done) return;
             // Ab Level 6 druckt der Drucker schneller.
-            float speed = GameManager.Instance.StoreLevel >= 6 ? 1.5f : 1f;
+            float speed = (GameManager.Instance.StoreLevel >= 6 ? 1.5f : 1f) * (GameManager.Instance.Skills.Has(Skill.Tinkerer) ? 1.25f : 1f);
             Progress = Mathf.Min(1f, Progress + speed * Time.deltaTime / (Printing.Hours * SecondsPerHour));
             if (jamAt >= 0f && Progress >= jamAt)
             {
