@@ -19,18 +19,25 @@
 Mit Vorbereitung und Abrechnung dauert ein ganzer Spieltag etwa **9–10 Minuten**.
 
 ### Wie lang ein Kapitel dauert
-Frühe Kapitel sind kurz (schnelles Erfolgserlebnis), spätere länger (mehr Systeme, mehr zu tun).
+Kapitel 1–3 dauern je etwa **1 Stunde**, Kapitel 4–7 je etwa **90 Minuten**. Jedes Kapitel besteht aus
+**Etappen** mit je 3–5 Aufgaben; zwischen den Etappen gibt es kleine Story-Momente (roter Faden).
 
 | Kapitel | Spieltage | Echtzeit ca. |
 |---|---|---|
-| 1 Der Traum beginnt | 1–2 | 15 Min. |
-| 2 Die ersten Stammkunden | 3 | 30 Min. |
-| 3 Das erste Turnier | 4 | 40 Min. |
-| 4 Handeln & Drucken | 5 | 50 Min. |
-| 5 TwoMoons wächst | 6 | 1 Std. |
-| 6 Der Ruf eilt voraus | 7 | 1 Std. 10 Min. |
-| 7 Das große Turnier | 8 | 1 Std. 20 Min. |
-| **Gesamt** | **ca. 35 Tage** | **ca. 6 Stunden** |
+| 1 Der Traum beginnt | 6–7 | 1 Std. |
+| 2 Die ersten Stammkunden | 6–7 | 1 Std. |
+| 3 Das erste Turnier | 6–7 | 1 Std. |
+| 4 Handeln & Drucken | 9–10 | 1 Std. 30 Min. |
+| 5 TwoMoons wächst | 9–10 | 1 Std. 30 Min. |
+| 6 Der Ruf eilt voraus | 9–10 | 1 Std. 30 Min. |
+| 7 Das große Turnier | 9–10 | 1 Std. 30 Min. |
+| **Gesamt** | **ca. 55–60 Tage** | **ca. 9 Stunden** |
+
+**Kapitel 1 in Etappen:**
+1. *Der erste Tag* – putzen, erstes Regal, einräumen, öffnen, 5 Kunden
+2. *Ein richtiger Laden* – 30 Packs verkaufen, 2 Regale, 2 Tage mit Gewinn
+3. *Gemütlich soll es sein* – 3 Deko, Gemütlichkeit 5, 25 Kunden
+4. *Der Laden läuft* – 80 Packs, an einem Tag 20 Packs, 3 weitere Gewinn-Tage, 50 Kunden
 
 Danach kann man frei weiterspielen (Endlos-Modus mit allen Freischaltungen).
 
@@ -47,12 +54,12 @@ erledigt (entschieden), steigt der Laden ein Level auf → **Level-Up-Bildschirm
 | Level | XP nötig | Titel |
 |---|---|---|
 | 1 | 0 | Leerer Laden |
-| 2 | 150 | Kleiner Kartenladen |
-| 3 | 500 | Treffpunkt |
-| 4 | 1.200 | Sammlerparadies |
-| 5 | 2.500 | Spielerheimat |
-| 6 | 4.500 | Stadtbekannt |
-| 7 | 7.500 | **Legendär** |
+| 2 | 1.200 | Kleiner Kartenladen |
+| 3 | 3.500 | Treffpunkt |
+| 4 | 7.000 | Sammlerparadies |
+| 5 | 12.000 | Spielerheimat |
+| 6 | 18.000 | Stadtbekannt |
+| 7 | 26.000 | **Legendär** |
 
 **XP gibt es für:**
 - 1 XP pro 1 € Umsatz

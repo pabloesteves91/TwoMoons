@@ -14,7 +14,7 @@ namespace TwoMoons
 
         const float VirtualHeight = UiKit.VirtualHeight;
         const float Margin = UiKit.Margin;
-        const float PanelWidth = 290f;
+        const float PanelWidth = 330f;
 
         GUIStyle panel, text, bold, title, prompt, hint, button;
         Vector2 orderScroll;
@@ -224,7 +224,7 @@ namespace TwoMoons
 
             var area = new Rect(width - PanelWidth - Margin, Margin, PanelWidth, 34f + rows * 22f);
             GUI.Box(area, GUIContent.none, panel);
-            GUI.Label(new Rect(area.x + 10f, area.y + 6f, area.width - 90f, 22f), ChapterOne.Title, bold);
+            GUI.Label(new Rect(area.x + 10f, area.y + 6f, area.width - 90f, 22f), chapter.Header, bold);
             GUI.Label(new Rect(area.xMax - 84f, area.y + 6f, 44f, 22f), $"{done}/{quests.Count}", hint);
             if (GUI.Button(new Rect(area.xMax - 36f, area.y + 5f, 28f, 24f), questsExpanded ? "▲" : "▼", button))
                 ToggleQuests();

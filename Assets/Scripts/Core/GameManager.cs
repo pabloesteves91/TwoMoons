@@ -114,6 +114,10 @@ namespace TwoMoons
         public event Action<int> ShelfStocked;
         public event Action ShopOpened;
         public event Action CustomerServed;
+        public event Action<int> PacksSold;
+        public event Action DecoPlaced;
+        /// <summary>Abends bei der Abrechnung, mit den Zahlen des Tages.</summary>
+        public event Action<DayStats> DayEnded;
 
         public bool InputLocked =>
             Phase == GamePhase.MainMenu || Phase == GamePhase.CharacterSelect || Phase == GamePhase.Intro || Phase == GamePhase.Summary ||
@@ -305,6 +309,7 @@ namespace TwoMoons
             else if (Phase == GamePhase.Closing && Customer.Active.Count == 0)
             {
                 Phase = GamePhase.Summary;
+                DayEnded?.Invoke(Today);
                 ComputerOpen = false;
                 PauseOpen = false;
                 BuildMode = false;
@@ -543,6 +548,7 @@ namespace TwoMoons
             ShowToast($"+{Money.Format(cents)}", 2f);
             SoundManager.Play(Sfx.Register);
             AddXp(cents / 100);
+            PacksSold?.Invoke(packs);
             CustomerServed?.Invoke();
         }
 
@@ -637,6 +643,8 @@ namespace TwoMoons
         public void NotifyDirtCleaned() => DirtCleaned?.Invoke();
 
         public void NotifyShelfPlaced() => ShelfPlaced?.Invoke();
+
+        public void NotifyDecoPlaced() => DecoPlaced?.Invoke();
 
         public void NotifyShelfStocked(int packs) => ShelfStocked?.Invoke(packs);
     }

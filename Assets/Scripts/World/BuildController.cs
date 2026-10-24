@@ -88,6 +88,7 @@ namespace TwoMoons
                     break;
                 default:
                     WorldFactory.SpawnDeco(Current, cell);
+                    game.NotifyDecoPlaced();
                     break;
             }
             game.AddToPlace(Current, -1);

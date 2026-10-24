@@ -8,7 +8,8 @@ namespace TwoMoons
     {
         public const int Max = 7;
 
-        static readonly int[] XpNeeded = { 0, 0, 150, 500, 1200, 2500, 4500, 7500 };
+        /// <summary>Grob auf die Kapitel-Länge abgestimmt: Kapitel 1–3 je ca. 1 Std., 4–7 je ca. 90 Min.</summary>
+        static readonly int[] XpNeeded = { 0, 0, 1200, 3500, 7000, 12000, 18000, 26000 };
 
         static readonly string[] Titles =
         {
