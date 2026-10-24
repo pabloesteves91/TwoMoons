@@ -37,6 +37,23 @@ namespace TwoMoons.EditorTools
                 "OK");
         }
 
+        /// <summary>
+        /// Menü „TwoMoons → Bilder und Sounds aktualisieren“: legt Platzhalter für neue Bilder/Sounds an und
+        /// trägt alles in die Bibliotheken ein. Eigene Bilder bleiben, die Szene wird nicht angefasst.
+        /// </summary>
+        [MenuItem("TwoMoons/Bilder und Sounds aktualisieren")]
+        public static void RefreshArt()
+        {
+            int createdSprites = CreateMissingSprites();
+            int createdSounds = CreateMissingSounds();
+            CreateOrUpdateLibrary();
+            CreateOrUpdateAudioLibrary();
+            EditorUtility.DisplayDialog("TwoMoons",
+                $"Fertig: {createdSprites} neue Platzhalter-Bilder, {createdSounds} neue Sounds.\n\n" +
+                $"Eigene Bilder: PNG mit genau demselben Namen in {SpriteFolder} ersetzen (z. B. shelf.png).",
+                "OK");
+        }
+
         /// <summary>Schreibt nur Bilder, die es noch nicht gibt – eigene Bilder werden nie überschrieben.</summary>
         static int CreateMissingSprites()
         {
