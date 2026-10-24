@@ -103,6 +103,9 @@ namespace TwoMoons
         /// <summary>Nach dem Intro: fragen, ob man das Tutorial möchte.</summary>
         public void Offer() => Asking = true;
 
+        /// <summary>Aus der Hilfe heraus noch einmal von vorn.</summary>
+        public void Restart() => Begin();
+
         void Begin()
         {
             Asking = false;

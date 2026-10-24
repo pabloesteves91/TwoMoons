@@ -7,7 +7,7 @@ namespace TwoMoons
     /// </summary>
     public class GameHUD : MonoBehaviour
     {
-        enum PauseScreen { Main, Settings, ConfirmMainMenu, ConfirmQuit, TestUnlock, TestUnlockSure }
+        enum PauseScreen { Main, Settings, ConfirmMainMenu, ConfirmQuit, TestUnlock, TestUnlockSure, Help }
 
         /// <summary>Test-Werkzeuge im Esc-Menü. Vor der Veröffentlichung auf false setzen.</summary>
         const bool ShowTestTools = true;
@@ -95,12 +95,13 @@ namespace TwoMoons
             switch (pauseScreen)
             {
                 case PauseScreen.Main:
-                    UiKit.BeginWindow(UiKit.Centered(width, 320f, ShowTestTools ? 430f : 340f));
+                    UiKit.BeginWindow(UiKit.Centered(width, 320f, ShowTestTools ? 480f : 390f));
                     GUILayout.Label("Pause", title);
                     GUILayout.Space(6f);
                     if (UiKit.BigButtonLayout("Weiter [Esc]")) Game.PauseOpen = false;
                     if (UiKit.BigButtonLayout("Speichern")) Game.SaveGame();
                     if (UiKit.BigButtonLayout("Einstellungen")) pauseScreen = PauseScreen.Settings;
+                    if (UiKit.BigButtonLayout("Hilfe")) pauseScreen = PauseScreen.Help;
                     if (UiKit.BigButtonLayout("Zum Hauptmenü")) pauseScreen = PauseScreen.ConfirmMainMenu;
                     if (UiKit.CanQuit && UiKit.BigButtonLayout("Spiel beenden")) pauseScreen = PauseScreen.ConfirmQuit;
                     if (ShowTestTools)
@@ -122,6 +123,10 @@ namespace TwoMoons
                 case PauseScreen.TestUnlockSure:
                     DrawTestConfirm(width, "Wirklich ganz sicher?",
                         "Der Spielstand bekommt das neue Level dauerhaft, sobald gespeichert wird.", "Ja, freischalten", PauseScreen.Main, unlock: true);
+                    break;
+
+                case PauseScreen.Help:
+                    if (HelpUI.Draw(width)) pauseScreen = PauseScreen.Main;
                     break;
 
                 case PauseScreen.Settings:
