@@ -7,7 +7,10 @@ namespace TwoMoons
     /// </summary>
     public class GameHUD : MonoBehaviour
     {
-        enum PauseScreen { Main, Settings, ConfirmMainMenu, ConfirmQuit }
+        enum PauseScreen { Main, Settings, ConfirmMainMenu, ConfirmQuit, TestUnlock, TestUnlockSure }
+
+        /// <summary>Test-Werkzeuge im Esc-Menü. Vor der Veröffentlichung auf false setzen.</summary>
+        const bool ShowTestTools = true;
 
         const float VirtualHeight = UiKit.VirtualHeight;
         const float Margin = UiKit.Margin;
@@ -66,7 +69,7 @@ namespace TwoMoons
             switch (pauseScreen)
             {
                 case PauseScreen.Main:
-                    UiKit.BeginWindow(UiKit.Centered(width, 300f, 300f));
+                    UiKit.BeginWindow(UiKit.Centered(width, 300f, ShowTestTools ? 350f : 300f));
                     GUILayout.Label("Pause", title);
                     GUILayout.Space(6f);
                     if (UiKit.BigButtonLayout("Weiter [Esc]")) Game.PauseOpen = false;
@@ -74,7 +77,25 @@ namespace TwoMoons
                     if (UiKit.BigButtonLayout("Einstellungen")) pauseScreen = PauseScreen.Settings;
                     if (UiKit.BigButtonLayout("Zum Hauptmenü")) pauseScreen = PauseScreen.ConfirmMainMenu;
                     if (UiKit.BigButtonLayout("Spiel beenden")) pauseScreen = PauseScreen.ConfirmQuit;
+                    if (ShowTestTools)
+                    {
+                        GUILayout.Space(6f);
+                        GUI.enabled = Game.StoreLevel < StoreLevels.Max;
+                        if (Button($"TEST: Level {Mathf.Min(Game.StoreLevel + 1, StoreLevels.Max)} freischalten", GUILayout.Height(30f)))
+                            pauseScreen = PauseScreen.TestUnlock;
+                        GUI.enabled = true;
+                    }
                     UiKit.EndWindow();
+                    break;
+
+                case PauseScreen.TestUnlock:
+                    DrawTestConfirm(width, $"Level {Game.StoreLevel + 1} freischalten?",
+                        "Nur zum Testen: Das überspringt XP und Kapitel-Aufgaben.", "Ja", PauseScreen.TestUnlockSure);
+                    break;
+
+                case PauseScreen.TestUnlockSure:
+                    DrawTestConfirm(width, "Wirklich ganz sicher?",
+                        "Der Spielstand bekommt das neue Level dauerhaft, sobald gespeichert wird.", "Ja, freischalten", PauseScreen.Main, unlock: true);
                     break;
 
                 case PauseScreen.Settings:
@@ -95,6 +116,28 @@ namespace TwoMoons
                     DrawLeaveConfirm(width, "Spiel beenden?", UiKit.QuitGame);
                     break;
             }
+        }
+
+        /// <summary>Doppelte Nachfrage für das Test-Freischalten.</summary>
+        void DrawTestConfirm(float width, string question, string detail, string confirm, PauseScreen next, bool unlock = false)
+        {
+            UiKit.BeginWindow(UiKit.Centered(width, 420f, 190f));
+            GUILayout.Label(question, title);
+            GUILayout.Label(detail, text);
+            GUILayout.FlexibleSpace();
+            GUILayout.BeginHorizontal();
+            if (Button("Abbrechen", GUILayout.Height(34f))) pauseScreen = PauseScreen.Main;
+            if (Button(confirm, GUILayout.Height(34f)))
+            {
+                pauseScreen = next;
+                if (unlock)
+                {
+                    Game.PauseOpen = false;
+                    Game.TestUnlockNextLevel();
+                }
+            }
+            GUILayout.EndHorizontal();
+            UiKit.EndWindow();
         }
 
         /// <summary>Vor dem Verlassen fragen, ob gespeichert werden soll.</summary>

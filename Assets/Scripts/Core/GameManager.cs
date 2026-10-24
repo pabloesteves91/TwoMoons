@@ -176,6 +176,14 @@ namespace TwoMoons
             SoundManager.Play(Sfx.Fanfare);
         }
 
+        /// <summary>Nur zum Testen: nächstes Level sofort, ohne XP und Kapitel-Aufgaben.</summary>
+        public void TestUnlockNextLevel()
+        {
+            if (StoreLevel >= StoreLevels.Max) return;
+            Xp = Mathf.Max(Xp, StoreLevels.XpFor(StoreLevel + 1));
+            ShowLevelUp();
+        }
+
         public void CloseLevelUp()
         {
             LevelUpShown = 0;
