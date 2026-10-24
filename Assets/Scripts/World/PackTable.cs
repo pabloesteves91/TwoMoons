@@ -10,7 +10,7 @@ namespace TwoMoons
             if (carried.Product.Category == ProductCategory.Promo) return "Turnier-Packs gehören zum Turnier-Counter";
             if (carried.Product.Category == ProductCategory.Supply) return "Filament gehört in den 3D-Drucker";
             if (carried.Product.Category != ProductCategory.Pack) return "Hier werden nur Boosterpacks geöffnet";
-            return $"{carried.Product.Name} öffnen ({carried.Amount} dabei)";
+            return $"{carried.Product.Name} öffnen ({carried.Amount} dabei · Einkaufspreis {Money.Format(carried.Product.BuyPrice)})";
         }
 
         public override bool CanInteract(PlayerController player) =>
