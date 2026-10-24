@@ -81,7 +81,9 @@ namespace TwoMoons
         {
             UiKit.DrawLogo(new Rect((width - 520f) / 2f, 20f, 520f, 190f));
 
-            var area = UiKit.Centered(width, 300f, 300f, 222f);
+            // Höhe passend zur Anzahl der Knöpfe.
+            int bigButtons = continueSlot >= 0 ? 4 : 3;
+            var area = UiKit.Centered(width, 300f, 34f + bigButtons * 46f + 42f, 222f);
             UiKit.BeginWindow(area);
 
             if (continueSlot >= 0 && UiKit.BigButtonLayout($"Fortsetzen ({slots[continueSlot].playerName})"))

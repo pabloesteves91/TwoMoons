@@ -95,13 +95,18 @@ namespace TwoMoons
             else GUI.Label(box, "TwoMoons", BigTitle);
         }
 
-        /// <summary>„logo.png“, sonst das erste Bild im Resources-Ordner – egal wie die Datei heißt.</summary>
+        /// <summary>
+        /// Ein Bild aus einem Resources-Ordner, dessen Name „logo“ oder „twomoons“ enthält
+        /// (z. B. logo.png oder twomoonspixel.png). Andere Bilder, etwa aus Unity-Paketen, werden ignoriert.
+        /// </summary>
         static Texture2D LoadLogoTexture()
         {
-            var logo = Resources.Load<Texture2D>("logo");
-            if (logo != null) return logo;
-            var all = Resources.LoadAll<Texture2D>("");
-            return all.Length > 0 ? all[0] : null;
+            foreach (var texture in Resources.LoadAll<Texture2D>(""))
+            {
+                string name = texture.name.ToLowerInvariant();
+                if (name.Contains("logo") || name.Contains("twomoons")) return texture;
+            }
+            return null;
         }
 
                 static Rect Fit(Rect box, float width, float height)
@@ -145,8 +150,9 @@ namespace TwoMoons
 
         static Texture2D Solid(Color color)
         {
-            var texture = new Texture2D(1, 1) { hideFlags = HideFlags.HideAndDontSave };
-            texture.SetPixel(0, 0, color);
+            // Ausdrücklich als sRGB-Textur anlegen, sonst wirken die Farben im Linear-Farbraum des Projekts zu hell.
+            var texture = new Texture2D(1, 1, TextureFormat.RGBA32, false, false) { hideFlags = HideFlags.HideAndDontSave };
+            texture.SetPixel(0, 0, texture.isDataSRGB ? color : color.linear);
             texture.Apply();
             return texture;
         }
