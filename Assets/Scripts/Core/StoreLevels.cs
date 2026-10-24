@@ -25,7 +25,7 @@ namespace TwoMoons
             new[] { "Spellforge-Booster und Spellforge-Karten", "Zubehör-Ständer: Hüllen, Ordner, Spielmatten", "Vitrine für Einzelkarten", "Deko: Teppich, Wanduhr, Lichterkette" },
             new[] { "Turniere jeden 2. Tag: Spieltisch, Turnier-Counter, Turnier-Tafel", "Gratis Turnier-Packs vom Hersteller", "Soul-Clash-Booster und -Karten", "Couch-&-TV-Ecke mit Konsole, Getränkekühlschrank", "Dein erster Mitarbeiter (Computer → Team)" },
             new[] { "3D-Drucker, Filament und Druck-Regal", "Ankauf: Kunden verkaufen dir Karten", "Deko: Neon-Schild" },
-            new[] { "Bald: Karten-Grading", "Bald: Ladenerweiterung (zweiter Raum)" },
+            new[] { "Grading-Station: Karten bewerten lassen (Note 1–10, bis ×5 Wert)", "Ladenerweiterung: zweiter Raum (Computer → Einrichtung)", "Deko: Sitzsack" },
             new[] { "Bald: Großturniere, Premium-Vitrine, Arcade-Automat" },
             new[] { "Bald: Stadtturnier und Trophäenwand" },
         };

@@ -20,6 +20,7 @@ namespace TwoMoons
 
         int pickingSlot = -1;
         Vector2 pickerScroll;
+        Vector2 showcaseScroll;
 
         static GameManager Game => GameManager.Instance;
 
@@ -194,6 +195,13 @@ namespace TwoMoons
                 {
                     CardUI.Draw(rect, card, true);
                     GUI.Label(new Rect(rect.x, rect.yMax - 20f, rect.width - 4f, 18f), $"×{collection.Count(card.Id)}", UiKit.Bold.WithAlignment(TextAnchor.LowerRight));
+                    int best = collection.BestGrade(card.Id);
+                    if (best > 0)
+                    {
+                        GUI.color = UiKit.Gold;
+                        GUI.Label(new Rect(rect.x + 3f, rect.y + 1f, rect.width, 18f), $"★{best}", UiKit.Bold);
+                        GUI.color = Color.white;
+                    }
                 }
                 else
                 {
@@ -224,6 +232,10 @@ namespace TwoMoons
                 GUI.color = Color.white;
                 GUILayout.Label($"Marktwert: {Money.Format(selected.Value)}", UiKit.Text);
                 GUILayout.Label($"Im Besitz: {collection.Count(selected.Id)}", UiKit.Text);
+                int best = collection.BestGrade(selected.Id);
+                if (best > 0) GUILayout.Label($"Beste Note: {best} ({Grading.Describe(best)})", UiKit.Text);
+                int slabs = Game.Slabs.FindAll(slab => slab.card == selected.Id).Count;
+                if (slabs > 0) GUILayout.Label($"Bewertet im Lager: {slabs}", UiKit.Text);
             }
             else
             {
@@ -250,48 +262,60 @@ namespace TwoMoons
                 return;
             }
 
-            var area = UiKit.Centered(width, 720f, 420f);
+            var area = UiKit.Centered(width, 720f, 440f);
             UiKit.BeginWindow(area);
-            GUILayout.Label("Vitrine", UiKit.Title);
-            GUILayout.Label("Sammler kaufen Einzelkarten. Über dem Marktwert kaufen weniger, darunter verkaufst du schneller.", UiKit.Hint);
+            GUILayout.Label(showcase.Premium ? "Premium-Vitrine" : "Vitrine", UiKit.Title);
+            GUILayout.Label(showcase.Premium
+                ? "Beleuchtet: Sammler zahlen hier bis zu 10 % über dem Wert. Bewertete Karten sind mehr wert."
+                : "Sammler kaufen Einzelkarten. Über dem Wert kaufen weniger, darunter verkaufst du schneller.", UiKit.Hint);
             GUILayout.Space(8f);
 
-            GUILayout.BeginHorizontal();
-            for (int slot = 0; slot < Showcase.SlotCount; slot++)
+            showcaseScroll = GUILayout.BeginScrollView(showcaseScroll);
+            const int columns = 4;
+            for (int slot = 0; slot < showcase.SlotCount; slot++)
             {
-                GUILayout.BeginVertical(UiKit.Panel, GUILayout.Width(160f), GUILayout.Height(300f));
-                var card = CardDatabase.Get(showcase.Cards[slot]);
-                var cardRect = GUILayoutUtility.GetRect(96f, 128f, GUILayout.Width(136f), GUILayout.Height(128f));
-                cardRect = new Rect(cardRect.center.x - 48f, cardRect.y, 96f, 128f);
-                if (card != null)
-                {
-                    CardUI.Draw(cardRect, card, true);
-                    GUILayout.Label(card.Name, UiKit.Bold);
-                    GUILayout.Label($"Wert {Money.Format(card.Value)}", UiKit.Text);
-
-                    // Preis per Schieberegler: 10 % bis 300 % vom Marktwert, in 10-Cent-Schritten.
-                    int price = showcase.Prices[slot];
-                    float euros = GUILayout.HorizontalSlider(price / 100f, card.Value * 0.1f / 100f, card.Value * 3f / 100f);
-                    int newPrice = Mathf.Max(10, Mathf.RoundToInt(euros * 10f) * 10);
-                    if (newPrice != price) showcase.Put(slot, card, newPrice);
-                    GUILayout.Label($"Preis: {Money.Format(showcase.Prices[slot])}", UiKit.Bold);
-
-                    if (UiKit.Button("Zurücknehmen", GUILayout.Height(28f)))
-                        Game.Collection.Add(showcase.Take(slot));
-                }
-                else
-                {
-                    GUI.Box(cardRect, "leer", UiKit.Hint);
-                    GUILayout.FlexibleSpace();
-                    if (UiKit.Button("Karte einlegen", GUILayout.Height(28f))) pickingSlot = slot;
-                }
-                GUILayout.EndVertical();
+                if (slot % columns == 0) GUILayout.BeginHorizontal();
+                DrawShowcaseSlot(showcase, slot);
+                if (slot % columns == columns - 1 || slot == showcase.SlotCount - 1) GUILayout.EndHorizontal();
             }
-            GUILayout.EndHorizontal();
+            GUILayout.EndScrollView();
 
             GUILayout.FlexibleSpace();
             if (UiKit.Button("Schließen [Esc]", GUILayout.Height(34f))) Game.OpenShowcase = null;
             UiKit.EndWindow();
+        }
+
+        void DrawShowcaseSlot(Showcase showcase, int slot)
+        {
+            GUILayout.BeginVertical(UiKit.Panel, GUILayout.Width(160f), GUILayout.Height(300f));
+            var card = CardDatabase.Get(showcase.Cards[slot]);
+            var cardRect = GUILayoutUtility.GetRect(96f, 128f, GUILayout.Width(136f), GUILayout.Height(128f));
+            cardRect = new Rect(cardRect.center.x - 48f, cardRect.y, 96f, 128f);
+            if (card != null)
+            {
+                int grade = showcase.Grades[slot];
+                if (grade > 0) CardUI.DrawSlab(cardRect, card, grade);
+                else CardUI.Draw(cardRect, card, true);
+                GUILayout.Label(card.Name, UiKit.Bold);
+                int value = showcase.ValueAt(slot);
+                GUILayout.Label(grade > 0 ? $"Note {grade} · Wert {Money.Format(value)}" : $"Wert {Money.Format(value)}", UiKit.Text);
+
+                // Preis per Schieberegler: 10 % bis 300 % vom Wert, in 10-Cent-Schritten.
+                int price = showcase.Prices[slot];
+                float euros = GUILayout.HorizontalSlider(price / 100f, value * 0.1f / 100f, value * 3f / 100f);
+                int newPrice = Mathf.Max(10, Mathf.RoundToInt(euros * 10f) * 10);
+                if (newPrice != price) showcase.Put(slot, card, newPrice, grade);
+                GUILayout.Label($"Preis: {Money.Format(showcase.Prices[slot])}", UiKit.Bold);
+
+                if (UiKit.Button("Zurücknehmen", GUILayout.Height(28f))) showcase.ReturnToOwner(slot);
+            }
+            else
+            {
+                GUI.Box(cardRect, "leer", UiKit.Hint);
+                GUILayout.FlexibleSpace();
+                if (UiKit.Button("Karte einlegen", GUILayout.Height(28f))) pickingSlot = slot;
+            }
+            GUILayout.EndVertical();
         }
 
         void DrawCardPicker(float width, Showcase showcase)
@@ -304,7 +328,9 @@ namespace TwoMoons
             foreach (var card in CardDatabase.All)
                 if (Game.Collection.Count(card.Id) > 0) owned.Add(card);
             owned.Sort((a, b) => b.Rarity != a.Rarity ? b.Rarity.CompareTo(a.Rarity) : a.Number.CompareTo(b.Number));
-            if (owned.Count == 0)
+            var slabs = new List<Slab>(Game.Slabs);
+            slabs.Sort((a, b) => b.Value.CompareTo(a.Value));
+            if (owned.Count == 0 && slabs.Count == 0)
             {
                 GUILayout.Label("Du hast noch keine Karten. Öffne Packs am Pack-Tisch hinter der Theke.", UiKit.Text);
             }
@@ -313,6 +339,26 @@ namespace TwoMoons
                 pickerScroll = GUILayout.BeginScrollView(pickerScroll);
                 const int columns = 7;
                 float cardWidth = 72f, cardHeight = 96f, gap = 10f;
+                if (slabs.Count > 0)
+                {
+                    GUILayout.Label("Bewertete Karten", UiKit.Bold);
+                    var slabGrid = GUILayoutUtility.GetRect(columns * (cardWidth + gap), Mathf.Ceil(slabs.Count / (float)columns) * (cardHeight + gap + 16f));
+                    for (int i = 0; i < slabs.Count; i++)
+                    {
+                        var slab = slabs[i];
+                        var rect = new Rect(slabGrid.x + (i % columns) * (cardWidth + gap), slabGrid.y + (i / columns) * (cardHeight + gap + 16f), cardWidth, cardHeight);
+                        CardUI.DrawSlab(rect, slab.Card, slab.grade);
+                        GUI.Label(new Rect(rect.x, rect.yMax, rect.width, 16f), Money.Format(slab.Value), UiKit.Hint);
+                        if (GUI.Button(rect, GUIContent.none, GUIStyle.none))
+                        {
+                            Game.Slabs.Remove(slab);
+                            showcase.Put(pickingSlot, slab.Card, slab.Value, slab.grade);
+                            pickingSlot = -1;
+                            SoundManager.Play(Sfx.Stock);
+                        }
+                    }
+                    GUILayout.Label("Karten aus der Sammlung", UiKit.Bold);
+                }
                 var grid = GUILayoutUtility.GetRect(columns * (cardWidth + gap), Mathf.Ceil(owned.Count / (float)columns) * (cardHeight + gap + 16f));
                 for (int i = 0; i < owned.Count; i++)
                 {

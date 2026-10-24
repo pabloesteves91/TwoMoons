@@ -115,20 +115,22 @@ namespace TwoMoons
             return shelf;
         }
 
-        public static Showcase SpawnShowcase(Vector2Int cell)
+        public static Showcase SpawnShowcase(Vector2Int cell, bool premium = false)
         {
-            var go = CreateSolid("Vitrine", "showcase", cell, null);
-            var icons = new SpriteRenderer[Showcase.SlotCount];
+            var go = CreateSolid(premium ? "Premium-Vitrine" : "Vitrine", premium ? "premiumShowcase" : "showcase", cell, null);
+            var icons = new SpriteRenderer[premium ? Showcase.PremiumSlots : Showcase.NormalSlots];
+            int columns = premium ? 4 : 2;
+            float step = premium ? 0.22f : 0.44f;
             for (int i = 0; i < icons.Length; i++)
             {
-                var position = ShopGrid.CellToWorld(cell) + new Vector3(-0.22f + (i % 2) * 0.44f, 0.18f - (i / 2) * 0.38f, 0f);
-                icons[i] = CreateSprite("Karte", "cardIcon", position, 1 + i, go.transform);
-                icons[i].transform.localScale = Vector3.one * 0.4f;
+                var offset = new Vector3(-step * (columns - 1) / 2f + (i % columns) * step, 0.18f - (i / columns) * 0.38f, 0f);
+                icons[i] = CreateSprite("Karte", "cardIcon", ShopGrid.CellToWorld(cell) + offset, 1 + i, go.transform);
+                icons[i].transform.localScale = Vector3.one * (premium ? 0.3f : 0.4f);
             }
             go.GetComponent<YSort>().Collect();
 
             var showcase = go.AddComponent<Showcase>();
-            showcase.Init(cell, icons);
+            showcase.Init(cell, icons, premium);
             Game.Showcases.Add(showcase);
             return showcase;
         }
@@ -155,6 +157,7 @@ namespace TwoMoons
             if (type == Furniture.GameTable) go.AddComponent<GameTable>().Init(cell);
             if (type == Furniture.PrizeCounter) go.AddComponent<PrizeCounter>().Init(cell);
             if (type == Furniture.Printer3D) go.AddComponent<Printer3D>().Init(cell);
+            if (type == Furniture.GradingStation) go.AddComponent<GradingStation>().Init(cell);
             Game.Decos.Add(deco);
             return deco;
         }

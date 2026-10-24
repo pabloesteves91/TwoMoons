@@ -245,7 +245,7 @@ Mit jedem Level-Aufstieg gibt es **1 Fähigkeitspunkt** (insgesamt 6). Man wähl
 | **B** ✅ | Kapitel 2 (Level 2): Spellforge, Zubehör-Ständer, erste Papa-Szene | Level 1 → 2 spielbar |
 | **C** ✅ | Kapitel 3 (Level 3): Spieltische, Turnier-Counter, Hersteller-Packs, Turnierablauf, Siegerehrung, Soul Clash, Couch-&-TV-Ecke, Getränke, 1 Mitarbeiter | Turniere und Couch-Ecke spielbar |
 | **D** ✅ | Kapitel 4 (Level 4): 3D-Drucker, Filament, Druck-Regal, Ankauf | Drucken & Handeln |
-| **E** | Kapitel 5 (Level 5): Karten-Grading, Ladenerweiterung | Laden wird groß |
+| **E** ✅ | Kapitel 5 (Level 5): Karten-Grading, Ladenerweiterung | Laden wird groß |
 | **F** | Kapitel 6–7: Großturniere, Premium-Deko, Finale mit Papa und der Two-Moons-Karte | Story fertig |
 | **G** | Fähigkeiten-Menü, Feinschliff, Balance | Rund und fertig |
 

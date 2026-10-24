@@ -353,6 +353,7 @@ namespace TwoMoons
             GUILayout.Label(options == Catalog.Orders
                 ? "Lieferung: sofort an den Eingang"
                 : "Lieferung sofort · mit [B] aufstellen · Deko macht den Laden gemütlicher", hint);
+            if (options == Catalog.Furnishings) DrawExtension();
             foreach (var option in options)
             {
                 bool locked = option.MinLevel > Game.StoreLevel;
@@ -377,6 +378,34 @@ namespace TwoMoons
                 GUILayout.EndHorizontal();
                 GUILayout.Space(8f);
             }
+        }
+
+        /// <summary>Ladenerweiterung: kein Möbelstück, sondern ein Umbau – deshalb ein eigener Eintrag.</summary>
+        void DrawExtension()
+        {
+            bool locked = Game.StoreLevel < GameManager.ExtensionLevel;
+            GUILayout.BeginHorizontal();
+            GUI.color = locked ? UiKit.Dimmed : Color.white;
+            GUILayout.BeginVertical();
+            GUILayout.Label($"Ladenerweiterung – {Money.Format(GameManager.ExtensionCost)}", bold);
+            GUILayout.Label(ShopGrid.Expanded
+                ? "Der zweite Raum ist gebaut."
+                : "Zweiter Raum rechts (+10 Spalten) · Umbau nur morgens vor Ladenöffnung", text);
+            GUILayout.EndVertical();
+            GUI.color = Color.white;
+            GUILayout.FlexibleSpace();
+            if (ShopGrid.Expanded)
+                GUILayout.Label("gebaut", hint, GUILayout.Width(90f), GUILayout.Height(36f));
+            else if (locked)
+                GUILayout.Label($"ab Level {GameManager.ExtensionLevel}", hint, GUILayout.Width(90f), GUILayout.Height(36f));
+            else
+            {
+                GUI.enabled = Game.MoneyCents >= GameManager.ExtensionCost && Game.Phase == GamePhase.Preparation;
+                if (Button("Bauen", GUILayout.Width(90f), GUILayout.Height(36f))) Game.BuildExtension();
+                GUI.enabled = true;
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.Space(8f);
         }
 
         void DrawTeam()

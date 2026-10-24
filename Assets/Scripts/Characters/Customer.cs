@@ -40,6 +40,7 @@ namespace TwoMoons
         Showcase showcase;
         int showcaseSlot = -1;
         CardDef card;
+        int cardGrade;
 
         SpriteRenderer spriteRenderer;
         SpriteRenderer moodIcon;
@@ -96,8 +97,10 @@ namespace TwoMoons
                 return;
             }
 
+            // Bewertete Karten locken mehr Sammler an.
             var showcases = Game.Showcases.FindAll(s => s.HasCards);
-            if (showcases.Count > 0 && Random.value < CollectorChance) PickShowcase(showcases);
+            float collectorChance = CollectorChance + (showcases.Exists(s => s.HasGradedCards) ? 0.1f : 0f);
+            if (showcases.Count > 0 && Random.value < collectorChance) PickShowcase(showcases);
             else PickShelf();
         }
 
@@ -241,17 +244,22 @@ namespace TwoMoons
         void BuyFromShowcase()
         {
             var filled = new List<int>();
-            for (int i = 0; i < Showcase.SlotCount; i++) if (showcase.Cards[i] >= 0) filled.Add(i);
+            for (int i = 0; i < showcase.SlotCount; i++) if (showcase.Cards[i] >= 0) filled.Add(i);
             if (filled.Count == 0)
             {
                 Leave(false, "Ein Sammler ist gegangen: Die Vitrine war leer.");
                 return;
             }
 
+            // Sammler greifen bevorzugt zu bewerteten Karten.
+            var graded = filled.FindAll(i => showcase.Grades[i] > 0);
+            if (graded.Count > 0 && Random.value < 0.7f) filled = graded;
+
             int slot = filled[Random.Range(0, filled.Count)];
             var wanted = CardDatabase.Get(showcase.Cards[slot]);
             int price = showcase.Prices[slot];
-            float ratio = price / (float)wanted.Value;
+            float fairValue = showcase.ValueAt(slot) * (showcase.Premium ? Showcase.PremiumBonus : 1f);
+            float ratio = price / fairValue;
             if (Random.value < Mathf.Clamp01((ratio - 1f) / PainRange))
             {
                 Leave(false, $"Ein Sammler fand {wanted.Name} zu teuer ({Money.Format(price)}).");
@@ -260,6 +268,7 @@ namespace TwoMoons
 
             bargain = ratio <= BargainRatio;
             showcaseSlot = slot;
+            cardGrade = showcase.Grades[slot];
             card = CardDatabase.Get(showcase.Take(slot));
             unitPrice = price;
             JoinQueue();
@@ -393,7 +402,7 @@ namespace TwoMoons
                 return;
             }
 
-            if (card != null) Game.RegisterCardSale(card, unitPrice);
+            if (card != null) Game.RegisterCardSale(card, unitPrice, cardGrade);
             else Game.RegisterSale(Total, itemCount, product);
             itemCount = 0;
             card = null;
@@ -445,7 +454,8 @@ namespace TwoMoons
         void ReturnCard()
         {
             if (card == null) return;
-            if (showcase != null && showcase.Cards[showcaseSlot] < 0) showcase.Put(showcaseSlot, card, unitPrice);
+            if (showcase != null && showcase.Cards[showcaseSlot] < 0) showcase.Put(showcaseSlot, card, unitPrice, cardGrade);
+            else if (cardGrade > 0) Game.AddSlab(new Slab { card = card.Id, grade = cardGrade }, false);
             else Game.Collection.Add(card.Id);
             card = null;
         }

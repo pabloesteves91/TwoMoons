@@ -157,6 +157,8 @@ namespace TwoMoons
             Furnishing(Furniture.Printer3D, "Druckt Figuren aus Filament", 30000, 4),
             Furnishing(Furniture.PrintShelf, "Regal für 3D-Drucke", 7000, 4),
             Furnishing(Furniture.NeonSign, "Für die Wand, leuchtet · Gemütlichkeit +5", 9000, 4),
+            Furnishing(Furniture.GradingStation, "Karten bewerten und versiegeln (5 € pro Karte)", 40000, 5),
+            Furnishing(Furniture.Lounge, "Gemütlich für die Spielecke · Gemütlichkeit +3", 6000, 5),
         };
 
         /// <summary>Ein Karton Ware zum Großhandelspreis.</summary>

@@ -47,7 +47,17 @@ namespace TwoMoons
                 Advance("packOpened", 1);
                 if (ultras > 0) Advance("ultraPulled", ultras);
             };
-            game.CardSold += () => Advance("cardSold", 1);
+            game.CardSold += grade =>
+            {
+                Advance("cardSold", 1);
+                if (grade > 0) Advance("slabSold", 1);
+            };
+            game.Graded += grade =>
+            {
+                Advance("graded", 1);
+                if (grade >= 9) Advance("topGrade", 1);
+            };
+            game.ShopExpanded += () => Advance("expanded", 1);
             game.TournamentHeld += () => Advance("tournament", 1);
             game.EmployeeHired += () => Advance("hired", 1);
             game.Printed += () => Advance("printed", 1);

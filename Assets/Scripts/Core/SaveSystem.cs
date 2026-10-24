@@ -42,6 +42,16 @@ namespace TwoMoons
         public int x, y;
         public int[] cards;
         public int[] prices;
+        public int[] grades;
+        public bool premium;
+    }
+
+    [Serializable]
+    public class SavedGrader
+    {
+        public int x, y;
+        public int card = -1;
+        public float progress;
     }
 
     [Serializable]
@@ -126,6 +136,12 @@ namespace TwoMoons
         /// <summary>Rolle des Mitarbeiters (Employee.Role), -1 = keiner.</summary>
         public int employee = -1;
         public List<SavedPrinter> printers = new List<SavedPrinter>();
+        /// <summary>Zweiter Raum gebaut (Level 5).</summary>
+        public bool expanded;
+        public List<Slab> slabs = new List<Slab>();
+        /// <summary>Beste Note pro Karte (count = Note), fürs Sammelbuch.</summary>
+        public List<SavedCard> bestGrades = new List<SavedCard>();
+        public List<SavedGrader> graders = new List<SavedGrader>();
         public long savedAtTicks;
 
         public DateTime SavedAt => new DateTime(savedAtTicks);

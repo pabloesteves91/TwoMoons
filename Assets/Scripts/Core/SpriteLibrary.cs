@@ -11,6 +11,8 @@ namespace TwoMoons
     {
         [Header("Laden")]
         public Sprite floor;
+        [Tooltip("Boden im zweiten Raum (Ladenerweiterung)")]
+        public Sprite floor2;
         public Sprite wall;
         public Sprite street;
         public Sprite door;
@@ -36,6 +38,8 @@ namespace TwoMoons
         public Sprite printer3d;
         public Sprite printShelf;
         public Sprite neonSign;
+        public Sprite gradingStation;
+        public Sprite beanBag;
 
         [Header("Deko")]
         public Sprite plant;
@@ -62,6 +66,7 @@ namespace TwoMoons
         public Sprite binder;
         public Sprite playmat;
         public Sprite cardIcon;
+        public Sprite slabIcon;
 
         [Header("Kunden-Laune")]
         public Sprite moodHappy;
@@ -82,7 +87,7 @@ namespace TwoMoons
             "floor", "wall", "street", "door", "sign", "signBoard", "counter", "register", "computer", "shelf", "box", "package", "dirt",
             "packTable", "showcase",
             "plant", "poster", "rug", "wallClock", "fairyLights",
-            "packMonstera", "packSpellforge", "sleeves", "binder", "playmat", "accessoryStand", "gameTable", "prizeCounter", "tournamentBoard", "fridge", "couch", "tv", "console", "packSoulClash", "soda", "energyDrink", "employee", "printer3d", "printShelf", "neonSign", "filament", "printSmall", "printMedium", "printLarge", "cardIcon",
+            "packMonstera", "packSpellforge", "sleeves", "binder", "playmat", "accessoryStand", "gameTable", "prizeCounter", "tournamentBoard", "fridge", "couch", "tv", "console", "packSoulClash", "soda", "energyDrink", "employee", "printer3d", "printShelf", "neonSign", "filament", "printSmall", "printMedium", "printLarge", "cardIcon", "gradingStation", "beanBag", "slabIcon", "floor2",
             "moodHappy", "moodNeutral", "moodAngry",
             "player1", "player2", "player3", "customer1", "customer2", "customer3",
         };

@@ -29,26 +29,36 @@ namespace TwoMoons
             SoundManager.Init(sounds);
             SetUpCamera();
             gameObject.AddComponent<SoundManager>();
+            ShopGrid.Expanded = false;
             Build(game => game.InitMainMenu());
         }
 
-        public static void ShowMainMenu() => instance.StartCoroutine(instance.Rebuild(game => game.InitMainMenu()));
+        public static void ShowMainMenu() => instance.StartCoroutine(instance.Rebuild(false, game => game.InitMainMenu()));
 
-        public static void NewGame(int slot) => instance.StartCoroutine(instance.Rebuild(game => game.InitNewGame(slot)));
+        public static void NewGame(int slot) => instance.StartCoroutine(instance.Rebuild(false, game => game.InitNewGame(slot)));
 
         public static void LoadGame(int slot)
         {
             var data = SaveSystem.Load(slot);
             if (data == null) return;
-            instance.StartCoroutine(instance.Rebuild(game => game.InitFromSave(slot, data)));
+            Reload(slot, data);
         }
 
+        /// <summary>Welt aus Spielstand-Daten neu aufbauen (Laden, oder nach dem Umbau des Ladens).</summary>
+        public static void Reload(int slot, SaveData data, System.Action<GameManager> then = null) =>
+            instance.StartCoroutine(instance.Rebuild(data.expanded, game =>
+            {
+                game.InitFromSave(slot, data);
+                then?.Invoke(game);
+            }));
+
         /// <summary>Alte Welt abbauen, einen Frame warten (damit alles wirklich weg ist), neue aufbauen.</summary>
-        IEnumerator Rebuild(System.Action<GameManager> init)
+        IEnumerator Rebuild(bool expanded, System.Action<GameManager> init)
         {
             Time.timeScale = 1f;
             if (world != null) Destroy(world);
             yield return null;
+            ShopGrid.Expanded = expanded;
             Build(init);
         }
 
@@ -120,7 +130,7 @@ namespace TwoMoons
             {
                 var cell = new Vector2Int(x, y);
                 var position = ShopGrid.CellToWorld(cell);
-                bool wall = x == 0 || x == ShopGrid.Width - 1 || y == 1 || y == ShopGrid.Height - 1;
+                bool wall = ShopGrid.IsWall(cell);
 
                 if (y == 0)
                 {
@@ -140,7 +150,9 @@ namespace TwoMoons
                 }
                 else
                 {
-                    WorldFactory.CreateSprite("Boden", "floor", position, WorldFactory.FloorOrder, root);
+                    // Der neue Raum bekommt einen eigenen Boden.
+                    string floor = x >= ShopGrid.BaseWidth - 1 ? "floor2" : "floor";
+                    WorldFactory.CreateSprite("Boden", floor, position, WorldFactory.FloorOrder, root);
                 }
             }
 

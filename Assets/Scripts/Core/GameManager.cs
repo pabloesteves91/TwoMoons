@@ -61,6 +61,8 @@ namespace TwoMoons
         /// <summary>Noch nicht ausgepacktes Möbel-Paket am Eingang (höchstens eins).</summary>
         public FurniturePackage Package;
         public readonly Collection Collection = new Collection();
+        /// <summary>Bewertete Karten, die gerade nicht in einer Vitrine liegen.</summary>
+        public readonly List<Slab> Slabs = new List<Slab>();
 
         public GamePhase Phase { get; private set; } = GamePhase.MainMenu;
         /// <summary>Speicherplatz des laufenden Spiels (0–2).</summary>
@@ -102,6 +104,10 @@ namespace TwoMoons
         public Printer3D OpenPrinter;
         /// <summary>Ankauf-Angebot eines Verkäufers an der Kasse.</summary>
         public Customer SellerOffer;
+        /// <summary>Kartenwahl an der Grading-Station.</summary>
+        public GradingStation OpenGrading;
+        /// <summary>Frisch bewertete Karte, deren Note gerade gezeigt wird.</summary>
+        public Slab GradeReveal;
 
         /// <summary>Der Mitarbeiter, wenn einer eingestellt ist.</summary>
         public Employee Staff { get; private set; }
@@ -133,7 +139,11 @@ namespace TwoMoons
         public event Action<Product, int> ProductSold;
         /// <summary>Ein Pack wurde geöffnet; Wert = Anzahl gezogener Ultra-Seltener.</summary>
         public event Action<int> PackOpened;
-        public event Action CardSold;
+        /// <summary>Karte aus der Vitrine verkauft; Wert = Note (0 = nicht bewertet).</summary>
+        public event Action<int> CardSold;
+        /// <summary>Eine Karte wurde bewertet; Wert = Note.</summary>
+        public event Action<int> Graded;
+        public event Action ShopExpanded;
         public event Action TournamentHeld;
         public event Action EmployeeHired;
         public event Action Printed;
@@ -146,12 +156,13 @@ namespace TwoMoons
             Phase == GamePhase.MainMenu || Phase == GamePhase.CharacterSelect || Phase == GamePhase.Intro || Phase == GamePhase.Summary ||
             DialogLines != null || ComputerOpen || PauseOpen || BuildMode ||
             CollectionOpen || OpenShowcase != null || OpenedPack != null || LevelUpShown > 0 || CutscenePlaying || PrizeCounterOpen ||
-            OpenPrinter != null || SellerOffer != null;
+            OpenPrinter != null || SellerOffer != null || OpenGrading != null || GradeReveal != null;
 
         /// <summary>Menüs, die das Spiel anhalten.</summary>
         bool Paused =>
             DialogLines != null || ComputerOpen || PauseOpen || CollectionOpen || OpenShowcase != null || OpenedPack != null ||
-            LevelUpShown > 0 || CutscenePlaying || PrizeCounterOpen || OpenPrinter != null || SellerOffer != null;
+            LevelUpShown > 0 || CutscenePlaying || PrizeCounterOpen || OpenPrinter != null || SellerOffer != null ||
+            OpenGrading != null || GradeReveal != null;
 
         public int ToPlace(Furniture furniture) => toPlace.TryGetValue(furniture, out int count) ? count : 0;
 
@@ -310,7 +321,7 @@ namespace TwoMoons
             {
                 // Das Pack-Menü kümmert sich selbst um Tasten.
             }
-            else if (CollectionOpen || OpenShowcase != null || PrizeCounterOpen || OpenPrinter != null)
+            else if (CollectionOpen || OpenShowcase != null || PrizeCounterOpen || OpenPrinter != null || OpenGrading != null || GradeReveal != null)
             {
                 if (GameInput.ConsumeCancel())
                 {
@@ -318,6 +329,8 @@ namespace TwoMoons
                     OpenShowcase = null;
                     PrizeCounterOpen = false;
                     OpenPrinter = null;
+                    OpenGrading = null;
+                    GradeReveal = null;
                 }
             }
             else if (ComputerOpen)
@@ -412,13 +425,15 @@ namespace TwoMoons
             foreach (var cell in data.dirt) WorldFactory.SpawnDirt(new Vector2Int(cell.x, cell.y));
             foreach (var saved in data.showcases)
             {
-                var showcase = WorldFactory.SpawnShowcase(new Vector2Int(saved.x, saved.y));
-                for (int i = 0; i < Showcase.SlotCount && i < saved.cards.Length; i++)
+                var showcase = WorldFactory.SpawnShowcase(new Vector2Int(saved.x, saved.y), saved.premium);
+                for (int i = 0; i < showcase.SlotCount && i < saved.cards.Length; i++)
                 {
                     var card = CardDatabase.Get(saved.cards[i]);
-                    if (card != null) showcase.Put(i, card, saved.prices[i]);
+                    int grade = saved.grades != null && i < saved.grades.Length ? saved.grades[i] : 0;
+                    if (card != null) showcase.Put(i, card, saved.prices[i], grade);
                 }
             }
+            if (data.slabs != null) Slabs.AddRange(data.slabs.FindAll(slab => slab.Card != null));
             // Passt der gespeicherte Kapitel-Fortschritt nicht zum Level (ältere Spielstände), beginnt das Kapitel neu.
             ChapterProgress.Restore(StoreLevel, data.chapter == StoreLevel ? data.questProgress : null);
             if (data.seenStories != null) foreach (var id in data.seenStories) seenStories.Add(id);
@@ -427,6 +442,11 @@ namespace TwoMoons
             {
                 var deco = Decos.Find(d => d.Type == Furniture.Printer3D && d.Cell == new Vector2Int(saved.x, saved.y));
                 if (deco != null) deco.GetComponent<Printer3D>().Restore(saved.filament, saved.model, saved.progress, saved.jammed);
+            }
+            foreach (var saved in data.graders)
+            {
+                var deco = Decos.Find(d => d.Type == Furniture.GradingStation && d.Cell == new Vector2Int(saved.x, saved.y));
+                if (deco != null) deco.GetComponent<GradingStation>().Restore(saved.card, saved.progress);
             }
             if (data.employee >= 0) Staff = WorldFactory.SpawnEmployee(ShopGrid.StaffCells[0], (Employee.Role)data.employee);
 
@@ -487,6 +507,14 @@ namespace TwoMoons
                     model = printer.ModelIndex, progress = printer.Progress, jammed = printer.Jammed,
                 });
             }
+            foreach (var deco in Decos)
+            {
+                if (deco.Type != Furniture.GradingStation) continue;
+                var grader = deco.GetComponent<GradingStation>();
+                data.graders.Add(new SavedGrader { x = deco.Cell.x, y = deco.Cell.y, card = grader.CardId, progress = grader.Progress });
+            }
+            data.expanded = ShopGrid.Expanded;
+            data.slabs.AddRange(Slabs);
             data.employee = Staff != null ? (int)Staff.Job : -1;
             foreach (var pair in toPlace)
                 if (pair.Value > 0) data.toPlace.Add(new SavedCount { type = (int)pair.Key, count = pair.Value });
@@ -506,6 +534,8 @@ namespace TwoMoons
                     y = showcase.Cell.y,
                     cards = (int[])showcase.Cards.Clone(),
                     prices = (int[])showcase.Prices.Clone(),
+                    grades = (int[])showcase.Grades.Clone(),
+                    premium = showcase.Premium,
                 });
             }
             foreach (var dirt in DirtSpot.Existing)
@@ -648,19 +678,75 @@ namespace TwoMoons
         public void SetPrice(Product product, int cents) =>
             prices[product.Id] = Mathf.Clamp(cents, MinPrice, MaxPrice);
 
-        /// <summary>Schnäppchen freuen die Kunden besonders.</summary>
-        public void RegisterCardSale(CardDef card, int cents)
+        /// <summary>Einzelkarte aus der Vitrine verkauft (<paramref name="grade"/> 0 = nicht bewertet).</summary>
+        public void RegisterCardSale(CardDef card, int cents, int grade)
         {
             if (IsDemo) return;
             MoneyCents += cents;
             Today.Income += cents;
             Today.CardsSold++;
             Today.CustomersServed++;
-            ShowToast($"{card.Name} verkauft: +{Money.Format(cents)}", 3f);
+            ShowToast($"{card.Name}{(grade > 0 ? $" (Note {grade})" : "")} verkauft: +{Money.Format(cents)}", 3f);
             SoundManager.Play(Sfx.Register);
             AddXp(cents / 100);
-            CardSold?.Invoke();
+            CardSold?.Invoke(grade);
             CustomerServed?.Invoke();
+        }
+
+        /// <summary>Geld ausgeben (z. B. fürs Grading). False, wenn es nicht reicht.</summary>
+        public bool Spend(int cents)
+        {
+            if (MoneyCents < cents)
+            {
+                ShowToast("Dafür reicht das Geld nicht.");
+                SoundManager.Play(Sfx.Error);
+                return false;
+            }
+            MoneyCents -= cents;
+            Today.Expenses += cents;
+            return true;
+        }
+
+        /// <summary>Bewertete Karte aufnehmen. Frisch aus der Grading-Station mit großer Enthüllung.</summary>
+        public void AddSlab(Slab slab, bool fresh)
+        {
+            Slabs.Add(slab);
+            if (!fresh) return;
+            Collection.RecordGrade(slab.card, slab.grade);
+            GradeReveal = slab;
+            if (slab.grade >= 10) SoundManager.Play(slab.Card.Rarity == Rarity.Ultra ? Sfx.Fanfare : Sfx.ShinyCard);
+            else SoundManager.Play(slab.grade >= 8 ? Sfx.RareCard : Sfx.CardFlip);
+            if (slab.grade >= 10 && slab.Card.Rarity == Rarity.Ultra) SoundManager.Play(Sfx.ShinyCard);
+            Graded?.Invoke(slab.grade);
+        }
+
+        public const int ExtensionCost = 100000;
+        public const int ExtensionLevel = 5;
+
+        /// <summary>
+        /// Ladenerweiterung: zweiter Raum rechts. Der Laden wird gespeichert und mit dem neuen Raum neu aufgebaut,
+        /// deshalb nur morgens, solange noch keine Kunden da sind.
+        /// </summary>
+        public void BuildExtension()
+        {
+            if (ShopGrid.Expanded || StoreLevel < ExtensionLevel || Phase != GamePhase.Preparation || !Spend(ExtensionCost)) return;
+            ComputerOpen = false;
+            var data = CreateSaveData();
+            data.expanded = true;
+            GameBootstrap.Reload(CurrentSlot, data, game => game.FinishExtension());
+        }
+
+        void FinishExtension()
+        {
+            Toasts.Clear();
+            SoundManager.Play(Sfx.Fanfare);
+            ShopExpanded?.Invoke();
+            SaveGame();
+            ShowDialog(new[]
+            {
+                "Die Handwerker sind fertig: Rechts ist die Wand durchbrochen – TwoMoons hat jetzt einen zweiten Raum!",
+                $"{PlayerName}: So viel Platz! Hier passen neue Regale, Vitrinen und eine richtige Spielecke rein.",
+            });
         }
 
         /// <summary>Ein Pack öffnen: Karten ziehen und sofort in die Sammlung legen.</summary>

@@ -6,19 +6,26 @@ namespace TwoMoons
     /// <summary>
     /// Das Raster des Ladens. Ein Feld = 1 Unity-Einheit = 16 Pixel.
     /// Innenraum: x 1–20, y 2–9 (20×8 Felder, passend zum Breitbild). y = 0 ist die Straße, y = 1 die untere Wand mit der Tür.
+    /// Mit der Ladenerweiterung (Level 5) kommt rechts ein zweiter Raum dazu: x 22–30, durch einen Durchgang verbunden.
     /// </summary>
     public class ShopGrid : MonoBehaviour
     {
-        public const int Width = 22;
+        public const int BaseWidth = 22;
+        /// <summary>So viele Spalten bringt die Ladenerweiterung.</summary>
+        public const int ExtraWidth = 10;
         public const int Height = 11;
 
-        public static readonly Vector2Int SpawnCell = new Vector2Int(Width / 2, 0);
-        public static readonly Vector2Int DoorCell = new Vector2Int(Width / 2, 1);
-        public static readonly Vector2Int SignCell = new Vector2Int(Width / 2 - 1, 1);
+        /// <summary>Zweiter Raum gebaut? Wird vor dem Aufbau der Welt gesetzt.</summary>
+        public static bool Expanded;
+        public static int Width => Expanded ? BaseWidth + ExtraWidth : BaseWidth;
+
+        public static readonly Vector2Int SpawnCell = new Vector2Int(BaseWidth / 2, 0);
+        public static readonly Vector2Int DoorCell = new Vector2Int(BaseWidth / 2, 1);
+        public static readonly Vector2Int SignCell = new Vector2Int(BaseWidth / 2 - 1, 1);
         public static readonly Vector2Int RegisterCell = new Vector2Int(3, 7);
         public static readonly Vector2Int ComputerCell = new Vector2Int(1, 9);
         public static readonly Vector2Int PackTableCell = new Vector2Int(4, 9);
-        public static readonly Vector2Int PlayerStartCell = new Vector2Int(Width / 2, 4);
+        public static readonly Vector2Int PlayerStartCell = new Vector2Int(BaseWidth / 2, 4);
 
         public static readonly Vector2Int[] CounterCells =
             { new Vector2Int(1, 7), new Vector2Int(2, 7), new Vector2Int(3, 7), new Vector2Int(4, 7) };
@@ -37,17 +44,26 @@ namespace TwoMoons
         /// <summary>Felder, die immer erreichbar bleiben müssen (hinter der Kasse, am Computer).</summary>
         public static readonly Vector2Int[] StaffCells = { new Vector2Int(3, 8), new Vector2Int(2, 9) };
 
-        readonly bool[,] blocked = new bool[Width, Height];
+        bool[,] blocked;
 
         public void Init()
         {
+            blocked = new bool[Width, Height];
             for (int x = 0; x < Width; x++)
             for (int y = 0; y < Height; y++)
             {
-                bool wall = x == 0 || x == Width - 1 || y == 1 || y == Height - 1;
+                bool wall = IsWall(new Vector2Int(x, y));
                 bool street = y == 0;
                 blocked[x, y] = (wall && !street && new Vector2Int(x, y) != DoorCell) || (street && x != SpawnCell.x);
             }
+        }
+
+        /// <summary>Außenwände, und nach der Erweiterung die Zwischenwand mit Durchgang (y 4–7).</summary>
+        public static bool IsWall(Vector2Int c)
+        {
+            if (c.y == 0) return false;
+            if (c.x == 0 || c.x == Width - 1 || c.y == 1 || c.y == Height - 1) return true;
+            return Expanded && c.x == BaseWidth - 1 && (c.y <= 3 || c.y >= 8);
         }
 
         public static bool InBounds(Vector2Int c) => c.x >= 0 && c.x < Width && c.y >= 0 && c.y < Height;
@@ -58,11 +74,11 @@ namespace TwoMoons
 
         public static Vector2Int WorldToCell(Vector3 p) => new Vector2Int(Mathf.FloorToInt(p.x), Mathf.FloorToInt(p.y));
 
-        public bool IsWalkable(Vector2Int c) => InBounds(c) && !blocked[c.x, c.y];
+        public bool IsWalkable(Vector2Int c) => InBounds(c) && c.x < blocked.GetLength(0) && !blocked[c.x, c.y];
 
         public void SetBlocked(Vector2Int c, bool value)
         {
-            if (InBounds(c)) blocked[c.x, c.y] = value;
+            if (InBounds(c) && c.x < blocked.GetLength(0)) blocked[c.x, c.y] = value;
         }
 
         public static bool IsReserved(Vector2Int c)

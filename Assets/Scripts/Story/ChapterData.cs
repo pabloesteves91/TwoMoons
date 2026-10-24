@@ -52,6 +52,10 @@ namespace TwoMoons
             new Quest { Text = text, Target = count, Key = $"category:{category}" };
         static Quest Prints(int count) => new Quest { Text = "3D-Drucke fertigstellen", Target = count, Key = "printed" };
         static Quest BuyCollections(int count) => new Quest { Text = "Karten ankaufen", Target = count, Key = "cardsBought" };
+        static Quest GradeCards(int count) => new Quest { Text = "Karten bewerten lassen", Target = count, Key = "graded" };
+        static Quest TopGrades(int count) => new Quest { Text = "Note 9 oder 10 bekommen", Target = count, Key = "topGrade" };
+        static Quest SellSlabs(int count) => new Quest { Text = "Bewertete Karten verkaufen", Target = count, Key = "slabSold" };
+        static Quest Extension() => new Quest { Text = "Laden erweitern (Computer → Einrichtung)", Key = "expanded", Poll = () => ShopGrid.Expanded ? 1 : 0 };
         static Quest BestDay(int packs) => new Quest { Text = "An einem Tag Packs verkaufen", Target = packs, Key = "bestDay" };
 
         // Zustands-Aufgaben
@@ -209,19 +213,31 @@ namespace TwoMoons
                     {
                         new QuestStage
                         {
-                            Title = "Wachsen",
-                            Quests = new List<Quest> { Shelves(6), Showcases(2), Sell(350) },
-                            Outro = new[] { "{0} ruft Papa nach Ladenschluss an. Seine Stimme klingt müde – aber stolz." },
+                            Title = "Auf den Punkt geprüft",
+                            Quests = new List<Quest> { Furnished(Furniture.GradingStation, 1), GradeCards(3) },
+                            Outro = new[] { "{0}: Note 9 auf der ersten Karte – das muss ich Papa erzählen!" },
+                        },
+                        new QuestStage
+                        {
+                            Title = "Sammlerstücke",
+                            Quests = new List<Quest> { GradeCards(8), TopGrades(2), SellSlabs(4), SellCards(12) },
+                            Outro = new[]
+                            {
+                                "{0} ruft Papa nach Ladenschluss an. Seine Stimme klingt müde, er hustet.",
+                                "Papa: „Mir geht's nicht so gut zurzeit. Aber erzähl – wie läuft mein alter Laden?“",
+                                "{0}: „Er wird zu klein, Papa. Wir bauen an.“ – Papa lacht leise: „Das wollte ich immer.“",
+                            },
+                        },
+                        new QuestStage
+                        {
+                            Title = "TwoMoons wächst",
+                            Quests = new List<Quest> { Extension(), Shelves(8), Showcases(3), Decos(12) },
+                            Outro = new[] { "Der neue Raum ist voll mit Leuten. {0} macht ein Foto und schickt es Papa." },
                         },
                         new QuestStage
                         {
                             Title = "Stadtgespräch",
-                            Quests = new List<Quest> { Reputation(3, "Stadtbekannt"), Serve(300), Money(1000) },
-                        },
-                        new QuestStage
-                        {
-                            Title = "Fast komplett",
-                            Quests = new List<Quest> { Cards(25), ProfitDays(6) },
+                            Quests = new List<Quest> { Reputation(3, "Stadtbekannt"), Sell(400), Serve(300), ProfitDays(6) },
                         },
                     };
 

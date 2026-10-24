@@ -284,6 +284,33 @@ namespace TwoMoons
                     Rect(2, 5, 12, 1, new Color32(230, 230, 235, 255));
                     Rect(2, 10, 12, 1, new Color32(230, 230, 235, 255));
                     break;
+                case "floor2":
+                    // Schachbrett-Fliesen für den neuen Raum.
+                    Rect(0, 0, 16, 16, new Color32(196, 184, 160, 255));
+                    Rect(0, 0, 8, 8, new Color32(170, 156, 132, 255));
+                    Rect(8, 8, 8, 8, new Color32(170, 156, 132, 255));
+                    break;
+                case "gradingStation":
+                    Rect(1, 0, 14, 10, new Color32(70, 80, 100, 255));
+                    Rect(2, 8, 12, 2, new Color32(230, 230, 240, 255));
+                    Rect(3, 10, 2, 5, new Color32(60, 60, 70, 255));
+                    Rect(3, 14, 6, 1, new Color32(60, 60, 70, 255));
+                    Rect(8, 12, 3, 3, new Color32(255, 240, 160, 255));
+                    Rect(9, 3, 4, 4, new Color32(140, 200, 255, 255));
+                    Frame(9, 3, 4, 4, new Color32(40, 40, 50, 255));
+                    break;
+                case "slabIcon":
+                    Rect(4, 0, 9, 15, new Color32(190, 215, 240, 255));
+                    Rect(5, 11, 7, 3, new Color32(210, 50, 50, 255));
+                    Rect(5, 1, 7, 9, new Color32(240, 200, 80, 255));
+                    Rect(6, 4, 5, 4, new Color32(120, 190, 230, 255));
+                    break;
+                case "beanBag":
+                    Rect(2, 1, 12, 8, new Color32(200, 70, 90, 255));
+                    Rect(3, 9, 10, 4, new Color32(220, 90, 110, 255));
+                    Rect(5, 13, 6, 1, new Color32(220, 90, 110, 255));
+                    Rect(4, 5, 8, 3, new Color32(170, 50, 70, 255));
+                    break;
                 case "neonSign":
                     Rect(1, 5, 14, 7, new Color32(30, 20, 40, 255));
                     Rect(2, 7, 4, 3, new Color32(255, 90, 160, 255));

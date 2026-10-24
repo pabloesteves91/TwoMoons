@@ -7,6 +7,15 @@ namespace TwoMoons
     {
         readonly Dictionary<int, int> owned = new Dictionary<int, int>();
         readonly HashSet<int> discovered = new HashSet<int>();
+        readonly Dictionary<int, int> bestGrades = new Dictionary<int, int>();
+
+        /// <summary>Beste Note, die diese Karte je bekommen hat (0 = nie bewertet).</summary>
+        public int BestGrade(int cardId) => bestGrades.TryGetValue(cardId, out int grade) ? grade : 0;
+
+        public void RecordGrade(int cardId, int grade)
+        {
+            if (grade > BestGrade(cardId)) bestGrades[cardId] = grade;
+        }
 
         public int DiscoveredCount => discovered.Count;
 
@@ -45,17 +54,21 @@ namespace TwoMoons
                 if (!IsDiscovered(card.Id)) continue;
                 data.cards.Add(new SavedCard { card = card.Id, count = Count(card.Id) });
             }
+            data.bestGrades.Clear();
+            foreach (var pair in bestGrades) data.bestGrades.Add(new SavedCard { card = pair.Key, count = pair.Value });
         }
 
         public void LoadFrom(SaveData data)
         {
             owned.Clear();
             discovered.Clear();
+            bestGrades.Clear();
             foreach (var saved in data.cards)
             {
                 discovered.Add(saved.card);
                 owned[saved.card] = saved.count;
             }
+            if (data.bestGrades != null) foreach (var saved in data.bestGrades) bestGrades[saved.card] = saved.count;
         }
     }
 }
