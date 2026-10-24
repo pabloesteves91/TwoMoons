@@ -56,6 +56,7 @@ namespace TwoMoons
         public PlayerController Player;
         public readonly List<Shelf> Shelves = new List<Shelf>();
         public readonly List<Showcase> Showcases = new List<Showcase>();
+        public readonly List<DecoItem> Decos = new List<DecoItem>();
         public readonly Collection Collection = new Collection();
 
         public GamePhase Phase { get; private set; } = GamePhase.MainMenu;
@@ -66,8 +67,14 @@ namespace TwoMoons
         public int Day { get; private set; } = 1;
         public int MoneyCents { get; private set; } = StartMoney;
         public int Reputation { get; private set; }
-        public int ShelvesToPlace;
-        public int ShowcasesToPlace;
+        /// <summary>Gekaufte Möbel, die noch aufgestellt werden müssen.</summary>
+        readonly Dictionary<Furniture, int> toPlace = new Dictionary<Furniture, int>();
+
+        public int StoreLevel { get; private set; } = 1;
+        /// <summary>Laden-Erfahrung insgesamt.</summary>
+        public int Xp { get; private set; }
+        /// <summary>Gerade angezeigter Level-Up-Bildschirm (0 = keiner).</summary>
+        public int LevelUpShown { get; private set; }
         public float DayTime { get; private set; }
         public DayStats Today { get; private set; } = new DayStats();
 
@@ -103,18 +110,69 @@ namespace TwoMoons
         public bool InputLocked =>
             Phase == GamePhase.MainMenu || Phase == GamePhase.CharacterSelect || Phase == GamePhase.Intro || Phase == GamePhase.Summary ||
             DialogLines != null || ComputerOpen || PauseOpen || BuildMode ||
-            CollectionOpen || OpenShowcase != null || OpenedPack != null;
+            CollectionOpen || OpenShowcase != null || OpenedPack != null || LevelUpShown > 0;
 
         /// <summary>Menüs, die das Spiel anhalten.</summary>
         bool Paused =>
-            DialogLines != null || ComputerOpen || PauseOpen || CollectionOpen || OpenShowcase != null || OpenedPack != null;
+            DialogLines != null || ComputerOpen || PauseOpen || CollectionOpen || OpenShowcase != null || OpenedPack != null ||
+            LevelUpShown > 0;
+
+        public int ToPlace(Furniture furniture) => toPlace.TryGetValue(furniture, out int count) ? count : 0;
+
+        public int TotalToPlace
+        {
+            get
+            {
+                int total = 0;
+                foreach (var count in toPlace.Values) total += count;
+                return total;
+            }
+        }
+
+        public void AddToPlace(Furniture furniture, int amount = 1) => toPlace[furniture] = ToPlace(furniture) + amount;
+
+        /// <summary>Summe der Gemütlichkeit aller Deko, abzüglich Flecken.</summary>
+        public int Coziness
+        {
+            get
+            {
+                int cozy = 0;
+                foreach (var deco in Decos) cozy += FurnitureCatalog.Get(deco.Type).Cozy;
+                return Mathf.Max(0, cozy - DirtSpot.Existing.Count);
+            }
+        }
 
         /// <summary>
         /// Wie lange ein Kunde in der Schlange wartet (alle drei Launen zusammen).
         /// Mit besserem Ruf geduldiger, Schmutz im Laden macht ungeduldig.
         /// </summary>
         public float CustomerPatience =>
-            (15f + 5f * ReputationStage) * Mathf.Max(0.5f, 1f - 0.08f * DirtSpot.Existing.Count);
+            (15f + 5f * ReputationStage) * Mathf.Max(0.5f, 1f - 0.08f * DirtSpot.Existing.Count) *
+            (1f + Mathf.Min(0.3f, Coziness * 0.02f));
+
+        /// <summary>Kapitel-Aufgaben des aktuellen Levels erledigt? (Kapitel 2–7 folgen.)</summary>
+        public bool ChapterComplete => StoreLevel == 1 && GetComponent<ChapterOne>().Completed;
+
+        public bool CanLevelUp => StoreLevel < StoreLevels.Max && Xp >= StoreLevels.XpFor(StoreLevel + 1) && ChapterComplete;
+
+        public void AddXp(int amount)
+        {
+            if (IsDemo || amount <= 0) return;
+            Xp += amount;
+        }
+
+        void ShowLevelUp()
+        {
+            StoreLevel++;
+            LevelUpShown = StoreLevel;
+            SoundManager.Play(Sfx.Fanfare);
+        }
+
+        public void CloseLevelUp()
+        {
+            LevelUpShown = 0;
+            SaveGame();
+        }
 
         bool IsDemo => Phase == GamePhase.MainMenu;
 
@@ -163,6 +221,13 @@ namespace TwoMoons
             if (DialogLines != null)
             {
                 if (GameInput.ConfirmPressed && Time.frameCount != dialogOpenedFrame) AdvanceDialog();
+                return;
+            }
+
+            if (LevelUpShown > 0) return;
+            if (CanLevelUp && !Paused && !BuildMode && Phase != GamePhase.Intro && Phase != GamePhase.CharacterSelect)
+            {
+                ShowLevelUp();
                 return;
             }
 
@@ -238,8 +303,13 @@ namespace TwoMoons
             Day = Mathf.Max(1, data.day);
             MoneyCents = data.money;
             Reputation = data.reputation;
-            ShelvesToPlace = data.shelvesToPlace;
-            ShowcasesToPlace = data.showcasesToPlace;
+            StoreLevel = Mathf.Clamp(data.storeLevel, 1, StoreLevels.Max);
+            Xp = data.xp;
+            // Ältere Spielstände kannten nur Regale und Vitrinen.
+            AddToPlace(Furniture.Shelf, data.shelvesToPlace);
+            AddToPlace(Furniture.Showcase, data.showcasesToPlace);
+            foreach (var saved in data.toPlace) AddToPlace((Furniture)saved.type, saved.count);
+            foreach (var saved in data.decos) WorldFactory.SpawnDeco((Furniture)saved.type, new Vector2Int(saved.x, saved.y));
             Collection.LoadFrom(data);
 
             foreach (var price in data.prices) prices[(ProductId)price.product] = price.cents;
@@ -279,8 +349,8 @@ namespace TwoMoons
                 day = Day,
                 money = MoneyCents,
                 reputation = Reputation,
-                shelvesToPlace = ShelvesToPlace,
-                showcasesToPlace = ShowcasesToPlace,
+                storeLevel = StoreLevel,
+                xp = Xp,
                 phase = (int)Phase,
                 dayTime = DayTime,
                 today = Today,
@@ -305,6 +375,9 @@ namespace TwoMoons
                 data.boxes.Add(new SavedBox { x = cell.x, y = cell.y, product = (int)box.Product.Id, amount = box.Amount });
             }
             Collection.SaveTo(data);
+            foreach (var pair in toPlace)
+                if (pair.Value > 0) data.toPlace.Add(new SavedCount { type = (int)pair.Key, count = pair.Value });
+            foreach (var deco in Decos) data.decos.Add(new SavedDeco { type = (int)deco.Type, x = deco.Cell.x, y = deco.Cell.y });
             foreach (var showcase in Showcases)
             {
                 data.showcases.Add(new SavedShowcase
@@ -398,6 +471,12 @@ namespace TwoMoons
         /// <summary>Bestellung bezahlen. Die Ware wird sofort am Eingang geliefert.</summary>
         public bool Order(OrderOption option)
         {
+            if (option.MinLevel > StoreLevel)
+            {
+                ShowToast($"{option.Name} gibt es erst ab Store-Level {option.MinLevel}.");
+                SoundManager.Play(Sfx.Error);
+                return false;
+            }
             if (MoneyCents < option.Cost)
             {
                 ShowToast("Dafür reicht das Geld nicht.");
@@ -408,15 +487,10 @@ namespace TwoMoons
             Today.Expenses += option.Cost;
             SoundManager.Play(Sfx.Order);
 
-            if (option.Kind == OrderKind.Shelf)
+            if (option.Kind == OrderKind.Furniture)
             {
-                ShelvesToPlace++;
-                ShowToast($"Regal geliefert! Drücke [B], um es aufzustellen ({ShelvesToPlace} übrig).");
-            }
-            else if (option.Kind == OrderKind.Showcase)
-            {
-                ShowcasesToPlace++;
-                ShowToast("Vitrine geliefert! Drücke [B], um sie aufzustellen.");
+                AddToPlace(option.Furniture);
+                ShowToast($"{option.Name} geliefert! Drücke [B], um es aufzustellen.");
             }
             else
             {
@@ -435,6 +509,7 @@ namespace TwoMoons
             Today.CustomersServed++;
             ShowToast($"+{Money.Format(cents)}", 2f);
             SoundManager.Play(Sfx.Register);
+            AddXp(cents / 100);
             CustomerServed?.Invoke();
         }
 
@@ -458,6 +533,7 @@ namespace TwoMoons
             Today.CustomersServed++;
             ShowToast($"{card.Name} verkauft: +{Money.Format(cents)}", 3f);
             SoundManager.Play(Sfx.Register);
+            AddXp(cents / 100);
             CustomerServed?.Invoke();
         }
 
@@ -473,7 +549,9 @@ namespace TwoMoons
 
         public void CustomerLeftHappy(bool bargain)
         {
-            if (!IsDemo) ChangeReputation(bargain ? 3 : 2);
+            if (IsDemo) return;
+            ChangeReputation(bargain ? 3 : 2);
+            AddXp(5);
         }
 
         public void CustomerLeftUnhappy(string reason)
@@ -500,7 +578,15 @@ namespace TwoMoons
             Today = new DayStats();
             DayTime = 0f;
             Phase = GamePhase.Preparation;
-            if (ShelvesToPlace + ShowcasesToPlace > 0) ShowToast("Es stehen noch Möbel zum Aufstellen bereit – drücke [B].");
+            if (TotalToPlace > 0) ShowToast("Es stehen noch Möbel zum Aufstellen bereit – drücke [B].");
+
+            // Ein gemütlicher Laden spricht sich herum.
+            int cozyBonus = Coziness / 5;
+            if (cozyBonus > 0)
+            {
+                ChangeReputation(cozyBonus);
+                ShowToast($"Dein gemütlicher Laden spricht sich herum: Ruf +{cozyBonus}");
+            }
 
             int dirt = UnityEngine.Random.Range(1, 4);
             for (int i = 0; i < dirt; i++) WorldFactory.SpawnDirtSomewhere();

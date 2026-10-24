@@ -55,7 +55,8 @@ namespace TwoMoons
             var game = GameManager.Instance;
             quest.Progress = Mathf.Min(quest.Target, quest.Progress + amount);
             if (!quest.Done) return;
-            game.ShowToast($"Aufgabe erledigt: {quest.Text}");
+            game.ShowToast($"Aufgabe erledigt: {quest.Text} (+20 XP)");
+            game.AddXp(20);
 
             if (!Quests.TrueForAll(q => q.Done))
             {

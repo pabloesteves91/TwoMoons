@@ -39,7 +39,7 @@ Danach kann man frei weiterspielen (Endlos-Modus mit allen Freischaltungen).
 ## 2. Store-Level und Laden-Erfahrung (XP)
 
 Der Laden sammelt **Laden-Erfahrung (XP)**. Ist die XP-Leiste voll **und** sind die Kapitel-Aufgaben
-erledigt, steigt der Laden ein Level auf → **Level-Up-Bildschirm** mit Fanfare und allen Freischaltungen.
+erledigt (entschieden), steigt der Laden ein Level auf → **Level-Up-Bildschirm** mit Fanfare und allen Freischaltungen.
 
 **Ruf** bleibt getrennt davon: Er bestimmt, wie viele Kunden kommen und wie geduldig sie sind.
 **Level** bestimmt, was man kaufen und bauen darf.
@@ -123,7 +123,7 @@ Flecken ziehen Gemütlichkeit ab.
 3. **Prizepool vorbereiten:** Den Karton zum **Turnier-Counter** tragen und dort die Preise einteilen:
    1. Platz, 2. Platz, 3. Platz, Teilnahmepreis. Optional eigene Karten aus der Sammlung dazulegen
    → größerer Prizepool lockt mehr Spieler und gibt mehr Ruf.
-4. **Anmeldung:** Über den Tag kommen Turnierspieler und zahlen **Startgeld** (z. B. 5 €) an der Kasse.
+4. **Anmeldung:** Über den Tag kommen Turnierspieler und zahlen **5 € Startgeld** an der Kasse (entschieden).
    Wie viele kommen, hängt ab von Ruf, Prizepool und Anzahl der Spieltisch-Plätze.
 5. **Turnier (3 Spielstunden, z. B. 14–17 Uhr):** Die Spieler sitzen an den Spieltischen und spielen
    (Karten-Animationen, kleine Jubel- und Ärger-Symbole). Eine Fortschrittsanzeige zeigt Runde 1/3, 2/3, 3/3.
@@ -164,7 +164,8 @@ Flecken ziehen Gemütlichkeit ab.
 - **Couch + TV + Konsole** aufstellen.
 - Kunden setzen sich und **zocken** (Bildschirm flackert, Controller-Animation). Sie bleiben länger im Laden,
   sind entspannter und kaufen eher Getränke und Packs.
-- **Spielzeit** wird an der Kasse bezahlt (z. B. 2 € pro Spielstunde).
+- **Zocken ist gratis** – dafür sind die Kunden danach glücklicher (mehr Ruf) und kaufen deutlich mehr
+  Getränke und Packs.
 - Mit **Getränkekühlschrank** daneben: Getränke als neue Ware.
 - Ab und zu **Konsolen-Abend**: kleine Bonusaufgabe, die Ecke voll zu bekommen.
 
@@ -204,7 +205,7 @@ Mit jedem Level-Aufstieg gibt es **1 Fähigkeitspunkt** (insgesamt 6). Man wähl
 
 | Schritt | Inhalt | Ergebnis |
 |---|---|---|
-| **A** | Store-Level, XP-Leiste, Level-Up-Bildschirm, Freischalt-System, Tab „Einrichtung“, Deko & Gemütlichkeit | Grundgerüst für alles Weitere |
+| **A** ✅ | Store-Level, XP-Leiste, Level-Up-Bildschirm, Freischalt-System, Tab „Einrichtung“, Deko & Gemütlichkeit | Grundgerüst für alles Weitere (umgesetzt: Pflanze, Poster, Teppich, Wanduhr, Lichterkette) |
 | **B** | Kapitel 2 (Level 2): Spellforge, Zubehör-Ständer, erste Papa-Szene | Level 1 → 2 spielbar |
 | **C** | Kapitel 3 (Level 3): Spieltische, Turnier-Counter, Hersteller-Packs, Turnierablauf, Siegerehrung, Soul Clash | Turniere spielbar |
 | **D** | Kapitel 4 (Level 4): 3D-Drucker, Filament, Druck-Regal, Ankauf | Drucken & Handeln |

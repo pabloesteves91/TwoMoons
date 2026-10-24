@@ -167,6 +167,40 @@ namespace TwoMoons
                     Rect(2, 8, 12, 1, new Color32(110, 70, 45, 255));
                     Rect(3, 12, 2, 1, new Color32(255, 255, 255, 255));
                     break;
+                case "plant":
+                    Rect(5, 0, 6, 5, new Color32(190, 100, 60, 255));
+                    Rect(4, 4, 8, 1, new Color32(160, 80, 50, 255));
+                    Rect(7, 5, 2, 4, new Color32(60, 120, 50, 255));
+                    Rect(3, 8, 5, 4, new Color32(80, 170, 80, 255));
+                    Rect(8, 9, 5, 5, new Color32(70, 150, 70, 255));
+                    Rect(6, 12, 4, 3, new Color32(100, 190, 90, 255));
+                    break;
+                case "poster":
+                    Rect(3, 3, 10, 12, new Color32(30, 22, 18, 255));
+                    Rect(4, 4, 8, 10, new Color32(245, 200, 80, 255));
+                    Rect(5, 8, 6, 5, new Color32(225, 85, 40, 255));
+                    Rect(6, 5, 4, 2, new Color32(250, 240, 220, 255));
+                    break;
+                case "rug":
+                    Rect(1, 2, 14, 12, new Color32(150, 45, 40, 255));
+                    Rect(2, 3, 12, 10, new Color32(190, 70, 50, 255));
+                    Rect(4, 5, 8, 6, new Color32(235, 180, 70, 255));
+                    Rect(6, 7, 4, 2, new Color32(150, 45, 40, 255));
+                    break;
+                case "wallClock":
+                    Rect(5, 5, 6, 8, new Color32(60, 40, 30, 255));
+                    Rect(4, 6, 8, 6, new Color32(60, 40, 30, 255));
+                    Rect(5, 6, 6, 6, new Color32(250, 245, 230, 255));
+                    Rect(8, 9, 1, 3, new Color32(30, 22, 18, 255));
+                    Rect(8, 9, 2, 1, new Color32(30, 22, 18, 255));
+                    break;
+                case "fairyLights":
+                    for (int x = 0; x < 16; x++) Rect(x, 11 - (x % 4 == 1 || x % 4 == 2 ? 1 : 0), 1, 1, new Color32(60, 60, 50, 255));
+                    Rect(1, 9, 2, 2, new Color32(255, 220, 90, 255));
+                    Rect(5, 9, 2, 2, new Color32(240, 110, 80, 255));
+                    Rect(9, 9, 2, 2, new Color32(120, 220, 120, 255));
+                    Rect(13, 9, 2, 2, new Color32(110, 170, 255, 255));
+                    break;
                 case "cardIcon":
                     Rect(4, 1, 8, 13, new Color32(30, 22, 18, 255));
                     Rect(5, 2, 6, 11, new Color32(240, 200, 80, 255));

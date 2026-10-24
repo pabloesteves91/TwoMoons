@@ -129,6 +129,29 @@ namespace TwoMoons
             return showcase;
         }
 
+        public static DecoItem SpawnDeco(Furniture type, Vector2Int cell)
+        {
+            var def = FurnitureCatalog.Get(type);
+            GameObject go;
+            switch (def.Placement)
+            {
+                case Placement.Floor:
+                    go = CreateSolid(def.Name, def.SpriteKey, cell, null);
+                    break;
+                case Placement.Wall:
+                    // Vor der Wand, aber hinter allem, was im Raum steht.
+                    go = CreateSprite(def.Name, def.SpriteKey, ShopGrid.CellToWorld(cell), -(cell.y * 100) - 40).gameObject;
+                    break;
+                default:
+                    go = CreateSprite(def.Name, def.SpriteKey, ShopGrid.CellToWorld(cell), FloorDecalOrder - 1).gameObject;
+                    break;
+            }
+            var deco = go.AddComponent<DecoItem>();
+            deco.Init(type, cell);
+            Game.Decos.Add(deco);
+            return deco;
+        }
+
         public static bool HasBoxAt(Vector2Int cell)
         {
             foreach (var box in DeliveryBox.Existing)

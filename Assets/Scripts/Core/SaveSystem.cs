@@ -43,6 +43,20 @@ namespace TwoMoons
     }
 
     [Serializable]
+    public class SavedCount
+    {
+        public int type;
+        public int count;
+    }
+
+    [Serializable]
+    public class SavedDeco
+    {
+        public int type;
+        public int x, y;
+    }
+
+    [Serializable]
     public class SavedPrice
     {
         public int product;
@@ -59,6 +73,9 @@ namespace TwoMoons
         public int day;
         public int money;
         public int reputation;
+        public int storeLevel = 1;
+        public int xp;
+        /// <summary>Nur noch zum Laden älterer Spielstände, neu: <see cref="toPlace"/>.</summary>
         public int shelvesToPlace;
         public int showcasesToPlace;
         /// <summary>Tagesphase (GamePhase) und Sekunden seit Ladenöffnung.</summary>
@@ -73,6 +90,8 @@ namespace TwoMoons
         public List<SavedCell> dirt = new List<SavedCell>();
         public List<SavedCard> cards = new List<SavedCard>();
         public List<SavedShowcase> showcases = new List<SavedShowcase>();
+        public List<SavedCount> toPlace = new List<SavedCount>();
+        public List<SavedDeco> decos = new List<SavedDeco>();
         public long savedAtTicks;
 
         public DateTime SavedAt => new DateTime(savedAtTicks);

@@ -80,7 +80,7 @@ namespace TwoMoons
         /// <summary>Startzustand von Kapitel 1: ein Regal zum Aufstellen, ein Karton, fünf Flecken.</summary>
         public static void SetUpNewGameWorld(GameManager game)
         {
-            game.ShelvesToPlace = 1;
+            game.AddToPlace(Furniture.Shelf);
             WorldFactory.SpawnBox(ShopGrid.DeliveryCells[0], Catalog.MonsteraPack, 12);
             foreach (var cell in StartDirt) WorldFactory.SpawnDirt(cell);
         }

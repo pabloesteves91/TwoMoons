@@ -16,7 +16,8 @@ namespace TwoMoons
         GUIStyle panel, text, bold, title, prompt, hint, button;
         Vector2 orderScroll;
         bool questsExpanded;
-        bool showPrices;
+        /// <summary>Computer-Tab: 0 = Ware, 1 = Einrichtung, 2 = Preise.</summary>
+        int computerTab;
         PauseScreen pauseScreen;
 
         static GameManager Game => GameManager.Instance;
@@ -52,6 +53,7 @@ namespace TwoMoons
             if (Game.ComputerOpen) DrawComputer(width);
             if (Game.Phase == GamePhase.Summary) DrawSummary(width);
             if (Game.DialogLines != null) DrawDialog(width);
+            if (Game.LevelUpShown > 0) DrawLevelUp(width);
             if (Game.PauseOpen) DrawPause(width);
         }
 
@@ -124,11 +126,42 @@ namespace TwoMoons
                 default: phase = "Feierabend"; break;
             }
             string line = $"Tag {Game.Day}  ·  {Game.ClockText}  ·  {phase}  ·  Geld: {Money.Format(Game.MoneyCents)}  ·  Ruf: {Game.ReputationName}  ·  [Esc] Menü";
+            line += "\n" + LevelLine();
             // Platz lassen für die Aufgabenliste rechts.
             float barWidth = Mathf.Min(760f, width - PanelWidth - 3f * Margin);
             var content = new GUIContent(line);
             float barHeight = Mathf.Max(34f, panel.CalcHeight(content, barWidth));
             GUI.Box(new Rect(Margin, Margin, barWidth, barHeight), content, panel);
+        }
+
+        /// <summary>Store-Level, XP-Fortschritt und was für den nächsten Aufstieg fehlt.</summary>
+        static string LevelLine()
+        {
+            int level = Game.StoreLevel;
+            string line = $"Store-Level {level}: {StoreLevels.Title(level)}  ·  Gemütlichkeit {Game.Coziness}";
+            if (level >= StoreLevels.Max) return line + "  ·  Höchstes Level!";
+
+            int from = StoreLevels.XpFor(level), to = StoreLevels.XpFor(level + 1);
+            int filled = Mathf.Clamp(Mathf.FloorToInt(10f * (Game.Xp - from) / (to - from)), 0, 10);
+            line += $"  ·  XP {new string('|', filled)}{new string('.', 10 - filled)} {Game.Xp}/{to}";
+            if (Game.Xp >= to && !Game.ChapterComplete)
+                line += level == 1 ? "  ·  Kapitel-Aufgaben erledigen!" : "  ·  Nächstes Kapitel folgt bald";
+            return line;
+        }
+
+        void DrawLevelUp(float width)
+        {
+            UiKit.DarkenScreen(width, 0.6f);
+            int level = Game.LevelUpShown;
+            UiKit.BeginWindow(UiKit.Centered(width, 460f, 320f));
+            GUILayout.Label("Level-Aufstieg!", UiKit.BigTitle.WithFontSize(34));
+            GUILayout.Label($"TwoMoons ist jetzt Store-Level {level}: {StoreLevels.Title(level)}", title.WithAlignment(TextAnchor.MiddleCenter).WithFontSize(18));
+            GUILayout.Space(10f);
+            GUILayout.Label("Neu freigeschaltet:", bold);
+            foreach (string unlock in StoreLevels.UnlocksFor(level)) GUILayout.Label($"•  {unlock}", text);
+            GUILayout.FlexibleSpace();
+            if (UiKit.BigButtonLayout("Weiter")) Game.CloseLevelUp();
+            UiKit.EndWindow();
         }
 
         /// <summary>
@@ -209,10 +242,12 @@ namespace TwoMoons
 
             if (Game.BuildMode)
             {
-                bool shelf = BuildController.Current == BuildController.Furniture.Shelf;
-                string item = shelf ? $"Regal ({Game.ShelvesToPlace})" : $"Vitrine ({Game.ShowcasesToPlace})";
-                bool canSwitch = shelf ? Game.ShowcasesToPlace > 0 : Game.ShelvesToPlace > 0;
-                line = $"Bau-Modus: {item}   Linksklick = Aufstellen   " +
+                var current = BuildController.Current;
+                var def = FurnitureCatalog.Get(current);
+                string item = $"{def.Name} ({Game.ToPlace(current)})";
+                bool canSwitch = Game.TotalToPlace > Game.ToPlace(current);
+                string where = def.Placement == Placement.Wall ? " an die hintere Wand" : "";
+                line = $"Bau-Modus: {item}{where}   Linksklick = Aufstellen   " +
                        (canSwitch ? "[B] = Wechseln   Rechtsklick = Abbrechen" : "Rechtsklick / [B] = Abbrechen");
             }
             else if (!Game.InputLocked)
@@ -225,8 +260,8 @@ namespace TwoMoons
                 }
                 if (player.Carried != null)
                     line = (line != null ? line + "      " : "") + $"Trägst: {player.Carried.Amount}× {player.Carried.Product.Name}   [Q] abstellen";
-                else if (Game.ShelvesToPlace + Game.ShowcasesToPlace > 0 && line == null)
-                    line = $"[B] Möbel aufstellen ({Game.ShelvesToPlace + Game.ShowcasesToPlace} übrig)";
+                else if (Game.TotalToPlace > 0 && line == null)
+                    line = $"[B] Möbel aufstellen ({Game.TotalToPlace} übrig)";
                 else if (line == null)
                     line = $"[C] Sammelbuch ({Game.Collection.DiscoveredCount}/{CardDatabase.Monstera.Count})";
             }
@@ -238,8 +273,8 @@ namespace TwoMoons
         void DrawComputer(float width)
         {
             // Höchstens so hoch wie der Bildschirm; der Inhalt lässt sich scrollen.
-            float height = Mathf.Min(VirtualHeight - 120f, 330f);
-            var area = new Rect((width - 480f) / 2f, 60f, 480f, height);
+            float height = Mathf.Min(VirtualHeight - 100f, 380f);
+            var area = new Rect((width - 500f) / 2f, 60f, 500f, height);
             GUI.Box(area, GUIContent.none, panel);
             GUILayout.BeginArea(new Rect(area.x + 16f, area.y + 12f, area.width - 32f, area.height - 24f));
 
@@ -250,17 +285,19 @@ namespace TwoMoons
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            GUI.color = showPrices ? UiKit.Dimmed : Color.white;
-            if (Button("Bestellen", GUILayout.Height(30f))) showPrices = false;
-            GUI.color = showPrices ? Color.white : UiKit.Dimmed;
-            if (Button("Preise", GUILayout.Height(30f))) showPrices = true;
+            string[] tabs = { "Ware", "Einrichtung", "Preise" };
+            for (int i = 0; i < tabs.Length; i++)
+            {
+                GUI.color = computerTab == i ? Color.white : UiKit.Dimmed;
+                if (Button(tabs[i], GUILayout.Height(30f))) computerTab = i;
+            }
             GUI.color = Color.white;
             GUILayout.EndHorizontal();
             GUILayout.Space(8f);
 
             orderScroll = GUILayout.BeginScrollView(orderScroll);
-            if (showPrices) DrawPriceList();
-            else DrawOrderList();
+            if (computerTab == 2) DrawPriceList();
+            else DrawOrderList(computerTab == 0 ? Catalog.Orders : Catalog.Furnishings);
             GUILayout.EndScrollView();
 
             GUILayout.Space(6f);
@@ -268,20 +305,32 @@ namespace TwoMoons
             GUILayout.EndArea();
         }
 
-        void DrawOrderList()
+        void DrawOrderList(OrderOption[] options)
         {
-            GUILayout.Label("Lieferung: sofort an den Eingang", hint);
-            foreach (var option in Catalog.Orders)
+            GUILayout.Label(options == Catalog.Orders
+                ? "Lieferung: sofort an den Eingang"
+                : "Lieferung sofort · mit [B] aufstellen · Deko macht den Laden gemütlicher", hint);
+            foreach (var option in options)
             {
+                bool locked = option.MinLevel > Game.StoreLevel;
                 GUILayout.BeginHorizontal();
+                GUI.color = locked ? UiKit.Dimmed : Color.white;
                 GUILayout.BeginVertical();
                 GUILayout.Label($"{option.Name} – {Money.Format(option.Cost)}", bold);
                 GUILayout.Label(option.Description, text);
                 GUILayout.EndVertical();
+                GUI.color = Color.white;
                 GUILayout.FlexibleSpace();
-                GUI.enabled = Game.MoneyCents >= option.Cost;
-                if (Button("Kaufen", GUILayout.Width(90f), GUILayout.Height(36f))) Game.Order(option);
-                GUI.enabled = true;
+                if (locked)
+                {
+                    GUILayout.Label($"ab Level {option.MinLevel}", hint, GUILayout.Width(90f), GUILayout.Height(36f));
+                }
+                else
+                {
+                    GUI.enabled = Game.MoneyCents >= option.Cost;
+                    if (Button("Kaufen", GUILayout.Width(90f), GUILayout.Height(36f))) Game.Order(option);
+                    GUI.enabled = true;
+                }
                 GUILayout.EndHorizontal();
                 GUILayout.Space(8f);
             }

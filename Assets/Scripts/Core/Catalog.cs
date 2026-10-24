@@ -2,7 +2,7 @@ namespace TwoMoons
 {
     public enum ProductId { MonsteraPack }
 
-    public enum OrderKind { ProductBox, Shelf, Showcase }
+    public enum OrderKind { ProductBox, Furniture }
 
     public class Product
     {
@@ -23,6 +23,9 @@ namespace TwoMoons
         public OrderKind Kind;
         public ProductId Product;
         public int Amount;
+        public Furniture Furniture;
+        /// <summary>Ab diesem Store-Level kann man es kaufen.</summary>
+        public int MinLevel = 1;
     }
 
     /// <summary>Alle Waren und Bestellmöglichkeiten. Spellforge, Soul Clash und Zubehör kommen in späteren Kapiteln dazu.</summary>
@@ -40,6 +43,7 @@ namespace TwoMoons
         /// <summary>Alles, wofür man am Computer einen Preis festlegen kann.</summary>
         public static readonly Product[] Products = { MonsteraPack };
 
+        /// <summary>Tab „Ware“ am Computer.</summary>
         public static readonly OrderOption[] Orders =
         {
             new OrderOption
@@ -51,20 +55,28 @@ namespace TwoMoons
                 Product = ProductId.MonsteraPack,
                 Amount = 12,
             },
-            new OrderOption
-            {
-                Name = "Regal",
-                Description = "Platz für 24 Boosterpacks",
-                Cost = 6000,
-                Kind = OrderKind.Shelf,
-            },
-            new OrderOption
-            {
-                Name = "Vitrine",
-                Description = "Für 4 Einzelkarten – Sammler kaufen daraus",
-                Cost = 8000,
-                Kind = OrderKind.Showcase,
-            },
+        };
+
+        /// <summary>Tab „Einrichtung“ am Computer: Möbel und Deko, nach Store-Level freigeschaltet.</summary>
+        public static readonly OrderOption[] Furnishings =
+        {
+            Furnishing(Furniture.Shelf, "Platz für 24 Boosterpacks", 6000, 1),
+            Furnishing(Furniture.Plant, "Gemütlichkeit +2", 1500, 1),
+            Furnishing(Furniture.Poster, "Für die Wand · Gemütlichkeit +1", 1000, 1),
+            Furnishing(Furniture.Showcase, "Für 4 Einzelkarten – Sammler kaufen daraus", 8000, 2),
+            Furnishing(Furniture.Rug, "Man kann darüber laufen · Gemütlichkeit +3", 4000, 2),
+            Furnishing(Furniture.WallClock, "Für die Wand · Gemütlichkeit +1", 2000, 2),
+            Furnishing(Furniture.FairyLights, "Für die Wand, funkelt · Gemütlichkeit +3", 2500, 2),
+        };
+
+        static OrderOption Furnishing(Furniture furniture, string description, int cost, int minLevel) => new OrderOption
+        {
+            Name = FurnitureCatalog.Get(furniture).Name,
+            Description = description,
+            Cost = cost,
+            Kind = OrderKind.Furniture,
+            Furniture = furniture,
+            MinLevel = minLevel,
         };
 
         public static Product Get(ProductId id)

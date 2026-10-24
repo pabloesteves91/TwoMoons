@@ -24,6 +24,13 @@ namespace TwoMoons
         public Sprite packTable;
         public Sprite showcase;
 
+        [Header("Deko")]
+        public Sprite plant;
+        public Sprite poster;
+        public Sprite rug;
+        public Sprite wallClock;
+        public Sprite fairyLights;
+
         [Header("Oberfläche")]
         [Tooltip("Logo im Hauptmenü, beliebige Größe. Leer = Assets/Art/UI/Resources/logo.png")]
         public Sprite logo;
@@ -49,6 +56,7 @@ namespace TwoMoons
         {
             "floor", "wall", "street", "door", "sign", "counter", "register", "computer", "shelf", "box", "dirt",
             "packTable", "showcase",
+            "plant", "poster", "rug", "wallClock", "fairyLights",
             "packMonstera", "cardIcon",
             "moodHappy", "moodNeutral", "moodAngry",
             "player1", "player2", "player3", "customer1", "customer2", "customer3",
