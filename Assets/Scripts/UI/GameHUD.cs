@@ -189,7 +189,7 @@ namespace TwoMoons
             int filled = Mathf.Clamp(Mathf.FloorToInt(10f * (Game.Xp - from) / (to - from)), 0, 10);
             line += $"  ·  XP {new string('|', filled)}{new string('.', 10 - filled)} {Game.Xp}/{to}";
             if (Game.Xp >= to && !Game.ChapterComplete)
-                line += level == 1 ? "  ·  Kapitel-Aufgaben erledigen!" : "  ·  Nächstes Kapitel folgt bald";
+                line += "  ·  Kapitel-Aufgaben erledigen!";
             return line;
         }
 
@@ -214,39 +214,34 @@ namespace TwoMoons
         /// </summary>
         float DrawQuests(float width)
         {
-            var chapter = GetComponent<ChapterOne>();
-            if (chapter == null) return Margin;
+            var chapters = Game.ChapterProgress;
+            if (chapters == null) return Margin;
 
-            var quests = chapter.Quests;
-            int done = quests.FindAll(q => q.Done).Count;
-            var current = quests.Find(q => !q.Done);
-            int rows = questsExpanded ? quests.Count : 1;
+            // Kapitel geschafft: Liste ausblenden, höchstens noch zeigen, wie viele XP fehlen.
+            if (chapters.Completed)
+            {
+                int level = Game.StoreLevel;
+                if (level >= StoreLevels.Max || Game.Xp >= StoreLevels.XpFor(level + 1)) return Margin;
+                var done = new Rect(width - PanelWidth - Margin, Margin, PanelWidth, 34f);
+                GUI.Box(done, $"Kapitel {chapters.Chapter} geschafft! Noch {StoreLevels.XpFor(level + 1) - Game.Xp} XP bis Level {level + 1}", panel);
+                return done.yMax;
+            }
+
+            var open = chapters.OpenQuests;
+            int rows = questsExpanded ? open.Count : Mathf.Min(1, open.Count);
 
             var area = new Rect(width - PanelWidth - Margin, Margin, PanelWidth, 34f + rows * 22f);
             GUI.Box(area, GUIContent.none, panel);
-            GUI.Label(new Rect(area.x + 10f, area.y + 6f, area.width - 90f, 22f), chapter.Header, bold);
-            GUI.Label(new Rect(area.xMax - 84f, area.y + 6f, 44f, 22f), $"{done}/{quests.Count}", hint);
+            GUI.Label(new Rect(area.x + 10f, area.y + 6f, area.width - 90f, 22f), chapters.Header, bold);
+            GUI.Label(new Rect(area.xMax - 84f, area.y + 6f, 44f, 22f), $"{open.Count} offen", hint);
             if (GUI.Button(new Rect(area.xMax - 36f, area.y + 5f, 28f, 24f), questsExpanded ? "▲" : "▼", button))
                 ToggleQuests();
 
             float y = area.y + 30f;
-            if (questsExpanded)
+            for (int i = 0; i < rows; i++)
             {
-                foreach (var quest in quests)
-                {
-                    DrawQuestRow(quest, area.x + 10f, y, area.width - 20f);
-                    y += 22f;
-                }
-            }
-            else if (current != null)
-            {
-                DrawQuestRow(current, area.x + 10f, y, area.width - 20f);
-            }
-            else
-            {
-                GUI.color = UiKit.Good;
-                GUI.Label(new Rect(area.x + 10f, y, area.width - 20f, 22f), "Kapitel geschafft! Alle Aufgaben: [Tab]", text);
-                GUI.color = Color.white;
+                DrawQuestRow(open[i], area.x + 10f, y, area.width - 20f);
+                y += 22f;
             }
             return area.yMax;
         }

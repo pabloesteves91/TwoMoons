@@ -117,6 +117,9 @@ namespace TwoMoons
         public event Action ShopOpened;
         public event Action CustomerServed;
         public event Action<int> PacksSold;
+        /// <summary>Ein Pack wurde geöffnet; Wert = Anzahl gezogener Ultra-Seltener.</summary>
+        public event Action<int> PackOpened;
+        public event Action CardSold;
         public event Action DecoPlaced;
         /// <summary>Abends bei der Abrechnung, mit den Zahlen des Tages.</summary>
         public event Action<DayStats> DayEnded;
@@ -165,7 +168,10 @@ namespace TwoMoons
             (1f + Mathf.Min(0.3f, Coziness * 0.02f));
 
         /// <summary>Kapitel-Aufgaben des aktuellen Levels erledigt? (Kapitel 2–7 folgen.)</summary>
-        public bool ChapterComplete => StoreLevel == 1 && GetComponent<ChapterOne>().Completed;
+        Chapters chapters;
+        public Chapters ChapterProgress => chapters != null ? chapters : chapters = GetComponent<Chapters>();
+
+        public bool ChapterComplete => ChapterProgress.Completed && ChapterProgress.Chapter == StoreLevel;
 
         public bool CanLevelUp => StoreLevel < StoreLevels.Max && Xp >= StoreLevels.XpFor(StoreLevel + 1) && ChapterComplete;
 
@@ -194,9 +200,23 @@ namespace TwoMoons
         {
             LevelUpShown = 0;
             SaveGame();
-            // Jedes neue Kapitel beginnt mit derselben Titelkarte.
-            if (TwoMoons.Cutscenes.ChapterExists(StoreLevel)) Cutscenes.PlayTitleCard(StoreLevel, null);
-            else ShowToast($"Kapitel {StoreLevel} „{TwoMoons.Cutscenes.ChapterTitles[StoreLevel]}“ folgt bald – bis dahin kannst du frei weiterspielen.", 6f);
+            // Jedes neue Kapitel beginnt mit derselben Titelkarte und neuen Aufgaben.
+            ChapterProgress.StartChapter(StoreLevel);
+            Cutscenes.PlayTitleCard(StoreLevel, null);
+        }
+
+        /// <summary>Alle Aufgaben eines Kapitels erledigt: kurzer Abschluss, beim ersten Kapitel mit Story-Szene.</summary>
+        public void ChapterFinished(int chapter)
+        {
+            string next = chapter < StoreLevels.Max
+                ? $"Sobald genug XP da sind, steigt TwoMoons auf Level {chapter + 1}."
+                : "TwoMoons ist der beste Laden der Stadt! Das große Finale folgt bald.";
+            Action story = chapter == 1 ? () => PlayStoryOnce("kapitel1Ende", TwoMoons.Cutscenes.Chapter1End) : (Action)null;
+            ShowDialog(new[]
+            {
+                $"{PlayerName}: Geschafft! Kapitel {chapter} „{TwoMoons.Cutscenes.ChapterTitles[chapter]}“ ist abgeschlossen.",
+                next,
+            }, story);
         }
 
         /// <summary>Spielt eine Story-Szene genau einmal pro Spielstand.</summary>
@@ -372,7 +392,8 @@ namespace TwoMoons
                     if (card != null) showcase.Put(i, card, saved.prices[i]);
                 }
             }
-            GetComponent<ChapterOne>().RestoreProgress(data.questProgress);
+            // Passt der gespeicherte Kapitel-Fortschritt nicht zum Level (ältere Spielstände), beginnt das Kapitel neu.
+            ChapterProgress.Restore(StoreLevel, data.chapter == StoreLevel ? data.questProgress : null);
             if (data.seenStories != null) foreach (var id in data.seenStories) seenStories.Add(id);
 
             // Weiter mit der gespeicherten Tageszeit. Kunden, die gerade im Laden waren, kommen nicht mit.
@@ -397,7 +418,8 @@ namespace TwoMoons
                 phase = (int)Phase,
                 dayTime = DayTime,
                 today = Today,
-                questProgress = GetComponent<ChapterOne>().SaveProgress(),
+                chapter = ChapterProgress.Chapter,
+                questProgress = ChapterProgress.SaveProgress(),
             };
             foreach (var price in prices) data.prices.Add(new SavedPrice { product = (int)price.Key, cents = price.Value });
             foreach (var shelf in Shelves)
@@ -589,6 +611,7 @@ namespace TwoMoons
             ShowToast($"{card.Name} verkauft: +{Money.Format(cents)}", 3f);
             SoundManager.Play(Sfx.Register);
             AddXp(cents / 100);
+            CardSold?.Invoke();
             CustomerServed?.Invoke();
         }
 
@@ -598,6 +621,7 @@ namespace TwoMoons
             OpenedPack = CardDatabase.RollPack();
             OpenedPackNew.Clear();
             foreach (var card in OpenedPack) OpenedPackNew.Add(Collection.Add(card.Id));
+            PackOpened?.Invoke(OpenedPack.FindAll(c => c.Rarity == Rarity.Ultra).Count);
         }
 
         public void ClosePack() => OpenedPack = null;

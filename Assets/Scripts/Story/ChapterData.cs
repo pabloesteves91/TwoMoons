@@ -1,0 +1,232 @@
+using System;
+using System.Collections.Generic;
+
+namespace TwoMoons
+{
+    public class Quest
+    {
+        public string Text;
+        public int Target = 1;
+        public int Progress;
+        /// <summary>Welches Ereignis die Aufgabe voranbringt (siehe <see cref="Chapters"/>).</summary>
+        public string Key;
+        /// <summary>Für Aufgaben, die einen Zustand prüfen (z. B. Gemütlichkeit) statt Ereignisse zu zählen.</summary>
+        public Func<int> Poll;
+        public bool Done => Progress >= Target;
+    }
+
+    public class QuestStage
+    {
+        public string Title;
+        public List<Quest> Quests;
+        /// <summary>Kleiner Story-Moment, wenn diese Etappe geschafft ist ({0} = Name).</summary>
+        public string[] Outro;
+    }
+
+    /// <summary>
+    /// Die Aufgaben aller 7 Kapitel, in Etappen. Kapitel = Store-Level.
+    /// Kapitel 1–3 sind auf ca. 1 Stunde ausgelegt, 4–7 auf ca. 90 Minuten.
+    /// Aufgaben für noch nicht gebaute Funktionen (Turniere, Spellforge, 3D-Druck …) kommen dazu, sobald es sie gibt.
+    /// </summary>
+    public static class ChapterData
+    {
+        static GameManager Game => GameManager.Instance;
+
+        // Ereignis-Aufgaben (zählen ab Beginn der Etappe)
+        static Quest Sell(int packs) => new Quest { Text = "Packs verkaufen", Target = packs, Key = "packsSold" };
+        static Quest Serve(int customers) => new Quest { Text = "Kunden bedienen", Target = customers, Key = "served" };
+        static Quest ProfitDays(int days) => new Quest { Text = "Tage mit Gewinn abschließen", Target = days, Key = "profitDay" };
+        static Quest OpenPacks(int packs) => new Quest { Text = "Packs am Pack-Tisch öffnen", Target = packs, Key = "packOpened" };
+        static Quest SellCards(int cards) => new Quest { Text = "Karten aus der Vitrine verkaufen", Target = cards, Key = "cardSold" };
+        static Quest PullUltra(int cards) => new Quest { Text = "Ultra-Seltene ziehen", Target = cards, Key = "ultraPulled" };
+        static Quest BestDay(int packs) => new Quest { Text = "An einem Tag Packs verkaufen", Target = packs, Key = "bestDay" };
+
+        // Zustands-Aufgaben
+        static Quest Shelves(int count) => new Quest { Text = "Regale im Laden", Target = count, Poll = () => Game.Shelves.Count };
+        static Quest Showcases(int count) => new Quest { Text = "Vitrinen im Laden", Target = count, Poll = () => Game.Showcases.Count };
+        static Quest Decos(int count) => new Quest { Text = "Deko im Laden", Target = count, Poll = () => Game.Decos.Count };
+        static Quest Cozy(int value) => new Quest { Text = "Gemütlichkeit erreichen", Target = value, Poll = () => Game.Coziness };
+        static Quest Cards(int count) => new Quest { Text = "Karten im Sammelbuch", Target = count, Poll = () => Game.Collection.DiscoveredCount };
+        static Quest Money(int euros) => new Quest { Text = "Euro auf dem Konto", Target = euros, Poll = () => Game.MoneyCents / 100 };
+
+        static Quest Reputation(int stage, string name) =>
+            new Quest { Text = $"Ruf „{name}“ erreichen", Target = 1, Poll = () => Game.ReputationStage >= stage ? 1 : 0 };
+
+        /// <summary>Erstellt die Etappen eines Kapitels (jedes Mal neu, damit der Fortschritt bei 0 beginnt).</summary>
+        public static List<QuestStage> Create(int chapter)
+        {
+            switch (chapter)
+            {
+                case 1:
+                    return new List<QuestStage>
+                    {
+                        new QuestStage
+                        {
+                            Title = "Der erste Tag",
+                            Quests = new List<Quest>
+                            {
+                                new Quest { Text = "Laden putzen", Target = 5, Key = "clean" },
+                                new Quest { Text = "Erstes Regal aufstellen", Key = "shelfPlaced" },
+                                new Quest { Text = "Monstera-Packs einräumen", Target = 12, Key = "stock" },
+                                new Quest { Text = "Laden öffnen", Key = "open" },
+                                Serve(5),
+                            },
+                            Outro = new[]
+                            {
+                                "{0}: Die ersten Kunden waren da! Aber ein Regal ist viel zu wenig für einen richtigen Laden.",
+                                "Mehr Ware, mehr Kunden – und am Ende des Tages soll mehr in der Kasse sein als vorher.",
+                            },
+                        },
+                        new QuestStage
+                        {
+                            Title = "Ein richtiger Laden",
+                            Quests = new List<Quest> { Sell(30), Shelves(2), ProfitDays(2) },
+                            Outro = new[]
+                            {
+                                "Eine Nachricht von Papa: „Ein Laden ist mehr als Regale. Die Leute sollen sich bei dir wohlfühlen.“",
+                                "{0}: Er hat recht. Ein bisschen Deko würde dem alten Laden guttun.",
+                            },
+                        },
+                        new QuestStage
+                        {
+                            Title = "Gemütlich soll es sein",
+                            Quests = new List<Quest> { Decos(3), Cozy(5), Serve(25) },
+                            Outro = new[]
+                            {
+                                "{0}: Es fühlt sich langsam an wie ein richtiger Laden. Wie Papas Laden damals.",
+                                "Jetzt muss es sich nur noch rechnen. Mal sehen, was an einem richtig guten Tag möglich ist!",
+                            },
+                        },
+                        new QuestStage
+                        {
+                            Title = "Der Laden läuft",
+                            Quests = new List<Quest> { Sell(80), BestDay(20), ProfitDays(3), Serve(50) },
+                        },
+                    };
+
+                case 2:
+                    return new List<QuestStage>
+                    {
+                        new QuestStage
+                        {
+                            Title = "Neue Ideen",
+                            Quests = new List<Quest> { Showcases(1), OpenPacks(5), Cards(10) },
+                            Outro = new[]
+                            {
+                                "Papa ruft an: „Sammler sind die treuesten Kunden. Zeig ihnen, was du hast.“",
+                            },
+                        },
+                        new QuestStage
+                        {
+                            Title = "Sammler entdecken TwoMoons",
+                            Quests = new List<Quest> { SellCards(3), Reputation(1, "Geheimtipp"), Sell(100) },
+                            Outro = new[] { "{0}: Immer mehr Gesichter kenne ich schon beim Namen. Das sind meine ersten Stammkunden!" },
+                        },
+                        new QuestStage
+                        {
+                            Title = "Stammkunden",
+                            Quests = new List<Quest> { Serve(80), Cozy(10), ProfitDays(3) },
+                        },
+                    };
+
+                case 3:
+                    return new List<QuestStage>
+                    {
+                        new QuestStage
+                        {
+                            Title = "Mehr Platz für mehr Spieler",
+                            Quests = new List<Quest> { Shelves(4), Money(300), Sell(150) },
+                            Outro = new[] { "{0}: Die Leute fragen ständig, wann es hier endlich ein Turnier gibt …" },
+                        },
+                        new QuestStage
+                        {
+                            Title = "Ein Name in der Stadt",
+                            Quests = new List<Quest> { Reputation(2, "Beliebt"), Serve(120), PullUltra(1) },
+                        },
+                    };
+
+                case 4:
+                    return new List<QuestStage>
+                    {
+                        new QuestStage
+                        {
+                            Title = "Für Sammler",
+                            Quests = new List<Quest> { Cards(20), SellCards(10), Money(500) },
+                            Outro = new[] { "In einer Kiste findet {0} Papas altes Notizbuch. Auf der letzten Seite: zwei gezeichnete Monde." },
+                        },
+                        new QuestStage
+                        {
+                            Title = "Volle Regale",
+                            Quests = new List<Quest> { Sell(250), Cozy(15), ProfitDays(5) },
+                        },
+                        new QuestStage
+                        {
+                            Title = "Ein Laden zum Bleiben",
+                            Quests = new List<Quest> { Serve(200), Decos(8) },
+                        },
+                    };
+
+                case 5:
+                    return new List<QuestStage>
+                    {
+                        new QuestStage
+                        {
+                            Title = "Wachsen",
+                            Quests = new List<Quest> { Shelves(6), Showcases(2), Sell(350) },
+                            Outro = new[] { "{0} ruft Papa nach Ladenschluss an. Seine Stimme klingt müde – aber stolz." },
+                        },
+                        new QuestStage
+                        {
+                            Title = "Stadtgespräch",
+                            Quests = new List<Quest> { Reputation(3, "Stadtbekannt"), Serve(300), Money(1000) },
+                        },
+                        new QuestStage
+                        {
+                            Title = "Fast komplett",
+                            Quests = new List<Quest> { Cards(25), ProfitDays(6) },
+                        },
+                    };
+
+                case 6:
+                    return new List<QuestStage>
+                    {
+                        new QuestStage
+                        {
+                            Title = "Großer Andrang",
+                            Quests = new List<Quest> { Sell(500), SellCards(25), Cozy(25) },
+                            Outro = new[] { "Papa steht plötzlich in der Tür: „Ich helfe dir heute an der Kasse. So lange ich kann.“" },
+                        },
+                        new QuestStage
+                        {
+                            Title = "Seltene Schätze",
+                            Quests = new List<Quest> { Serve(450), Money(2000), PullUltra(3) },
+                        },
+                        new QuestStage
+                        {
+                            Title = "Das komplette Sammelbuch",
+                            Quests = new List<Quest> { Cards(CardDatabase.Monstera.Count), ProfitDays(8) },
+                        },
+                    };
+
+                case 7:
+                    return new List<QuestStage>
+                    {
+                        new QuestStage
+                        {
+                            Title = "Legende werden",
+                            Quests = new List<Quest> { Reputation(4, "Legendär"), Sell(700), Money(3000) },
+                            Outro = new[] { "Der Hersteller schreibt: TwoMoons soll das große Stadtturnier ausrichten!" },
+                        },
+                        new QuestStage
+                        {
+                            Title = "Bereit für das große Turnier",
+                            Quests = new List<Quest> { Serve(600), SellCards(40), ProfitDays(10) },
+                        },
+                    };
+
+                default:
+                    return new List<QuestStage>();
+            }
+        }
+    }
+}

@@ -33,6 +33,11 @@ Kapitel 1–3 dauern je etwa **1 Stunde**, Kapitel 4–7 je etwa **90 Minuten**.
 | 7 Das große Turnier | 9–10 | 1 Std. 30 Min. |
 | **Gesamt** | **ca. 55–60 Tage** | **ca. 9 Stunden** |
 
+**Aufgaben:** Das Kapitel folgt immer dem Store-Level. Erledigte Aufgaben verschwinden aus der Liste;
+ist ein Kapitel geschafft, verschwindet die Liste (oder zeigt nur noch die fehlenden XP).
+Alle Kapitel-Aufgaben stehen in `Assets/Scripts/Story/ChapterData.cs`. Aufgaben zu noch nicht gebauten Funktionen
+(Turniere, Spellforge, 3D-Druck, Grading …) kommen dazu, sobald es die Funktion gibt.
+
 **Kapitel 1 in Etappen:**
 1. *Der erste Tag* – putzen, erstes Regal, einräumen, öffnen, 5 Kunden
 2. *Ein richtiger Laden* – 30 Packs verkaufen, 2 Regale, 2 Tage mit Gewinn

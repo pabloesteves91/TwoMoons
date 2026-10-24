@@ -33,7 +33,7 @@ namespace TwoMoons
         };
 
         /// <summary>Gibt es dieses Kapitel schon im Spiel?</summary>
-        public static bool ChapterExists(int chapter) => chapter == 1;
+        public static bool ChapterExists(int chapter) => chapter >= 1 && chapter < ChapterTitles.Length;
 
         public static readonly Cutscene Intro = new Cutscene(new[]
         {
