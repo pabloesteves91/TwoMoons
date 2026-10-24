@@ -99,6 +99,10 @@ namespace TwoMoons
         CutscenePlayer Cutscenes => cutscenePlayer != null ? cutscenePlayer : cutscenePlayer = GetComponent<CutscenePlayer>();
 
         public bool CutscenePlaying => Cutscenes != null && Cutscenes.IsPlaying;
+
+        Tutorial tutorial;
+        public Tutorial Guide => tutorial != null ? tutorial : tutorial = GetComponent<Tutorial>();
+        bool TutorialAsking => Guide != null && Guide.Asking;
         public float DayTime { get; private set; }
         public DayStats Today { get; private set; } = new DayStats();
 
@@ -168,13 +172,13 @@ namespace TwoMoons
             Phase == GamePhase.MainMenu || Phase == GamePhase.CharacterSelect || Phase == GamePhase.Intro || Phase == GamePhase.Summary ||
             DialogLines != null || ComputerOpen || PauseOpen || BuildMode ||
             CollectionOpen || OpenShowcase != null || OpenedPack != null || LevelUpShown > 0 || CutscenePlaying || PrizeCounterOpen ||
-            OpenPrinter != null || SellerOffer != null || OpenGrading != null || GradeReveal != null;
+            OpenPrinter != null || SellerOffer != null || OpenGrading != null || GradeReveal != null || TutorialAsking;
 
         /// <summary>Menüs, die das Spiel anhalten.</summary>
         bool Paused =>
             DialogLines != null || ComputerOpen || PauseOpen || CollectionOpen || OpenShowcase != null || OpenedPack != null ||
             LevelUpShown > 0 || CutscenePlaying || PrizeCounterOpen || OpenPrinter != null || SellerOffer != null ||
-            OpenGrading != null || GradeReveal != null;
+            OpenGrading != null || GradeReveal != null || TutorialAsking;
 
         public int ToPlace(Furniture furniture) => toPlace.TryGetValue(furniture, out int count) ? count : 0;
 
@@ -380,7 +384,12 @@ namespace TwoMoons
                 return;
             }
 
-            if (OpenedPack != null)
+            if (TutorialAsking)
+            {
+                // [Esc] bei der Tutorial-Frage = „Nein, danke“.
+                if (GameInput.ConsumeCancel()) Guide.Stop();
+            }
+            else if (OpenedPack != null)
             {
                 // Das Pack-Menü kümmert sich selbst um Tasten.
             }
@@ -649,7 +658,7 @@ namespace TwoMoons
                 "Und eines Tages finde ich die Two-Moons-Karte. Für dich.",
                 "Viel Geld habe ich nicht. Aber es ist ein Anfang: ein Karton Monstera-Packs und Papas altes Regal.",
                 "Erst mal aufräumen. Dann das Regal aufstellen, Packs einräumen und das Schild an der Tür umdrehen!",
-            }));
+            }, () => Guide?.Offer()));
         }
 
         public void ShowDialog(string[] lines, Action onDone = null)
