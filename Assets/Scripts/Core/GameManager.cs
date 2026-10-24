@@ -75,6 +75,14 @@ namespace TwoMoons
         public int Xp { get; private set; }
         /// <summary>Gerade angezeigter Level-Up-Bildschirm (0 = keiner).</summary>
         public int LevelUpShown { get; private set; }
+
+        /// <summary>Story-Szenen, die schon gezeigt wurden (damit jede nur einmal kommt).</summary>
+        readonly HashSet<string> seenStories = new HashSet<string>();
+
+        CutscenePlayer cutscenePlayer;
+        CutscenePlayer Cutscenes => cutscenePlayer != null ? cutscenePlayer : cutscenePlayer = GetComponent<CutscenePlayer>();
+
+        public bool CutscenePlaying => Cutscenes != null && Cutscenes.IsPlaying;
         public float DayTime { get; private set; }
         public DayStats Today { get; private set; } = new DayStats();
 
@@ -110,12 +118,12 @@ namespace TwoMoons
         public bool InputLocked =>
             Phase == GamePhase.MainMenu || Phase == GamePhase.CharacterSelect || Phase == GamePhase.Intro || Phase == GamePhase.Summary ||
             DialogLines != null || ComputerOpen || PauseOpen || BuildMode ||
-            CollectionOpen || OpenShowcase != null || OpenedPack != null || LevelUpShown > 0;
+            CollectionOpen || OpenShowcase != null || OpenedPack != null || LevelUpShown > 0 || CutscenePlaying;
 
         /// <summary>Menüs, die das Spiel anhalten.</summary>
         bool Paused =>
             DialogLines != null || ComputerOpen || PauseOpen || CollectionOpen || OpenShowcase != null || OpenedPack != null ||
-            LevelUpShown > 0;
+            LevelUpShown > 0 || CutscenePlaying;
 
         public int ToPlace(Furniture furniture) => toPlace.TryGetValue(furniture, out int count) ? count : 0;
 
@@ -172,6 +180,20 @@ namespace TwoMoons
         {
             LevelUpShown = 0;
             SaveGame();
+            // Jedes neue Kapitel beginnt mit derselben Titelkarte.
+            if (TwoMoons.Cutscenes.ChapterExists(StoreLevel)) Cutscenes.PlayTitleCard(StoreLevel, null);
+            else ShowToast($"Kapitel {StoreLevel} „{TwoMoons.Cutscenes.ChapterTitles[StoreLevel]}“ folgt bald – bis dahin kannst du frei weiterspielen.", 6f);
+        }
+
+        /// <summary>Spielt eine Story-Szene genau einmal pro Spielstand.</summary>
+        public void PlayStoryOnce(string id, Cutscene cutscene, Action then = null)
+        {
+            if (!seenStories.Add(id))
+            {
+                then?.Invoke();
+                return;
+            }
+            Cutscenes.Play(cutscene, then);
         }
 
         bool IsDemo => Phase == GamePhase.MainMenu;
@@ -331,6 +353,7 @@ namespace TwoMoons
                 }
             }
             GetComponent<ChapterOne>().RestoreProgress(data.questProgress);
+            if (data.seenStories != null) foreach (var id in data.seenStories) seenStories.Add(id);
 
             // Weiter mit der gespeicherten Tageszeit. Kunden, die gerade im Laden waren, kommen nicht mit.
             var phase = (GamePhase)data.phase;
@@ -375,6 +398,7 @@ namespace TwoMoons
                 data.boxes.Add(new SavedBox { x = cell.x, y = cell.y, product = (int)box.Product.Id, amount = box.Amount });
             }
             Collection.SaveTo(data);
+            data.seenStories.AddRange(seenStories);
             foreach (var pair in toPlace)
                 if (pair.Value > 0) data.toPlace.Add(new SavedCount { type = (int)pair.Key, count = pair.Value });
             foreach (var deco in Decos) data.decos.Add(new SavedDeco { type = (int)deco.Type, x = deco.Cell.x, y = deco.Cell.y });
@@ -418,6 +442,7 @@ namespace TwoMoons
             Figure = figure;
             Player.SetFigure(figure);
             Phase = GamePhase.Intro;
+            Cutscenes.Play(TwoMoons.Cutscenes.Intro, FinishIntro);
         }
 
         /// <summary>Nach der Intro-Geschichte (oder beim Überspringen): erster Tag im leeren Laden.</summary>
@@ -426,13 +451,13 @@ namespace TwoMoons
             if (Phase != GamePhase.Intro) return;
             Phase = GamePhase.Preparation;
             SaveGame();
-            ShowDialog(new[]
+            Cutscenes.PlayTitleCard(1, () => ShowDialog(new[]
             {
                 $"{PlayerName}: Mein eigener Laden. TwoMoons. Papa, ich mach dich stolz.",
                 "Und eines Tages finde ich die Two-Moons-Karte. Für dich.",
                 "Viel Geld habe ich nicht. Aber es ist ein Anfang: ein Karton Monstera-Packs und Papas altes Regal.",
                 "Erst mal aufräumen. Dann das Regal aufstellen, Packs einräumen und das Schild an der Tür umdrehen!",
-            });
+            }));
         }
 
         public void ShowDialog(string[] lines, Action onDone = null)
@@ -571,8 +596,14 @@ namespace TwoMoons
             SoundManager.Play(Sfx.Quest);
         }
 
-        /// <summary>Nach der Abrechnung beginnt ein neuer Tag.</summary>
+        /// <summary>Nach der Abrechnung beginnt ein neuer Tag – nach dem allerersten Tag ruft Papa an.</summary>
         public void Sleep()
+        {
+            if (Day == 1) PlayStoryOnce("ersterAbend", TwoMoons.Cutscenes.FirstEvening, StartNextDay);
+            else StartNextDay();
+        }
+
+        void StartNextDay()
         {
             Day++;
             Today = new DayStats();

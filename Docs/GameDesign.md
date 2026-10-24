@@ -95,6 +95,14 @@ Drei Stufen: **Gewöhnlich**, **Selten**, **Ultra-Selten** (shiny).
 - **Roter Faden: Papa** – Papas Krankheit begleitet die Story leise weiter, z. B. durch Besuche im Laden,
   Briefe oder alte Fotos und Notizen aus seiner Ladenzeit, die man in späteren Kapiteln findet.
   Im Finale schließt sich der Kreis: Papa erlebt den vollen Laden beim großen Turnier – und die Two-Moons-Karte.
+- **Story-Rhythmus:**
+  - Jedes Kapitel beginnt mit derselben Titelkarte: Nachthimmel, die zwei Monde schweben herein, „Kapitel X“ + Name.
+  - Mitten im Kapitel gibt es kleine Papa-Momente (roter Faden).
+  - Nach jedem geschafften Kapitel kommt eine kurze Story-Szene mit Papa, dann der Level-Aufstieg.
+  - Kapitel 1: *„Der erste Abend“* (nach Tag 1: Papa ruft an und hustet länger als sonst) und
+    *„Licht im Fenster“* (Kapitelende: Papa sieht von der anderen Straßenseite, dass im Laden wieder Licht brennt,
+    und schreibt: „Ich hab das Licht gesehen. Danke.“).
+  - Jede Szene kommt pro Spielstand nur einmal; [Esc] überspringt.
 - **Ziel/Ende:** TwoMoons wird zum besten Laden der Stadt – Höhepunkt ist ein großes
   Turnier/Event, das der Laden ausrichtet.
 

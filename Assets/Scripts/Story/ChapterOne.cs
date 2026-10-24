@@ -69,9 +69,8 @@ namespace TwoMoons
             game.ShowDialog(new[]
             {
                 $"{game.PlayerName}: Geschafft! Die ersten Kunden sind zufrieden nach Hause gegangen.",
-                "TwoMoons ist wirklich eröffnet. Jetzt muss ich dafür sorgen, dass sie wiederkommen …",
-                "Kapitel 1 abgeschlossen! Kapitel 2 „Die ersten Stammkunden“ folgt bald. Bis dahin kannst du weiterspielen.",
-            });
+                "TwoMoons ist wirklich eröffnet. Kapitel 1 abgeschlossen!",
+            }, () => game.PlayStoryOnce("kapitel1Ende", Cutscenes.Chapter1End));
         }
     }
 }

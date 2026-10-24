@@ -92,6 +92,7 @@ namespace TwoMoons
         public List<SavedShowcase> showcases = new List<SavedShowcase>();
         public List<SavedCount> toPlace = new List<SavedCount>();
         public List<SavedDeco> decos = new List<SavedDeco>();
+        public List<string> seenStories = new List<string>();
         public long savedAtTicks;
 
         public DateTime SavedAt => new DateTime(savedAtTicks);

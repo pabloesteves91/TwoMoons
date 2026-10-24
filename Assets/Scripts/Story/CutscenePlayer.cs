@@ -4,111 +4,24 @@ using UnityEngine;
 namespace TwoMoons
 {
     /// <summary>
-    /// Die Geschichte vor dem ersten Tag: ein Kind träumt von einem Laden, Papa erzählt die Legende der zwei Monde,
-    /// und zum 18. Geburtstag bekommt es Papas alten, leeren Laden – Papa ist krank und will noch erleben,
-    /// wie dort wieder Licht brennt.
-    /// Nur zum Durchklicken (Klick / Leertaste), [Esc] überspringt.
+    /// Spielt Story-Szenen ab (Intro, Papa-Momente) und die Titelkarte „Kapitel X“ vor jedem Kapitel.
+    /// Szenen werden durchgeklickt (Klick / Leertaste), [Esc] überspringt.
     /// </summary>
-    public class IntroCutscene : MonoBehaviour
+    public class CutscenePlayer : MonoBehaviour
     {
         const float FadeSeconds = 0.6f;
         const float CharsPerSecond = 45f;
+        const float TitleCardSeconds = 4.5f;
 
-        class Scene
-        {
-            public Action<IntroCutscene, float> Draw;
-            /// <summary>Sprecher (null = Erzähler) und Text. {0} wird durch den Namen ersetzt.</summary>
-            public (string speaker, string text)[] Lines;
-        }
-
-        const string Papa = "Papa";
-        const string Kid = "{0}";
-
-        static readonly Scene[] Scenes =
-        {
-            new Scene
-            {
-                Draw = (c, t) => c.DrawBedroom(t, thought: true, father: false, doorOpen: 0f, dark: 0f),
-                Lines = new[]
-                {
-                    ((string)null, "Es ist spät in der Nacht. Vor dem Fenster gehen zwei Monde auf – ein roter und ein goldener."),
-                    (null, "{0} kann nicht schlafen. Wie fast jede Nacht träumt {0} von einem eigenen Laden …"),
-                    (null, "… mit Regalen voller Sammelkarten und Kunden, die strahlend mit ihren Packs nach Hause gehen."),
-                },
-            },
-            new Scene
-            {
-                Draw = (c, t) => c.DrawBedroom(t + 20f, thought: false, father: true, doorOpen: Mathf.Clamp01(t / 1.2f), dark: 0f, walkTime: t - 1f),
-                Lines = new[]
-                {
-                    ((string)null, "Da geht leise die Tür auf."),
-                    (Papa, "Na, mein Schatz? Wieder zu aufgeregt zum Schlafen?"),
-                    (Kid, "Papa … erzählst du mir noch einmal die Geschichte von den zwei Monden?"),
-                },
-            },
-            new Scene
-            {
-                Draw = (c, t) => c.DrawBedroom(t + 40f, thought: false, father: true, doorOpen: 1f, dark: c.IsLastLine ? Mathf.Clamp01(c.LineTime / 3f) * 0.6f : 0f, walkTime: 99f),
-                Lines = new[]
-                {
-                    (Papa, "Es heißt, in den Nächten, in denen beide Monde zugleich am Himmel stehen, wurde eine ganz besondere Karte gedruckt."),
-                    (Papa, "Man nennt sie „Two Moons“. Niemand weiß, wo sie heute ist."),
-                    (Papa, "Aber man sagt, sie findet ihren Weg zu dem, der seinen Traum nie aufgibt."),
-                    (Kid, "Ich geb meinen Traum nie auf, Papa. Versprochen."),
-                    (Papa, "Das weiß ich. Und jetzt schlaf. Träume brauchen Kraft."),
-                },
-            },
-            new Scene
-            {
-                Draw = (c, t) => c.DrawYearsPass(t),
-                Lines = new[]
-                {
-                    ((string)null, "Die Jahre vergehen. Viele Monde ziehen über den Himmel …"),
-                    (null, "… aber der Traum bleibt."),
-                },
-            },
-            new Scene
-            {
-                Draw = (c, t) => c.DrawKitchen(t),
-                Lines = new[]
-                {
-                    ((string)null, "Am Morgen des 18. Geburtstags."),
-                    (Papa, "Alles Gute, {0}! Ich hab da etwas für dich."),
-                    (null, "Ein alter Schlüssel. Am Anhänger baumeln zwei kleine Monde – ein roter und ein goldener."),
-                    (null, "Papa lächelt. Aber {0} sieht, wie müde er in letzter Zeit aussieht. Und die vielen Tablettendosen auf dem Küchenschrank."),
-                },
-            },
-            new Scene
-            {
-                Draw = (c, t) => c.DrawShopFront(t),
-                Lines = new[]
-                {
-                    (Papa, "Das hier war einmal mein Laden. Als du klein warst, musste ich ihn schließen."),
-                    (Papa, "Ich wollte ihn immer wieder aufmachen. Aber die Ärzte sagen, ich muss jetzt kürzertreten."),
-                    (Kid, "Papa …"),
-                    (Papa, "Schon gut. Ich möchte nur noch erleben, wie hier drin wieder Licht brennt. Ab heute gehört er dir."),
-                },
-            },
-            new Scene
-            {
-                Draw = (c, t) => c.DrawShopEmpty(t),
-                Lines = new[]
-                {
-                    ((string)null, "Drinnen: Staub, Spinnweben und ein schiefes, altes Regal. Sonst nichts."),
-                    (Papa, "Er ist leer, ich weiß. Einen Karton Monstera-Packs habe ich dir noch besorgt. Den Rest schaffst du."),
-                    (Kid, "Er ist perfekt, Papa. Und du wirst sehen, wie er sich füllt. Versprochen."),
-                    (Kid, "Ich weiß auch schon, wie er heißen wird … TwoMoons."),
-                },
-            },
-        };
+        Cutscene cutscene;
+        Action onDone;
+        int titleCardChapter;
 
         int sceneIndex;
         int lineIndex;
         float sceneStart;
         float lineStart;
         float fadeOutStart = -1f;
-        bool finished;
-        bool active;
 
         Rect canvas;
         float pixel;
@@ -116,35 +29,51 @@ namespace TwoMoons
 
         static GameManager Game => GameManager.Instance;
 
-        bool IsLastLine => lineIndex == Scenes[sceneIndex].Lines.Length - 1;
-        float LineTime => Time.unscaledTime - lineStart;
+        public bool IsPlaying => cutscene != null || titleCardChapter > 0;
 
-        void Restart()
+        internal bool IsLastLine => lineIndex == cutscene.Scenes[sceneIndex].Lines.Length - 1;
+        internal float LineTime => Time.unscaledTime - lineStart;
+        internal int LineIndex => lineIndex;
+
+        public void Play(Cutscene scenes, Action done)
         {
+            cutscene = scenes;
+            titleCardChapter = 0;
+            Begin(done);
+        }
+
+        /// <summary>Die immer gleiche Animation zum Start eines Kapitels.</summary>
+        public void PlayTitleCard(int chapter, Action done)
+        {
+            cutscene = null;
+            titleCardChapter = chapter;
+            Begin(done);
+            SoundManager.Play(Sfx.Quest);
+        }
+
+        void Begin(Action done)
+        {
+            onDone = done;
             sceneIndex = 0;
             lineIndex = 0;
             sceneStart = lineStart = Time.unscaledTime;
             fadeOutStart = -1f;
-            finished = false;
         }
 
         void Update()
         {
-            if (Game.Phase != GamePhase.Intro)
-            {
-                active = false;
-                return;
-            }
-            if (!active)
-            {
-                active = true;
-                Restart();
-            }
-            if (finished) return;
+            if (!IsPlaying) return;
 
             if (GameInput.ConsumeCancel())
             {
                 Finish();
+                return;
+            }
+
+            if (titleCardChapter > 0)
+            {
+                bool over = Time.unscaledTime - sceneStart > TitleCardSeconds;
+                if (over || (GameInput.ConfirmPressed && Time.unscaledTime - sceneStart > 1f)) Finish();
                 return;
             }
 
@@ -153,7 +82,7 @@ namespace TwoMoons
                 if (Time.unscaledTime - fadeOutStart < FadeSeconds) return;
                 fadeOutStart = -1f;
                 sceneIndex++;
-                if (sceneIndex >= Scenes.Length)
+                if (sceneIndex >= cutscene.Scenes.Length)
                 {
                     Finish();
                     return;
@@ -173,7 +102,7 @@ namespace TwoMoons
             }
 
             SoundManager.Play(Sfx.Dialog);
-            if (lineIndex < Scenes[sceneIndex].Lines.Length - 1)
+            if (lineIndex < cutscene.Scenes[sceneIndex].Lines.Length - 1)
             {
                 lineIndex++;
                 lineStart = Time.unscaledTime;
@@ -186,17 +115,20 @@ namespace TwoMoons
 
         void Finish()
         {
-            finished = true;
-            Game.FinishIntro();
+            var done = onDone;
+            cutscene = null;
+            titleCardChapter = 0;
+            onDone = null;
+            done?.Invoke();
         }
 
-        string CurrentText => string.Format(Scenes[sceneIndex].Lines[lineIndex].text, Game.PlayerName);
+        string CurrentText => string.Format(cutscene.Scenes[sceneIndex].Lines[lineIndex].text, Game.PlayerName);
 
         int VisibleChars => Mathf.FloorToInt(LineTime * CharsPerSecond);
 
         void OnGUI()
         {
-            if (Game.Phase != GamePhase.Intro || finished) return;
+            if (!IsPlaying) return;
 
             float width = UiKit.Begin();
             EnsureWhite();
@@ -208,22 +140,31 @@ namespace TwoMoons
 
             pixel = Mathf.Min(width / IntroArt.Width, UiKit.VirtualHeight / IntroArt.Height);
             float w = IntroArt.Width * pixel, h = IntroArt.Height * pixel;
-            canvas = new Rect((width - w) / 2f, (UiKit.VirtualHeight - h) / 2f, w, h);
+            var outer = new Rect((width - w) / 2f, (UiKit.VirtualHeight - h) / 2f, w, h);
 
-            GUI.BeginGroup(canvas);
+            GUI.BeginGroup(outer);
             canvas = new Rect(0f, 0f, w, h);
-            Scenes[sceneIndex].Draw(this, Time.unscaledTime - sceneStart);
+            float t = Time.unscaledTime - sceneStart;
+            if (titleCardChapter > 0) DrawTitleCard(t);
+            else cutscene.Scenes[sceneIndex].Draw(this, t);
             GUI.EndGroup();
-            canvas = new Rect((width - w) / 2f, (UiKit.VirtualHeight - h) / 2f, w, h);
+            canvas = outer;
 
             // Ein- und Ausblenden
-            float fade = Mathf.Clamp01(1f - (Time.unscaledTime - sceneStart) / FadeSeconds);
+            float fade = Mathf.Clamp01(1f - t / FadeSeconds);
+            if (titleCardChapter > 0) fade = Mathf.Max(fade, Mathf.Clamp01((t - (TitleCardSeconds - FadeSeconds)) / FadeSeconds));
             if (fadeOutStart >= 0f) fade = Mathf.Max(fade, Mathf.Clamp01((Time.unscaledTime - fadeOutStart) / FadeSeconds));
             if (fade > 0f)
             {
                 GUI.color = new Color(0f, 0f, 0f, fade);
                 GUI.DrawTexture(new Rect(0f, 0f, width, UiKit.VirtualHeight), white);
                 GUI.color = Color.white;
+            }
+
+            if (titleCardChapter > 0)
+            {
+                DrawTitleText(width, t);
+                return;
             }
 
             DrawTextBox(width);
@@ -238,7 +179,7 @@ namespace TwoMoons
         void DrawTextBox(float width)
         {
             if (fadeOutStart >= 0f) return;
-            var (speaker, _) = Scenes[sceneIndex].Lines[lineIndex];
+            var (speaker, _) = cutscene.Scenes[sceneIndex].Lines[lineIndex];
             string text = CurrentText;
             string visible = text.Substring(0, Mathf.Clamp(VisibleChars, 0, text.Length));
 
@@ -254,6 +195,29 @@ namespace TwoMoons
             GUI.Label(new Rect(area.x + 18f, y, area.width - 36f, area.yMax - y - 22f), visible, style.WithFontSize(16));
             if (visible.Length == text.Length)
                 GUI.Label(new Rect(area.x, area.yMax - 22f, area.width - 14f, 18f), "Weiter: Klick / [Leertaste]", UiKit.Hint.WithAlignment(TextAnchor.MiddleRight));
+        }
+
+        // ---------- Titelkarte „Kapitel X“ ----------
+
+        /// <summary>Nachthimmel, die zwei Monde schweben von links und rechts herein.</summary>
+        void DrawTitleCard(float t)
+        {
+            Draw(IntroArt.Get("nightSky"), 0f, 0f);
+            DrawTwinkle(t, 0f, 20f, IntroArt.Width, 70f);
+            float k = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t / 1.6f));
+            Draw(IntroArt.Get("moonRed"), Mathf.Lerp(-20f, 64f, k), 62f + Mathf.Sin(t * 1.2f));
+            Draw(IntroArt.Get("moonGold"), Mathf.Lerp(IntroArt.Width + 6f, 82f, k), 60f + Mathf.Sin(t * 1.2f + 1f));
+        }
+
+        void DrawTitleText(float width, float t)
+        {
+            float alpha = Mathf.Clamp01((t - 0.9f) / 0.8f) * (1f - Mathf.Clamp01((t - (TitleCardSeconds - FadeSeconds)) / FadeSeconds));
+            float grow = Mathf.Lerp(0.85f, 1f, Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((t - 0.9f) / 0.8f)));
+            GUI.color = new Color(1f, 1f, 1f, alpha);
+            GUI.Label(new Rect(0f, 250f, width, 70f), $"Kapitel {titleCardChapter}", UiKit.BigTitle.WithFontSize(Mathf.RoundToInt(56 * grow)));
+            string title = titleCardChapter < Cutscenes.ChapterTitles.Length ? Cutscenes.ChapterTitles[titleCardChapter] : "";
+            GUI.Label(new Rect(0f, 320f, width, 40f), title, UiKit.Title.WithAlignment(TextAnchor.MiddleCenter).WithFontSize(26));
+            GUI.color = Color.white;
         }
 
         // ---------- Zeichnen auf der 160×90-Leinwand (x/y in Pixeln, y = 0 unten) ----------
@@ -278,7 +242,7 @@ namespace TwoMoons
         Sprite PlayerSprite => Art.Get($"player{Game.Figure + 1}");
 
         /// <summary>Die Spielfigur, <paramref name="size"/> Pixel groß, mit den Füßen bei (x, y).</summary>
-        void DrawPlayer(float x, float y, float size, bool flip = false)
+        internal void DrawPlayer(float x, float y, float size, bool flip = false)
         {
             var rect = ToScreen(x, y, size, size);
             if (flip) rect = new Rect(rect.xMax, rect.y, -rect.width, rect.height);
@@ -286,7 +250,7 @@ namespace TwoMoons
         }
 
         /// <summary>Nur den Kopf der Figur zeichnen (obere 7 von 16 Pixeln) – für das Kind im Bett.</summary>
-        void DrawPlayerHead(float x, float y)
+        internal void DrawPlayerHead(float x, float y)
         {
             var sprite = PlayerSprite;
             var texture = sprite.texture;
@@ -296,7 +260,7 @@ namespace TwoMoons
             GUI.DrawTextureWithTexCoords(ToScreen(x, y, 16f, 7f), texture, uv);
         }
 
-        void DrawBedroom(float t, bool thought, bool father, float doorOpen, float dark, float walkTime = 0f)
+        internal void DrawBedroom(float t, bool thought, bool father, float doorOpen, float dark, float walkTime = 0f)
         {
             // Himmel hinter dem Fenster mit aufgehenden Monden (Fensteröffnung: x 92–136, y 40–74).
             var sky = IntroArt.Get("nightSky");
@@ -350,7 +314,7 @@ namespace TwoMoons
             if (dark > 0f) Fill(0f, 0f, IntroArt.Width, IntroArt.Height, new Color(0.02f, 0.02f, 0.08f, dark));
         }
 
-        void DrawTwinkle(float t, float x, float y, float w, float h)
+        internal void DrawTwinkle(float t, float x, float y, float w, float h)
         {
             for (int i = 0; i < 8; i++)
             {
@@ -359,7 +323,7 @@ namespace TwoMoons
             }
         }
 
-        void DrawYearsPass(float t)
+        internal void DrawYearsPass(float t)
         {
             Draw(IntroArt.Get("nightSky"), 0f, 0f);
             DrawTwinkle(t, 0f, 20f, IntroArt.Width, 70f);
@@ -376,7 +340,7 @@ namespace TwoMoons
             DrawPlayer(80f - size / 2f, 2f, size);
         }
 
-        void DrawKitchen(float t)
+        internal void DrawKitchen(float t)
         {
             Draw(IntroArt.Get("kitchen"), 0f, 0f);
             DrawPlayer(30f, 10f, 22f);
@@ -389,9 +353,9 @@ namespace TwoMoons
                 Fill(79f + i * 5f, 46f, 1f, 2f + flicker, new Color(1f, 0.75f + flicker * 0.25f, 0.2f, 1f));
             }
             // Ab dem zweiten Satz hält Papa den Schlüssel hoch, dann schwebt er zum Geburtstagskind.
-            if (lineIndex >= 1)
+            if (LineIndex >= 1)
             {
-                float k = lineIndex >= 2 ? Mathf.Clamp01(LineTime / 1.5f) : 0f;
+                float k = LineIndex >= 2 ? Mathf.Clamp01(LineTime / 1.5f) : 0f;
                 float x = Mathf.Lerp(120f, 76f, k);
                 float y = Mathf.Lerp(30f, 58f, k) + Mathf.Sin(t * 2f) * 1f;
                 Draw(IntroArt.Get("key"), x, y);
@@ -404,7 +368,7 @@ namespace TwoMoons
             }
         }
 
-        void DrawShopFront(float t)
+        internal void DrawShopFront(float t)
         {
             Draw(IntroArt.Get("shopFront"), 0f, 0f);
             float progress = Mathf.Clamp01(t / 3f);
@@ -417,7 +381,7 @@ namespace TwoMoons
             Fill(bird + 1f, 83f + Mathf.Sin(t * 3f) * 2f, 1f, 1f, new Color(0.2f, 0.2f, 0.25f));
         }
 
-        void DrawShopEmpty(float t)
+        internal void DrawShopEmpty(float t)
         {
             Draw(IntroArt.Get("shopEmpty"), 0f, 0f);
             // Lichtkegel durchs Fenster und tanzender Staub
@@ -437,6 +401,83 @@ namespace TwoMoons
                 float a = Mathf.Clamp01(LineTime / 2f);
                 Draw(IntroArt.Get("moonRed"), 66f, 76f, a);
                 Draw(IntroArt.Get("moonGold"), 80f, 74f, a);
+            }
+        }
+
+        /// <summary>Der Laden nachts: dunkel, nur die Lampe über der Kasse. Optional mit Papa am Telefon.</summary>
+        internal void DrawShopNight(float t, bool phoneCall)
+        {
+            Draw(IntroArt.Get("shopEmpty"), 0f, 0f);
+            Fill(0f, 0f, IntroArt.Width, IntroArt.Height, new Color(0.03f, 0.03f, 0.1f, 0.7f));
+
+            // Lampe über der Theke, leicht flackernd
+            float flicker = 0.9f + 0.1f * Mathf.PerlinNoise(t * 3f, 0f);
+            Fill(8f, 30f, 44f, 40f, new Color(1f, 0.8f, 0.45f, 0.12f * flicker));
+            Fill(16f, 44f, 28f, 26f, new Color(1f, 0.8f, 0.45f, 0.12f * flicker));
+            Fill(28f, 74f, 4f, 3f, new Color(1f, 0.9f, 0.6f, flicker));
+            Fill(29f, 77f, 2f, 13f, new Color(0.15f, 0.12f, 0.12f));
+
+            DrawPlayer(22f, 30f, 20f);
+            // Handy am Ohr bzw. in der Hand
+            float buzz = phoneCall ? 0f : Mathf.Sin(t * 30f) * 0.4f * (LineIndex == 0 ? 1f : 0f);
+            Fill(37f + buzz, 41f, 2f, 3f, new Color(0.2f, 0.2f, 0.25f));
+            Fill(37.5f + buzz, 42f, 1f, 1.5f, new Color(0.5f, 0.8f, 1f));
+
+            if (!phoneCall || LineIndex < 2) return;
+
+            // Papa am anderen Ende: kleines Bild rechts, in seinem Wohnzimmer im Sessel
+            float appear = Mathf.Clamp01(LineTime / 0.5f);
+            if (LineIndex > 2) appear = 1f;
+            Fill(96f, 34f, 56f, 46f, new Color(0.1f, 0.07f, 0.06f, appear));
+            Fill(98f, 36f, 52f, 42f, new Color(0.35f, 0.25f, 0.22f, appear));
+            Fill(98f, 36f, 52f, 8f, new Color(0.45f, 0.32f, 0.22f, appear));
+            Fill(104f, 44f, 22f, 14f, new Color(0.45f, 0.18f, 0.16f, appear));
+            Fill(136f, 44f, 6f, 20f, new Color(0.95f, 0.85f, 0.6f, 0.35f * appear));
+            var father = IntroArt.Get("father");
+            float cough = LineIndex == 5 ? Mathf.Abs(Mathf.Sin(LineTime * 9f)) * Mathf.Clamp01(2f - LineTime) : 0f;
+            GUI.color = new Color(1f, 1f, 1f, appear);
+            GUI.DrawTexture(ToScreen(107f, 44f - cough, father.width, father.height), father);
+            GUI.color = Color.white;
+        }
+
+        /// <summary>Die Ladenfront bei Nacht: Zum ersten Mal brennt wieder Licht, über der Tür steht „TwoMoons“.</summary>
+        internal void DrawShopFrontNight(float t, bool papaClose)
+        {
+            Draw(IntroArt.Get("shopFront"), 0f, 0f);
+            Fill(0f, 0f, IntroArt.Width, IntroArt.Height, new Color(0.04f, 0.04f, 0.14f, 0.72f));
+            DrawTwinkle(t, 0f, 70f, IntroArt.Width, 20f);
+
+            // Warmes Licht im Schaufenster und aus der Tür
+            float glow = 0.85f + 0.15f * Mathf.Sin(t * 1.5f);
+            Fill(36f, 22f, 44f, 34f, new Color(1f, 0.8f, 0.45f, 0.85f * glow));
+            Fill(40f, 26f, 36f, 2f, new Color(0.45f, 0.3f, 0.2f));
+            Fill(40f, 36f, 36f, 2f, new Color(0.45f, 0.3f, 0.2f));
+            Fill(36f, 10f, 44f, 12f, new Color(1f, 0.8f, 0.45f, 0.15f * glow));
+            Fill(97f, 18f, 12f, 30f, new Color(1f, 0.8f, 0.45f, 0.35f * glow));
+
+            // Schild mit dem Namen
+            Fill(50f, 62f, 60f, 10f, new Color(0.18f, 0.1f, 0.08f));
+            var sign = ToScreen(50f, 62f, 60f, 10f);
+            GUI.Label(sign, "TwoMoons", UiKit.Title.WithAlignment(TextAnchor.MiddleCenter).WithFontSize(Mathf.RoundToInt(pixel * 6f)));
+
+            // Papa auf der anderen Straßenseite (vorne im Bild)
+            var father = IntroArt.Get("father");
+            if (papaClose)
+            {
+                float walk = Mathf.Clamp01((t - 3f) / 6f);
+                float x = Mathf.Lerp(124f, 175f, walk);
+                float bob = walk > 0f && walk < 1f ? Mathf.Abs(Mathf.Sin(t * 6f)) : 0f;
+                var rect = ToScreen(x, -6f + bob, father.width * 1.6f, father.height * 1.6f);
+                if (walk > 0f) rect = new Rect(rect.xMax, rect.y, -rect.width, rect.height);
+                GUI.color = new Color(0.55f, 0.55f, 0.7f, 1f);
+                GUI.DrawTexture(rect, father);
+                GUI.color = Color.white;
+            }
+            else
+            {
+                GUI.color = new Color(0.45f, 0.45f, 0.6f, 1f);
+                GUI.DrawTexture(ToScreen(130f, -2f, father.width * 1.3f, father.height * 1.3f), father);
+                GUI.color = Color.white;
             }
         }
 
