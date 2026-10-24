@@ -41,7 +41,13 @@ namespace TwoMoons
     public class GameManager : MonoBehaviour
     {
         public const int StartMoney = 6000;
-        public const float DayLengthSeconds = 300f;
+        /// <summary>Öffnungszeit in Echtzeit: Level 1–2 fünf Minuten, ab Level 3 (Turniere) sieben Minuten.</summary>
+        public static float DayLengthFor(int storeLevel) => storeLevel >= 3 ? 420f : 300f;
+
+        /// <summary>Länge des laufenden Tages. Wird beim Öffnen festgelegt, damit ein Level-Aufstieg die Uhr nicht verstellt.</summary>
+        public float DayLength { get; private set; } = DayLengthFor(1);
+
+        public static float DayLengthSeconds => Instance != null ? Instance.DayLength : DayLengthFor(1);
         public const int OpenMinute = 9 * 60;
         public const int CloseMinute = 18 * 60;
 
@@ -527,6 +533,7 @@ namespace TwoMoons
             // Weiter mit der gespeicherten Tageszeit. Kunden, die gerade im Laden waren, kommen nicht mit.
             var phase = (GamePhase)data.phase;
             Phase = phase == GamePhase.Open || phase == GamePhase.Closing || phase == GamePhase.Summary ? phase : GamePhase.Preparation;
+            DayLength = DayLengthFor(StoreLevel);
             DayTime = Mathf.Clamp(data.dayTime, 0f, DayLengthSeconds);
             if (data.today != null) Today = data.today;
             ShowToast($"Willkommen zurück, {PlayerName}! Tag {Day}, {ClockText}.");
@@ -689,6 +696,7 @@ namespace TwoMoons
             if (Phase != GamePhase.Preparation) return;
             Phase = GamePhase.Open;
             DayTime = 0f;
+            DayLength = DayLengthFor(StoreLevel);
             ShowToast("Der Laden ist geöffnet!");
             SoundManager.Play(Sfx.Doorbell);
             ShopOpened?.Invoke();

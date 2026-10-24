@@ -23,7 +23,7 @@ namespace TwoMoons
             new Model { Product = Catalog.PrintLarge, Filament = 4, Hours = 3f },
         };
 
-        /// <summary>Echtzeit-Sekunden pro Spielstunde (5 Minuten für 9 Stunden).</summary>
+        /// <summary>Echtzeit-Sekunden pro Spielstunde (Öffnungszeit für 9 Stunden).</summary>
         static float SecondsPerHour => GameManager.DayLengthSeconds / 9f;
         const float JamChancePerPrint = 0.12f;
 
