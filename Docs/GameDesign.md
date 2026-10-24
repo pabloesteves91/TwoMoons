@@ -125,7 +125,8 @@ Nach dem Finale kann man weiterspielen.
 - **Menüpunkte:** Fortsetzen (nur wenn ein Spielstand existiert) · Neues Spiel · Laden · Einstellungen · Credits · Beenden
 - **Speichern:** automatisch jeden Morgen nach dem Schlafen + jederzeit manuell über das Esc-Menü.
   Spielstände liegen als JSON in `Application.persistentDataPath` (`spielstand_1.json` …).
-  Beim Laden beginnt der gespeicherte Tag morgens vor dem Öffnen.
+  Gespeichert werden auch Tagesphase, Uhrzeit, Aufgaben und Tageszahlen; nach dem Laden geht es genau dort weiter.
+  Kunden, die gerade im Laden waren, werden nicht gespeichert.
 - **Esc-Menü im Spiel:** Weiter · Speichern · Einstellungen · Zum Hauptmenü · Spiel beenden (mit Nachfrage, ob gespeichert werden soll)
 - **Neues Spiel:** Speicherplatz wählen (belegt → Nachfrage „Überschreiben?“), dann Name und Figur
 - **Laden:** Spielstand wählen oder mit Nachfrage löschen

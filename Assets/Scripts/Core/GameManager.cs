@@ -17,6 +17,7 @@ namespace TwoMoons
         Summary,
     }
 
+    [Serializable]
     public class DayStats
     {
         public int Income;
@@ -259,9 +260,12 @@ namespace TwoMoons
             }
             GetComponent<ChapterOne>().RestoreProgress(data.questProgress);
 
-            // Geladen wird immer am Morgen, vor dem Öffnen.
-            Phase = GamePhase.Preparation;
-            ShowToast($"Willkommen zurück, {PlayerName}! Tag {Day}.");
+            // Weiter mit der gespeicherten Tageszeit. Kunden, die gerade im Laden waren, kommen nicht mit.
+            var phase = (GamePhase)data.phase;
+            Phase = phase == GamePhase.Open || phase == GamePhase.Closing || phase == GamePhase.Summary ? phase : GamePhase.Preparation;
+            DayTime = Mathf.Clamp(data.dayTime, 0f, DayLengthSeconds);
+            if (data.today != null) Today = data.today;
+            ShowToast($"Willkommen zurück, {PlayerName}! Tag {Day}, {ClockText}.");
         }
 
         SaveData CreateSaveData()
@@ -275,6 +279,9 @@ namespace TwoMoons
                 reputation = Reputation,
                 shelvesToPlace = ShelvesToPlace,
                 showcasesToPlace = ShowcasesToPlace,
+                phase = (int)Phase,
+                dayTime = DayTime,
+                today = Today,
                 questProgress = GetComponent<ChapterOne>().SaveProgress(),
             };
             foreach (var price in prices) data.prices.Add(new SavedPrice { product = (int)price.Key, cents = price.Value });

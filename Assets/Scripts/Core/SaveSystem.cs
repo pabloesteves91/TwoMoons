@@ -61,6 +61,10 @@ namespace TwoMoons
         public int reputation;
         public int shelvesToPlace;
         public int showcasesToPlace;
+        /// <summary>Tagesphase (GamePhase) und Sekunden seit Ladenöffnung.</summary>
+        public int phase;
+        public float dayTime;
+        public DayStats today;
         public int chapter = 1;
         public int[] questProgress;
         public List<SavedPrice> prices = new List<SavedPrice>();
