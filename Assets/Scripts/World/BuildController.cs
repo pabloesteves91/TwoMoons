@@ -102,6 +102,9 @@ namespace TwoMoons
                 case Furniture.Showcase:
                     WorldFactory.SpawnShowcase(cell);
                     break;
+                case Furniture.PremiumShowcase:
+                    WorldFactory.SpawnShowcase(cell, true);
+                    break;
                 default:
                     WorldFactory.SpawnDeco(Current, cell);
                     game.NotifyDecoPlaced();

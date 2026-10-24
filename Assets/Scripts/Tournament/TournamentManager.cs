@@ -8,6 +8,7 @@ namespace TwoMoons
     /// Morgens kommen Gratis-Packs vom Hersteller für den Prizepool, ab 13 Uhr melden sich Spieler
     /// an der Kasse an (5 € Startgeld), um 15 Uhr wird an den Spieltischen gespielt,
     /// um 18 Uhr versammeln sich alle am Turnier-Counter zur Siegerehrung.
+    /// Ab Level 6 werden daraus Großturniere (mehr Spieler, mehr XP), in Kapitel 7 kommt das Stadtturnier als Finale.
     /// </summary>
     public class TournamentManager : MonoBehaviour
     {
@@ -82,12 +83,33 @@ namespace TwoMoons
 
         public bool Ready => Game.StoreLevel >= 3 && Tables().Count > 0 && Counter() != null;
 
+        /// <summary>Großturnier ab Level 6: mehr Spieler und mehr Belohnung.</summary>
+        public bool IsBig => Game.StoreLevel >= 6;
+
+        /// <summary>Das nächste Turnier ist das Stadtturnier (letzte Etappe von Kapitel 7).</summary>
+        public bool IsCityTournament
+        {
+            get
+            {
+                var chapters = Game.ChapterProgress;
+                return chapters.Chapter == 7 && !chapters.Completed && chapters.Quests.Exists(q => q.Key == CityTournamentKey);
+            }
+        }
+
+        public const string CityTournamentKey = "cityTournament";
+
+        /// <summary>Papa schaut beim Stadtturnier aus der ersten Reihe zu.</summary>
+        GameObject papa;
+
+        string Kind => IsCityTournament ? "Stadtturnier" : IsBig ? "Großturnier" : "Turnier";
+
         /// <summary>Wie viele Spieler voraussichtlich kommen: Ruf, Prizepool und Bonus-Karte locken.</summary>
         public int ExpectedPlayers
         {
             get
             {
-                int players = 2 + Game.ReputationStage + PrizePackTotal / 4;
+                if (IsCityTournament) return Seats;
+                int players = 2 + Game.ReputationStage + PrizePackTotal / 4 + (IsBig ? 3 : 0);
                 var bonus = CardDatabase.Get(BonusCard);
                 if (bonus != null) players += 1 + (int)bonus.Rarity;
                 return Mathf.Clamp(players, 0, Seats);
@@ -104,15 +126,15 @@ namespace TwoMoons
                 if (NextDay <= 0) return null;
                 switch (Current)
                 {
-                    case State.Registration: return $"Turnier heute 15–18 Uhr ({GameName}) · Anmeldungen: {Players.Count + PendingEntrants}";
-                    case State.Running: return $"Turnier läuft: Runde {Round}/{Rounds} · {Players.Count} Spieler";
+                    case State.Registration: return $"{Kind} heute 15–18 Uhr ({GameName}) · Anmeldungen: {Players.Count + PendingEntrants}";
+                    case State.Running: return $"{Kind} läuft: Runde {Round}/{Rounds} · {Players.Count} Spieler";
                     case State.Ceremony: return "Siegerehrung am Turnier-Counter – [E] dort drücken!";
                 }
                 if (IsTournamentDay)
                     return HasPrizepool
-                        ? $"Turnier heute 15–18 Uhr ({GameName}) · Prizepool: {PrizePackTotal} Packs"
-                        : "Turnier heute 15 Uhr – Prizepool am Turnier-Counter vorbereiten!";
-                return $"Nächstes Turnier: Tag {NextDay}, 15 Uhr ({GameName})";
+                        ? $"{Kind} heute 15–18 Uhr ({GameName}) · Prizepool: {PrizePackTotal} Packs"
+                        : $"{Kind} heute 15 Uhr – Prizepool am Turnier-Counter vorbereiten!";
+                return $"Nächstes {Kind}: Tag {NextDay}, 15 Uhr ({GameName})";
             }
         }
 
@@ -150,13 +172,13 @@ namespace TwoMoons
             if (NextDay <= 0 || NextDay < Game.Day) NextDay = Game.Day + 1;
             if (!IsTournamentDay)
             {
-                Game.ShowToast($"Morgen ist Turniertag! ({GameName}, 15–18 Uhr)", 5f);
+                Game.ShowToast($"Morgen ist {Kind}! ({GameName}, 15–18 Uhr)", 5f);
                 return;
             }
 
-            int packs = 8 + 4 * (Game.StoreLevel - 3);
+            int packs = IsCityTournament ? 40 : 8 + 4 * (Game.StoreLevel - 3);
             WorldFactory.SpawnBox(WorldFactory.FreeDeliveryCell(), Catalog.TournamentPack, packs);
-            Game.ShowToast($"Turniertag! Der Hersteller schickt {packs} Turnier-Packs – bring sie zum Turnier-Counter.", 7f);
+            Game.ShowToast($"{Kind}! Der Hersteller schickt {packs} Turnier-Packs – bring sie zum Turnier-Counter.", 7f);
         }
 
         /// <summary>Hersteller-Packs in den Prizepool legen und automatisch aufteilen.</summary>
@@ -217,7 +239,21 @@ namespace TwoMoons
             expectedPlayers = ExpectedPlayers;
             spawnedEntrants = 0;
             nextSpawn = 0f;
-            Game.ShowToast($"Die Anmeldung fürs Turnier läuft! Erwartet: etwa {expectedPlayers} Spieler.", 5f);
+            Game.ShowToast($"Die Anmeldung fürs {Kind} läuft! Erwartet: etwa {expectedPlayers} Spieler.", 5f);
+            if (IsCityTournament) SpawnPapa();
+        }
+
+        /// <summary>Papa nimmt neben dem Turnier-Counter Platz, in der ersten Reihe.</summary>
+        void SpawnPapa()
+        {
+            if (papa != null) return;
+            var counter = Counter();
+            var spot = ShopGrid.PlayerStartCell;
+            if (counter != null)
+                foreach (var cell in Game.Grid.WalkableNeighbours(counter.Cell)) { spot = cell; break; }
+            papa = WorldFactory.CreateSprite("Papa", "papa", ShopGrid.CellToWorld(spot), 0).gameObject;
+            papa.AddComponent<YSort>();
+            Game.ShowToast("Papa ist da! Er sitzt in der ersten Reihe und winkt dir zu.", 6f);
         }
 
         void SpawnEntrants()
@@ -254,6 +290,7 @@ namespace TwoMoons
             if (Players.Count < 2)
             {
                 Game.ShowToast("Zu wenige Anmeldungen – das Turnier fällt heute aus.", 6f);
+                if (papa != null) Destroy(papa);
                 foreach (var player in Players) player.Leave(false);
                 Players.Clear();
                 Finish();
@@ -261,7 +298,7 @@ namespace TwoMoons
             }
             Current = State.Running;
             SoundManager.Play(Sfx.Quest);
-            Game.ShowToast($"Das Turnier beginnt! {Players.Count} Spieler, 3 Runden.", 5f);
+            Game.ShowToast($"Das {Kind} beginnt! {Players.Count} Spieler, 3 Runden.", 5f);
             foreach (var player in Players) player.StartPlaying();
         }
 
@@ -295,11 +332,13 @@ namespace TwoMoons
             foreach (var player in Players) player.Leave(hadPrizes);
             Players.Clear();
 
+            bool city = IsCityTournament;
             if (hadPrizes)
             {
+                int xp = (IsBig ? 100 : 60) + (players >= Seats ? 20 : 0);
                 Game.ChangeReputation(3 + players);
-                Game.AddXp(60 + (players >= Seats ? 20 : 0));
-                Game.ShowToast($"Tolles Turnier! Ruf +{3 + players}, +60 XP", 6f);
+                Game.AddXp(xp);
+                Game.ShowToast($"Tolles {Kind}! Ruf +{3 + players}, +{xp} XP", 6f);
             }
             else
             {
@@ -312,13 +351,16 @@ namespace TwoMoons
             Held++;
             Game.NotifyTournamentHeld();
 
+            if (papa != null) Destroy(papa);
             if (Held == 1)
                 Game.PlayStoryOnce("erstesTurnier", Cutscenes.FirstTournament);
+            if (city && hadPrizes) Game.NotifyCityTournament();
             Finish();
         }
 
         void CeremonyMissed()
         {
+            if (papa != null) Destroy(papa);
             foreach (var player in Players) player.Leave(false);
             Players.Clear();
             Game.ChangeReputation(-5);

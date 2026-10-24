@@ -58,6 +58,7 @@ namespace TwoMoons
                 if (grade >= 9) Advance("topGrade", 1);
             };
             game.ShopExpanded += () => Advance("expanded", 1);
+            game.CityTournamentHeld += () => Advance(TournamentManager.CityTournamentKey, 1);
             game.TournamentHeld += () => Advance("tournament", 1);
             game.EmployeeHired += () => Advance("hired", 1);
             game.Printed += () => Advance("printed", 1);
@@ -147,12 +148,14 @@ namespace TwoMoons
             if (StageIndex < Stages.Count - 1)
             {
                 // Nächste Etappe, mit einem kleinen Story-Moment dazwischen.
-                var outro = Stage.Outro;
+                var finished = Stage;
                 StageIndex++;
                 SoundManager.Play(Sfx.Quest);
                 game.ShowToast($"Neue Aufgaben: {Stage.Title}", 5f);
-                if (outro != null)
-                    game.ShowDialog(Array.ConvertAll(outro, line => string.Format(line, game.PlayerName)));
+                if (finished.Outro != null)
+                    game.ShowDialog(Array.ConvertAll(finished.Outro, line => string.Format(line, game.PlayerName)), finished.Then);
+                else
+                    finished.Then?.Invoke();
                 return;
             }
 

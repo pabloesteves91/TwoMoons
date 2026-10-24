@@ -40,6 +40,19 @@ namespace TwoMoons
                 Rect(x + w - 1, y, 1, h, c);
             }
 
+            void Circle(int cx, int cy, int r, Color32 c)
+            {
+                for (int yy = -r; yy <= r; yy++)
+                for (int xx = -r; xx <= r; xx++)
+                    if (xx * xx + yy * yy <= r * r + r) Rect(cx + xx, cy + yy, 1, 1, c);
+            }
+
+            void Speckle(Color32 c, int count, int seed)
+            {
+                var random = new System.Random(seed);
+                for (int i = 0; i < count; i++) Rect(random.Next(Size), random.Next(Size), 1, 1, c);
+            }
+
             void Face(Color32 skin, bool smile, bool angry)
             {
                 var outline = new Color32(40, 25, 20, 255);
@@ -310,6 +323,55 @@ namespace TwoMoons
                     Rect(3, 9, 10, 4, new Color32(220, 90, 110, 255));
                     Rect(5, 13, 6, 1, new Color32(220, 90, 110, 255));
                     Rect(4, 5, 8, 3, new Color32(170, 50, 70, 255));
+                    break;
+                case "premiumShowcase":
+                    Rect(0, 0, 16, 14, new Color32(40, 30, 50, 255));
+                    Rect(1, 2, 14, 10, new Color32(200, 230, 255, 255));
+                    Rect(1, 12, 14, 2, new Color32(255, 220, 120, 255));
+                    Rect(0, 14, 16, 2, new Color32(240, 200, 80, 255));
+                    break;
+                case "arcade":
+                    Rect(2, 0, 12, 16, new Color32(60, 30, 110, 255));
+                    Rect(3, 8, 10, 6, new Color32(20, 20, 30, 255));
+                    Rect(4, 9, 8, 4, new Color32(90, 220, 255, 255));
+                    Rect(3, 5, 10, 2, new Color32(40, 20, 80, 255));
+                    Rect(5, 5, 1, 2, new Color32(240, 80, 80, 255));
+                    Rect(9, 5, 2, 1, new Color32(255, 220, 90, 255));
+                    Rect(2, 14, 12, 2, new Color32(255, 90, 160, 255));
+                    break;
+                case "turf":
+                    Rect(0, 0, 16, 16, new Color32(80, 160, 70, 255));
+                    Speckle(new Color32(110, 190, 90, 255), 30, 3);
+                    Speckle(new Color32(60, 130, 55, 255), 20, 4);
+                    break;
+                case "trophyWall":
+                    Rect(0, 3, 16, 11, new Color32(110, 70, 40, 255));
+                    Rect(1, 4, 14, 1, new Color32(80, 50, 30, 255));
+                    Rect(1, 9, 14, 1, new Color32(80, 50, 30, 255));
+                    break;
+                case "trophy":
+                    Rect(5, 0, 6, 2, new Color32(120, 80, 40, 255));
+                    Rect(7, 2, 2, 4, new Color32(240, 190, 60, 255));
+                    Rect(4, 6, 8, 6, new Color32(250, 210, 80, 255));
+                    Rect(2, 9, 2, 3, new Color32(250, 210, 80, 255));
+                    Rect(12, 9, 2, 3, new Color32(250, 210, 80, 255));
+                    break;
+                case "moonStatue":
+                    Rect(3, 0, 10, 3, new Color32(120, 120, 130, 255));
+                    Rect(7, 3, 2, 5, new Color32(150, 150, 160, 255));
+                    Circle(6, 10, 3, new Color32(225, 85, 40, 255));
+                    Circle(10, 11, 3, new Color32(245, 200, 80, 255));
+                    break;
+                case "papa":
+                    Rect(5, 0, 2, 3, new Color32(60, 50, 50, 255));
+                    Rect(9, 0, 2, 3, new Color32(60, 50, 50, 255));
+                    Rect(4, 3, 8, 6, new Color32(110, 90, 70, 255));
+                    Rect(7, 3, 2, 6, new Color32(200, 190, 170, 255));
+                    Rect(5, 9, 6, 5, new Color32(240, 200, 160, 255));
+                    Rect(5, 13, 6, 2, new Color32(200, 200, 205, 255));
+                    Rect(6, 11, 1, 1, new Color32(30, 20, 25, 255));
+                    Rect(9, 11, 1, 1, new Color32(30, 20, 25, 255));
+                    Rect(6, 9, 4, 1, new Color32(200, 200, 205, 255));
                     break;
                 case "neonSign":
                     Rect(1, 5, 14, 7, new Color32(30, 20, 40, 255));

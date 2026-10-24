@@ -159,6 +159,11 @@ namespace TwoMoons
             Furnishing(Furniture.NeonSign, "Für die Wand, leuchtet · Gemütlichkeit +5", 9000, 4),
             Furnishing(Furniture.GradingStation, "Karten bewerten und versiegeln (5 € pro Karte)", 40000, 5),
             Furnishing(Furniture.Lounge, "Gemütlich für die Spielecke · Gemütlichkeit +3", 6000, 5),
+            Furnishing(Furniture.PremiumShowcase, "Beleuchtet, 8 Karten · Sammler zahlen bis +10 %", 25000, 6),
+            Furnishing(Furniture.Arcade, "Kunden zocken für 1 € pro Runde · Gemütlichkeit +6", 40000, 6),
+            Furnishing(Furniture.Turf, "Kunstrasen-Ecke, man kann darüber laufen · Gemütlichkeit +4", 5000, 6),
+            Furnishing(Furniture.TrophyWall, "Für die Wand, zeigt deine Turniere · Gemütlichkeit +8", 30000, 7),
+            Furnishing(Furniture.MoonStatue, "Das Wahrzeichen von TwoMoons · Gemütlichkeit +10", 50000, 7),
         };
 
         /// <summary>Ein Karton Ware zum Großhandelspreis.</summary>

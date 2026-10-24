@@ -481,6 +481,141 @@ namespace TwoMoons
             }
         }
 
+        /// <summary>Kleine Figur aus dem Spiel (Kunde, Papa …) auf der Leinwand.</summary>
+        void DrawFigure(string sprite, float x, float y, float size, bool flip = false, float alpha = 1f)
+        {
+            var rect = ToScreen(x, y, size, size);
+            if (flip) rect = new Rect(rect.xMax, rect.y, -rect.width, rect.height);
+            GUI.color = new Color(1f, 1f, 1f, alpha);
+            UiKit.DrawSprite(Art.Get(sprite), rect);
+            GUI.color = Color.white;
+        }
+
+        /// <summary>Ein Brief auf dem Tresen, im Licht der Lampe. Optional mit den zwei gezeichneten Monden.</summary>
+        internal void DrawLetter(float t, bool moons)
+        {
+            DrawShopNight(t, phoneCall: false);
+            float rise = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t / 1.2f));
+            float y = Mathf.Lerp(-40f, 14f, rise);
+            Fill(54f, y - 1f, 54f, 64f, new Color(0.3f, 0.22f, 0.15f));
+            Fill(55f, y, 52f, 62f, new Color(0.96f, 0.92f, 0.8f));
+            for (int i = 0; i < 7; i++) Fill(60f, y + 50f - i * 6f, 30f + (i * 7) % 12, 1f, new Color(0.35f, 0.3f, 0.35f));
+            if (moons)
+            {
+                Draw(IntroArt.Get("moonRed"), 80f, y + 8f, rise);
+                Draw(IntroArt.Get("moonGold"), 92f, y + 12f, rise);
+            }
+        }
+
+        /// <summary>Der volle Laden am Tag. Mit <paramref name="papaAtRegister"/> steht Papa an der Kasse.</summary>
+        internal void DrawShopBusy(float t, bool papaAtRegister)
+        {
+            Draw(IntroArt.Get("shopEmpty"), 0f, 0f);
+            Fill(0f, 0f, IntroArt.Width, IntroArt.Height, new Color(1f, 0.9f, 0.7f, 0.12f));
+            // Regale voller Packs
+            for (int i = 0; i < 3; i++)
+            {
+                float x = 70f + i * 28f;
+                Fill(x, 20f, 20f, 34f, new Color(0.45f, 0.3f, 0.2f));
+                for (int row = 0; row < 3; row++)
+                for (int p = 0; p < 4; p++)
+                    Fill(x + 2f + p * 4.5f, 24f + row * 10f, 3f, 6f, Color.HSVToRGB(Mathf.Repeat(i * 0.3f + p * 0.13f, 1f), 0.6f, 0.9f));
+            }
+            // Kunden laufen hin und her
+            for (int i = 0; i < 4; i++)
+            {
+                float phase = Mathf.Repeat(t * 0.08f + i * 0.27f, 1f);
+                float x = Mathf.Lerp(150f, 50f, phase);
+                float bob = Mathf.Abs(Mathf.Sin(t * 7f + i)) * 0.8f;
+                DrawFigure($"customer{i % 3 + 1}", x, 4f + bob, 18f, flip: true);
+            }
+            // Theke mit Kasse
+            Fill(6f, 4f, 40f, 16f, new Color(0.4f, 0.26f, 0.18f));
+            Fill(6f, 18f, 40f, 3f, new Color(0.55f, 0.38f, 0.25f));
+            Fill(30f, 21f, 9f, 6f, new Color(0.25f, 0.25f, 0.3f));
+            if (papaAtRegister)
+            {
+                float wave = LineIndex >= 1 ? Mathf.Sin(t * 5f) * 0.6f : 0f;
+                Draw(IntroArt.Get("father"), 14f, 14f + Mathf.Abs(wave));
+            }
+            DrawPlayer(48f, 4f, 20f, flip: true);
+        }
+
+        /// <summary>Das Stadtturnier: volle Tische, Banner, Papa in der ersten Reihe.</summary>
+        internal void DrawCityTournament(float t)
+        {
+            Draw(IntroArt.Get("shopEmpty"), 0f, 0f);
+            Fill(0f, 0f, IntroArt.Width, IntroArt.Height, new Color(1f, 0.85f, 0.6f, 0.15f));
+            // Banner
+            Fill(30f, 70f, 100f, 12f, new Color(0.55f, 0.12f, 0.1f));
+            Fill(31f, 71f, 98f, 10f, new Color(0.75f, 0.2f, 0.15f));
+            GUI.Label(ToScreen(30f, 70f, 100f, 12f), "STADTTURNIER", UiKit.Title.WithAlignment(TextAnchor.MiddleCenter).WithFontSize(Mathf.RoundToInt(pixel * 7f)));
+            // Wimpelkette
+            for (int i = 0; i < 16; i++)
+                Fill(4f + i * 10f, 86f - (i % 2), 4f, 3f, Color.HSVToRGB(Mathf.Repeat(i * 0.17f, 1f), 0.6f, 1f));
+            // Spieltische mit Spielern
+            for (int table = 0; table < 2; table++)
+            {
+                float x = 34f + table * 56f;
+                Fill(x, 24f, 36f, 10f, new Color(0.2f, 0.45f, 0.3f));
+                Fill(x, 22f, 36f, 2f, new Color(0.35f, 0.22f, 0.15f));
+                for (int seat = 0; seat < 3; seat++)
+                {
+                    float bob = Mathf.Abs(Mathf.Sin(t * 3f + seat + table * 2f)) * 0.6f;
+                    DrawFigure($"customer{(seat + table) % 3 + 1}", x + seat * 12f, 30f + bob, 14f);
+                }
+            }
+            // Zuschauer und Papa vorne
+            for (int i = 0; i < 6; i++) DrawFigure($"customer{i % 3 + 1}", 8f + i * 24f, -2f, 18f, alpha: 0.85f);
+            Draw(IntroArt.Get("father"), 66f, -6f);
+            DrawPlayer(88f, 0f, 20f, flip: true);
+        }
+
+        /// <summary>Die legendäre Karte erscheint im Licht der zwei Monde.</summary>
+        internal void DrawLegendCard(float t)
+        {
+            Draw(IntroArt.Get("nightSky"), 0f, 0f);
+            DrawTwinkle(t, 0f, 10f, IntroArt.Width, 80f);
+            float k = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(t / 2f));
+            Draw(IntroArt.Get("moonRed"), Mathf.Lerp(-20f, 40f, k), 58f);
+            Draw(IntroArt.Get("moonGold"), Mathf.Lerp(IntroArt.Width + 6f, 106f, k), 60f);
+
+            // Lichtschein
+            float glow = 0.5f + 0.5f * Mathf.Sin(t * 2f);
+            Fill(56f, 6f, 48f, 78f, new Color(1f, 0.9f, 0.5f, 0.12f + 0.08f * glow));
+            Fill(62f, 10f, 36f, 70f, new Color(1f, 0.9f, 0.5f, 0.12f + 0.08f * glow));
+
+            float appear = Mathf.Clamp01((t - 0.8f) / 1.5f);
+            float scale = Mathf.Lerp(0.6f, 1f, appear);
+            float w = 42f * scale, h = 56f * scale;
+            var rect = ToScreen(80f - w / 2f, 46f - h / 2f + Mathf.Sin(t * 1.5f) * 1.5f, w, h);
+            GUI.color = new Color(1f, 1f, 1f, appear);
+            CardUI.Draw(rect, CardDatabase.TwoMoons);
+            GUI.color = Color.white;
+        }
+
+        /// <summary>Schluss: Papa und {0} vor dem Laden, über ihnen stehen beide Monde am Himmel.</summary>
+        internal void DrawFinaleNight(float t)
+        {
+            Draw(IntroArt.Get("shopFront"), 0f, 0f);
+            Fill(0f, 0f, IntroArt.Width, IntroArt.Height, new Color(0.04f, 0.04f, 0.14f, 0.65f));
+            DrawTwinkle(t, 0f, 66f, IntroArt.Width, 24f);
+            float rise = Mathf.Min(t, 12f) * 0.6f;
+            Draw(IntroArt.Get("moonRed"), 20f, 66f + rise * 0.2f);
+            Draw(IntroArt.Get("moonGold"), 128f, 68f + rise * 0.2f);
+            float glow = 0.85f + 0.15f * Mathf.Sin(t * 1.5f);
+            Fill(36f, 22f, 44f, 34f, new Color(1f, 0.8f, 0.45f, 0.85f * glow));
+            Fill(50f, 62f, 60f, 10f, new Color(0.18f, 0.1f, 0.08f));
+            GUI.Label(ToScreen(50f, 62f, 60f, 10f), "TwoMoons", UiKit.Title.WithAlignment(TextAnchor.MiddleCenter).WithFontSize(Mathf.RoundToInt(pixel * 6f)));
+            Draw(IntroArt.Get("father"), 98f, 2f);
+            DrawPlayer(82f, 2f, 22f);
+            if (IsLastLine)
+            {
+                float a = Mathf.Clamp01(LineTime / 2f);
+                Fill(0f, 0f, IntroArt.Width, IntroArt.Height, new Color(0f, 0f, 0f, a * 0.5f));
+            }
+        }
+
         void EnsureWhite()
         {
             if (white != null) return;

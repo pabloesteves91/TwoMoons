@@ -19,7 +19,7 @@ namespace TwoMoons
         {
             if (cache.TryGetValue(card.Id, out var texture) && texture != null) return texture;
             texture = Resources.Load<Texture2D>($"Cards/{card.ArtKey}");
-            if (texture == null) texture = CreatePlaceholder(card);
+            if (texture == null) texture = card == CardDatabase.TwoMoons ? CreateTwoMoons() : CreatePlaceholder(card);
             cache[card.Id] = texture;
             return texture;
         }
@@ -93,6 +93,26 @@ namespace TwoMoons
             int gems = (int)card.Rarity + 1;
             for (int i = 0; i < gems; i++) Fill(px, 5 + i * 3, 5, 2, 2, frame);
 
+            texture.SetPixels32(px);
+            texture.Apply();
+            return texture;
+        }
+
+        /// <summary>Platzhalter für die Legende: Nachthimmel mit rotem und goldenem Mond, goldener Rahmen.</summary>
+        static Texture2D CreateTwoMoons()
+        {
+            var texture = NewTexture();
+            var px = new Color32[Width * Height];
+            var gold = new Color32(245, 200, 80, 255);
+            Fill(px, 0, 0, Width, Height, new Color32(30, 22, 18, 255));
+            Fill(px, 1, 1, Width - 2, Height - 2, gold);
+            Fill(px, 3, 12, Width - 6, Height - 15, new Color32(25, 25, 70, 255));
+            var random = new System.Random(2);
+            for (int i = 0; i < 14; i++) Fill(px, 3 + random.Next(Width - 6), 12 + random.Next(Height - 15), 1, 1, new Color32(255, 250, 220, 255));
+            Circle(px, 9, 22, 4, new Color32(225, 85, 40, 255));
+            Circle(px, 15, 18, 4, gold);
+            Fill(px, 3, 3, Width - 6, 7, new Color32(245, 235, 210, 255));
+            for (int i = 0; i < 5; i++) Fill(px, 5 + i * 3, 5, 2, 2, gold);
             texture.SetPixels32(px);
             texture.Apply();
             return texture;

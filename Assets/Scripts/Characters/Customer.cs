@@ -224,8 +224,9 @@ namespace TwoMoons
 
                 case State.ToCouch:
                     if (!Arrived) break;
-                    // Auf die Couch setzen und zocken.
-                    transform.position = ShopGrid.CellToWorld(DecoCell(Couch)) + new Vector3(0f, 0.1f, 0f);
+                    // Auf die Couch setzen (am Arcade-Automaten davor stehen bleiben) und zocken.
+                    if (Couch.Type == Furniture.Couch)
+                        transform.position = ShopGrid.CellToWorld(DecoCell(Couch)) + new Vector3(0f, 0.1f, 0f);
                     state = State.Gaming;
                     timer = Random.Range(20f, 40f);
                     moodIcon.enabled = true;
@@ -350,14 +351,17 @@ namespace TwoMoons
             }
         }
 
-        /// <summary>Freie Couch, wenn die Couch-Ecke komplett ist (Couch + Fernseher + Konsole).</summary>
-        static DecoItem FreeCouch()
+        /// <summary>
+        /// Freier Platz zum Zocken: eine Couch, wenn die Couch-Ecke komplett ist (Couch + Fernseher + Konsole),
+        /// oder ein Arcade-Automat.
+        /// </summary>
+        static DecoItem FreeGamingSpot()
         {
             var decos = Game.Decos;
-            if (!decos.Exists(d => d.Type == Furniture.Tv) || !decos.Exists(d => d.Type == Furniture.Console)) return null;
-            foreach (var deco in decos)
-                if (deco.Type == Furniture.Couch && !Active.Exists(c => c.Couch == deco)) return deco;
-            return null;
+            bool couchCorner = decos.Exists(d => d.Type == Furniture.Tv) && decos.Exists(d => d.Type == Furniture.Console);
+            var free = decos.FindAll(deco =>
+                ((deco.Type == Furniture.Couch && couchCorner) || deco.Type == Furniture.Arcade) && !deco.InUse);
+            return free.Count > 0 ? free[Random.Range(0, free.Count)] : null;
         }
 
         /// <summary>Nach dem Zocken: glücklich, Ruf-Bonus, und gern noch ein Getränk.</summary>
@@ -366,7 +370,8 @@ namespace TwoMoons
             var seat = Couch;
             Couch = null;
             moodIcon.enabled = false;
-            transform.position = ShopGrid.CellToWorld(DecoCell(seat));
+            if (seat.Type == Furniture.Arcade) Game.RegisterArcade(Random.Range(2, 6));
+            else transform.position = ShopGrid.CellToWorld(DecoCell(seat));
             Game.ChangeReputation(1);
             var drinks = Game.Shelves.FindAll(s => s.Stock > 0 && s.Category == ProductCategory.Drink);
             if (drinks.Count > 0 && Random.value < 0.7f)
@@ -407,8 +412,8 @@ namespace TwoMoons
             itemCount = 0;
             card = null;
 
-            // Ab und zu noch eine Runde auf der Couch.
-            var couch = !hasGamed && Random.value < CouchChance ? FreeCouch() : null;
+            // Ab und zu noch eine Runde auf der Couch oder am Arcade-Automaten.
+            var couch = !hasGamed && Random.value < CouchChance ? FreeGamingSpot() : null;
             if (couch != null)
             {
                 Game.Register.Remove(this);

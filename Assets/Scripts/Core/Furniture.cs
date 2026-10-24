@@ -2,7 +2,8 @@ namespace TwoMoons
 {
     /// <summary>Neue Einträge immer hinten anhängen – die Nummern stehen in Spielständen.</summary>
     public enum Furniture { Shelf, Showcase, Plant, Poster, Rug, WallClock, FairyLights, AccessoryStand, GameTable, PrizeCounter, TournamentBoard,
-        Fridge, Couch, Tv, Console, Printer3D, PrintShelf, NeonSign, GradingStation, Lounge }
+        Fridge, Couch, Tv, Console, Printer3D, PrintShelf, NeonSign, GradingStation, Lounge,
+        PremiumShowcase, Arcade, Turf, TrophyWall, MoonStatue }
 
     /// <summary>Wo ein Möbelstück hinkommt.</summary>
     public enum Placement
@@ -49,6 +50,11 @@ namespace TwoMoons
             new FurnitureDef { Id = Furniture.NeonSign, Name = "Neon-Schild", SpriteKey = "neonSign", Placement = Placement.Wall, Cozy = 5 },
             new FurnitureDef { Id = Furniture.GradingStation, Name = "Grading-Station", SpriteKey = "gradingStation", Placement = Placement.Floor },
             new FurnitureDef { Id = Furniture.Lounge, Name = "Sitzsack", SpriteKey = "beanBag", Placement = Placement.Floor, Cozy = 3 },
+            new FurnitureDef { Id = Furniture.PremiumShowcase, Name = "Premium-Vitrine", SpriteKey = "premiumShowcase", Placement = Placement.Floor, Cozy = 1 },
+            new FurnitureDef { Id = Furniture.Arcade, Name = "Arcade-Automat", SpriteKey = "arcade", Placement = Placement.Floor, Cozy = 6 },
+            new FurnitureDef { Id = Furniture.Turf, Name = "Kunstrasen", SpriteKey = "turf", Placement = Placement.Rug, Cozy = 4 },
+            new FurnitureDef { Id = Furniture.TrophyWall, Name = "Trophäenwand", SpriteKey = "trophyWall", Placement = Placement.Wall, Cozy = 8 },
+            new FurnitureDef { Id = Furniture.MoonStatue, Name = "Two-Moons-Statue", SpriteKey = "moonStatue", Placement = Placement.Floor, Cozy = 10 },
         };
 
         public static FurnitureDef Get(Furniture id) => All[(int)id];

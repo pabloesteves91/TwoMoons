@@ -8,6 +8,8 @@ namespace TwoMoons
     {
         /// <summary>Im Hauptmenü kassiert der Laden von selbst.</summary>
         const float DemoServeSeconds = 1.5f;
+        /// <summary>Papa kassiert in Kapitel 6 einen Tag lang mit – gemütlich.</summary>
+        const float PapaServeSeconds = 3f;
 
         readonly List<Customer> queue = new List<Customer>();
         float demoTimer;
@@ -15,9 +17,11 @@ namespace TwoMoons
         void Update()
         {
             var front = Front;
-            if (GameManager.Instance.Phase != GamePhase.MainMenu || front == null)
+            var game = GameManager.Instance;
+            bool demo = game.Phase == GamePhase.MainMenu;
+            if ((!demo && !game.PapaHelping) || front == null || front.IsSeller)
             {
-                demoTimer = DemoServeSeconds;
+                demoTimer = demo ? DemoServeSeconds : PapaServeSeconds;
                 return;
             }
             demoTimer -= Time.deltaTime;

@@ -144,6 +144,7 @@ namespace TwoMoons
         /// <summary>Eine Karte wurde bewertet; Wert = Note.</summary>
         public event Action<int> Graded;
         public event Action ShopExpanded;
+        public event Action CityTournamentHeld;
         public event Action TournamentHeld;
         public event Action EmployeeHired;
         public event Action Printed;
@@ -235,18 +236,64 @@ namespace TwoMoons
             Cutscenes.PlayTitleCard(StoreLevel, null);
         }
 
-        /// <summary>Alle Aufgaben eines Kapitels erledigt: kurzer Abschluss, beim ersten Kapitel mit Story-Szene.</summary>
+        /// <summary>Alle Aufgaben eines Kapitels erledigt: kurzer Abschluss, dann ein Story-Moment mit Papa.</summary>
         public void ChapterFinished(int chapter)
         {
             string next = chapter < StoreLevels.Max
                 ? $"Sobald genug XP da sind, steigt TwoMoons auf Level {chapter + 1}."
-                : "TwoMoons ist der beste Laden der Stadt! Das große Finale folgt bald.";
-            Action story = chapter == 1 ? () => PlayStoryOnce("kapitel1Ende", TwoMoons.Cutscenes.Chapter1End) : (Action)null;
+                : "TwoMoons ist der beste Laden der Stadt!";
+            var cutscene = TwoMoons.Cutscenes.ChapterEnd(chapter);
+            Action story = cutscene == null ? (Action)null
+                : () => PlayStoryOnce($"kapitel{chapter}Ende", cutscene, chapter == StoreLevels.Max ? FinishStory : (Action)null);
             ShowDialog(new[]
             {
                 $"{PlayerName}: Geschafft! Kapitel {chapter} „{TwoMoons.Cutscenes.ChapterTitles[chapter]}“ ist abgeschlossen.",
                 next,
             }, story);
+        }
+
+        const string TwoMoonsStory = "twoMoonsKarte";
+
+        /// <summary>Die legendäre Karte gehört dir (nach dem Finale).</summary>
+        public bool HasTwoMoons => seenStories.Contains(TwoMoonsStory);
+
+        /// <summary>Nach dem Finale: die Two-Moons-Karte ins Sammelbuch, dann geht das Spiel frei weiter.</summary>
+        void FinishStory()
+        {
+            seenStories.Add(TwoMoonsStory);
+            SoundManager.Play(Sfx.ShinyCard);
+            ChangeReputation(50);
+            SaveGame();
+            ShowDialog(new[]
+            {
+                "Die Two-Moons-Karte hat jetzt einen Ehrenplatz im Sammelbuch [C].",
+                "TwoMoons bleibt geöffnet: Verkaufe weiter, richte Turniere aus und vervollständige deine Sammlung!",
+            });
+        }
+
+        /// <summary>Papa steht heute mit an der Kasse (Kapitel 6), bis zum Ladenschluss.</summary>
+        public bool PapaHelping { get; private set; }
+        GameObject papaHelper;
+
+        public void StartPapaDay()
+        {
+            PlayStoryOnce("papaHilft", TwoMoons.Cutscenes.PapaHelps, () =>
+            {
+                if (PapaHelping) return;
+                PapaHelping = true;
+                var cell = ShopGrid.StaffCells[0] + Vector2Int.left;
+                papaHelper = WorldFactory.CreateSprite("Papa", "papa", ShopGrid.CellToWorld(cell), 0).gameObject;
+                papaHelper.AddComponent<YSort>();
+                ShowToast("Papa kassiert heute mit – bis Ladenschluss.", 5f);
+            });
+        }
+
+        void EndPapaDay()
+        {
+            if (!PapaHelping) return;
+            PapaHelping = false;
+            if (papaHelper != null) Destroy(papaHelper);
+            ShowToast("Papa: „Das war der schönste Tag seit Langem. Danke.“", 6f);
         }
 
         /// <summary>Spielt eine Story-Szene genau einmal pro Spielstand.</summary>
@@ -365,6 +412,7 @@ namespace TwoMoons
             else if (Phase == GamePhase.Closing && Customer.Active.Count == 0 && !Tournament.Busy)
             {
                 Phase = GamePhase.Summary;
+                EndPapaDay();
                 if (Staff != null)
                 {
                     MoneyCents -= Employee.DailyWage;
@@ -829,6 +877,20 @@ namespace TwoMoons
         public void NotifyTournamentHeld() => TournamentHeld?.Invoke();
 
         public void NotifyPrinted() => Printed?.Invoke();
+
+        public void NotifyCityTournament() => CityTournamentHeld?.Invoke();
+
+        /// <summary>Ein Kunde hat am Arcade-Automaten gespielt: 1 € pro Runde.</summary>
+        public void RegisterArcade(int rounds)
+        {
+            if (IsDemo) return;
+            int cents = rounds * 100;
+            MoneyCents += cents;
+            Today.Income += cents;
+            ShowToast($"Arcade: {rounds} Runden, +{Money.Format(cents)}", 2f);
+            SoundManager.Play(Sfx.Register);
+            AddXp(rounds);
+        }
 
         /// <summary>Ankauf: Karten vom Verkäufer übernehmen und bezahlen.</summary>
         public void BuyCards(List<CardDef> cards, int price)

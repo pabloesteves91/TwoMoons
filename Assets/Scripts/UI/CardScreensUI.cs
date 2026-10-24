@@ -177,6 +177,12 @@ namespace TwoMoons
                 }
                 GUI.color = Color.white;
             }
+            if (Game.HasTwoMoons)
+            {
+                GUI.color = UiKit.Gold;
+                if (UiKit.Button("★ Two Moons", GUILayout.Width(120f), GUILayout.Height(28f))) selectedCard = CardDatabase.TwoMoons.Id;
+                GUI.color = Color.white;
+            }
             GUILayout.FlexibleSpace();
             GUILayout.Label($"{collection.DiscoveredIn(collectionGame)}/{CardDatabase.CardsPerGame} entdeckt", UiKit.Bold);
             GUILayout.EndHorizontal();
@@ -222,7 +228,16 @@ namespace TwoMoons
             GUILayout.Space(16f);
             GUILayout.BeginVertical();
             var selected = CardDatabase.Get(selectedCard);
-            if (selected != null && collection.IsDiscovered(selected.Id))
+            if (selected == CardDatabase.TwoMoons && Game.HasTwoMoons)
+            {
+                var big = GUILayoutUtility.GetRect(180f, 240f, GUILayout.Width(180f), GUILayout.Height(240f));
+                CardUI.Draw(big, selected);
+                GUI.color = UiKit.Gold;
+                GUILayout.Label("Two Moons – die Legende", UiKit.Bold);
+                GUI.color = Color.white;
+                GUILayout.Label("Es gibt sie nur ein einziges Mal. Sie gehört dem besten Laden der Stadt – und ist unverkäuflich.", UiKit.Text);
+            }
+            else if (selected != null && collection.IsDiscovered(selected.Id))
             {
                 var big = GUILayoutUtility.GetRect(180f, 240f, GUILayout.Width(180f), GUILayout.Height(240f));
                 CardUI.Draw(big, selected);

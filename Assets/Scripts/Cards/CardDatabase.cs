@@ -79,6 +79,15 @@ namespace TwoMoons
 
         public static readonly TcgGame[] Games = { TcgGame.Monstera, TcgGame.Spellforge, TcgGame.SoulClash };
 
+        /// <summary>
+        /// Die legendäre Two-Moons-Karte aus Papas Geschichte. Gibt es nur einmal, nie in Packs –
+        /// man bekommt sie im Finale (Stadtturnier). Eigenes Bild: Cards/two_moons.png.
+        /// </summary>
+        public static readonly CardDef TwoMoons = new CardDef
+        {
+            Id = 999, Game = TcgGame.Monstera, Number = 0, Name = "Two Moons", Rarity = Rarity.Ultra, Value = 1000000, ArtKey = "two_moons",
+        };
+
         static List<CardDef> Build(TcgGame game, string[][] names, string artPrefix)
         {
             var cards = new List<CardDef>();
@@ -118,7 +127,7 @@ namespace TwoMoons
         public static CardDef Get(int id)
         {
             foreach (var card in all) if (card.Id == id) return card;
-            return null;
+            return id == TwoMoons.Id ? TwoMoons : null;
         }
 
         public static string RarityName(Rarity rarity)

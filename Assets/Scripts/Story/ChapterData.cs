@@ -21,6 +21,8 @@ namespace TwoMoons
         public List<Quest> Quests;
         /// <summary>Kleiner Story-Moment, wenn diese Etappe geschafft ist ({0} = Name).</summary>
         public string[] Outro;
+        /// <summary>Passiert nach dem Story-Moment (z. B. Papa kommt vorbei).</summary>
+        public Action Then;
     }
 
     /// <summary>
@@ -56,6 +58,10 @@ namespace TwoMoons
         static Quest TopGrades(int count) => new Quest { Text = "Note 9 oder 10 bekommen", Target = count, Key = "topGrade" };
         static Quest SellSlabs(int count) => new Quest { Text = "Bewertete Karten verkaufen", Target = count, Key = "slabSold" };
         static Quest Extension() => new Quest { Text = "Laden erweitern (Computer → Einrichtung)", Key = "expanded", Poll = () => ShopGrid.Expanded ? 1 : 0 };
+        static Quest CityTournament() =>
+            new Quest { Text = "Das Stadtturnier ausrichten (nächstes Turnier)", Key = TournamentManager.CityTournamentKey };
+        static Quest TableSeats(int seats) =>
+            new Quest { Text = "Turnier-Plätze an Spieltischen", Target = seats, Poll = () => Game.Tournament.Seats };
         static Quest BestDay(int packs) => new Quest { Text = "An einem Tag Packs verkaufen", Target = packs, Key = "bestDay" };
 
         // Zustands-Aufgaben
@@ -246,19 +252,21 @@ namespace TwoMoons
                     {
                         new QuestStage
                         {
-                            Title = "Großer Andrang",
-                            Quests = new List<Quest> { Sell(500), SellCards(25), Cozy(25) },
-                            Outro = new[] { "Papa steht plötzlich in der Tür: „Ich helfe dir heute an der Kasse. So lange ich kann.“" },
+                            Title = "Der Ruf eilt voraus",
+                            Quests = new List<Quest> { Furnished(Furniture.PremiumShowcase, 1), Furnished(Furniture.Arcade, 1), SellCards(15), Cozy(30) },
+                            Outro = new[] { "Die Tür geht auf. Jemand Bekanntes steht im Eingang und lächelt." },
+                            Then = () => Game.StartPapaDay(),
+                        },
+                        new QuestStage
+                        {
+                            Title = "Großturniere",
+                            Quests = new List<Quest> { TableSeats(8), Tournaments(2), BestDay(40), Serve(250) },
+                            Outro = new[] { "{0}: Acht Spieler gleichzeitig! Papa hätte Tränen in den Augen." },
                         },
                         new QuestStage
                         {
                             Title = "Seltene Schätze",
-                            Quests = new List<Quest> { Serve(450), Money(2000), PullUltra(3) },
-                        },
-                        new QuestStage
-                        {
-                            Title = "Das komplette Sammelbuch",
-                            Quests = new List<Quest> { CardsIn(TcgGame.Monstera, CardDatabase.CardsPerGame), ProfitDays(8) },
+                            Quests = new List<Quest> { TopGrades(3), SellSlabs(8), PullUltra(3), Money(2500), ProfitDays(5) },
                         },
                     };
 
@@ -268,13 +276,23 @@ namespace TwoMoons
                         new QuestStage
                         {
                             Title = "Legende werden",
-                            Quests = new List<Quest> { Reputation(4, "Legendär"), Sell(700), Money(3000) },
-                            Outro = new[] { "Der Hersteller schreibt: TwoMoons soll das große Stadtturnier ausrichten!" },
+                            Quests = new List<Quest> { Reputation(4, "Legendär"), Furnished(Furniture.TrophyWall, 1), Sell(500), Serve(350) },
+                            Outro = new[] { "{0}: Die Trophäenwand füllt sich. Bald kommt der größte Pokal von allen." },
                         },
                         new QuestStage
                         {
                             Title = "Bereit für das große Turnier",
-                            Quests = new List<Quest> { Serve(600), SellCards(40), ProfitDays(10) },
+                            Quests = new List<Quest> { Furnished(Furniture.MoonStatue, 1), TableSeats(12), Tournaments(1), Money(3000), Cozy(45) },
+                            Outro = new[]
+                            {
+                                "Der Hersteller bestätigt: Das nächste Turnier bei TwoMoons ist das Stadtturnier!",
+                                "Papa ruft an: „Ich komme. Erste Reihe. Halt mir einen Platz frei.“",
+                            },
+                        },
+                        new QuestStage
+                        {
+                            Title = "Das Stadtturnier",
+                            Quests = new List<Quest> { CityTournament() },
                         },
                     };
 

@@ -23,7 +23,8 @@ namespace TwoMoons
             GUI.Label(new Rect(textArea.x, textArea.y + pixel * 2.4f, textArea.width, textArea.height), card.Name, nameStyle);
 
             var numberStyle = new GUIStyle(nameStyle) { alignment = TextAnchor.UpperRight, fontSize = Mathf.RoundToInt(pixel * 1.6f), fontStyle = FontStyle.Normal };
-            GUI.Label(new Rect(textArea.x, textArea.y + pixel * 0.3f, textArea.width - pixel, textArea.height), $"#{card.Number:00}/{CardDatabase.CardsPerGame}", numberStyle);
+            string number = card == CardDatabase.TwoMoons ? "1/1" : $"#{card.Number:00}/{CardDatabase.CardsPerGame}";
+            GUI.Label(new Rect(textArea.x, textArea.y + pixel * 0.3f, textArea.width - pixel, textArea.height), number, numberStyle);
         }
 
         /// <summary>Versiegelte Karte in der Schutzhülle („Slab“) mit Notenschild oben.</summary>

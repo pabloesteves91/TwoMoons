@@ -79,7 +79,9 @@ namespace TwoMoons
         void Update()
         {
             if (Printing == null || Jammed || Done) return;
-            Progress = Mathf.Min(1f, Progress + Time.deltaTime / (Printing.Hours * SecondsPerHour));
+            // Ab Level 6 druckt der Drucker schneller.
+            float speed = GameManager.Instance.StoreLevel >= 6 ? 1.5f : 1f;
+            Progress = Mathf.Min(1f, Progress + speed * Time.deltaTime / (Printing.Hours * SecondsPerHour));
             if (jamAt >= 0f && Progress >= jamAt)
             {
                 Jammed = true;

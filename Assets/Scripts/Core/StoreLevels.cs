@@ -26,8 +26,8 @@ namespace TwoMoons
             new[] { "Turniere jeden 2. Tag: Spieltisch, Turnier-Counter, Turnier-Tafel", "Gratis Turnier-Packs vom Hersteller", "Soul-Clash-Booster und -Karten", "Couch-&-TV-Ecke mit Konsole, Getränkekühlschrank", "Dein erster Mitarbeiter (Computer → Team)" },
             new[] { "3D-Drucker, Filament und Druck-Regal", "Ankauf: Kunden verkaufen dir Karten", "Deko: Neon-Schild" },
             new[] { "Grading-Station: Karten bewerten lassen (Note 1–10, bis ×5 Wert)", "Ladenerweiterung: zweiter Raum (Computer → Einrichtung)", "Deko: Sitzsack" },
-            new[] { "Bald: Großturniere, Premium-Vitrine, Arcade-Automat" },
-            new[] { "Bald: Stadtturnier und Trophäenwand" },
+            new[] { "Großturniere: mehr Spieler, mehr XP", "Premium-Vitrine (8 Karten, Sammler zahlen mehr)", "Arcade-Automat: Kunden zocken für 1 € pro Runde", "3D-Drucker druckt 50 % schneller", "Deko: Kunstrasen" },
+            new[] { "Das Stadtturnier – das große Finale", "Trophäenwand mit deinen Pokalen", "Two-Moons-Statue" },
         };
 
         /// <summary>XP, die insgesamt für dieses Level nötig sind.</summary>
