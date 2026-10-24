@@ -94,7 +94,7 @@ namespace TwoMoons
                 },
                 new Step
                 {
-                    Text = "Super, dein erster Verkauf!\n\n• [C] Sammelbuch · [Tab] Aufgaben aufklappen · [Esc] Pause & Speichern\n• Am Pack-Tisch hinter der Theke öffnest du Packs für deine Sammlung.\n• Um 18 Uhr schließt der Laden, danach gibt's die Abrechnung.\n\nDie Aufgaben oben rechts führen dich weiter. Viel Spaß!",
+                    Text = "Super, dein erster Verkauf!\n\n• [C] Sammelbuch · [Tab] Aufgaben aufklappen · [Esc] Pause & Speichern\n• Booster öffnen: am Regal mit [E] einen herausnehmen und zum Pack-Tisch hinter der Theke bringen.\n• Um 18 Uhr schließt der Laden, danach gibt's die Abrechnung.\n\nDie Aufgaben oben rechts führen dich weiter. Viel Spaß!",
                     Final = true,
                 },
             };

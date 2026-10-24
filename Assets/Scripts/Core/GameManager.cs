@@ -529,7 +529,7 @@ namespace TwoMoons
                 if (saved.product >= 0) shelf.SetStock(Catalog.Get((ProductId)saved.product), saved.stock);
             }
             foreach (var box in data.boxes)
-                WorldFactory.SpawnBox(new Vector2Int(box.x, box.y), Catalog.Get((ProductId)box.product), box.amount);
+                WorldFactory.SpawnBox(new Vector2Int(box.x, box.y), Catalog.Get((ProductId)box.product), box.amount).IsSingle = box.single;
             foreach (var cell in data.dirt) WorldFactory.SpawnDirt(new Vector2Int(cell.x, cell.y));
             foreach (var saved in data.showcases)
             {
@@ -605,7 +605,7 @@ namespace TwoMoons
                 // Ein getragener Karton wird dort gespeichert, wo die Figur gerade steht.
                 var cell = ShopGrid.WorldToCell(box.transform.position);
                 if (!box.enabled) cell = ShopGrid.WorldToCell(Player.transform.position);
-                data.boxes.Add(new SavedBox { x = cell.x, y = cell.y, product = (int)box.Product.Id, amount = box.Amount });
+                data.boxes.Add(new SavedBox { x = cell.x, y = cell.y, product = (int)box.Product.Id, amount = box.Amount, single = box.IsSingle });
             }
             Collection.SaveTo(data);
             Skills.SaveTo(data);

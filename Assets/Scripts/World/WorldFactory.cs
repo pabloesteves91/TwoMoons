@@ -74,6 +74,14 @@ namespace TwoMoons
             return box;
         }
 
+        /// <summary>Ein einzelnes Stück Ware (aus dem Regal oder frisch gedruckt), kein Karton.</summary>
+        public static DeliveryBox SpawnSingle(Vector2Int cell, Product product)
+        {
+            var single = SpawnBox(cell, product, 1);
+            single.IsSingle = true;
+            return single;
+        }
+
         public static DirtSpot SpawnDirt(Vector2Int cell)
         {
             var renderer = CreateSprite("Fleck", "dirt", ShopGrid.CellToWorld(cell), FloorDecalOrder);

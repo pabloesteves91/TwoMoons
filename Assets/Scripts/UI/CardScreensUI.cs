@@ -256,7 +256,7 @@ namespace TwoMoons
             {
                 GUILayout.Label(selected != null ? "Diese Karte hast du noch nicht gezogen." : "Klick auf eine Karte für Details.", UiKit.Text);
                 GUILayout.Space(8f);
-                GUILayout.Label("Packs öffnest du am Pack-Tisch hinter der Theke: ein Pack aus dem Regal nehmen oder einen Karton tragen und [E] drücken.", UiKit.Text);
+                GUILayout.Label("Packs öffnest du am Pack-Tisch hinter der Theke: einen Booster aus dem Regal nehmen ([E]), hintragen und [E] drücken.", UiKit.Text);
             }
             GUILayout.EndVertical();
             GUILayout.EndHorizontal();

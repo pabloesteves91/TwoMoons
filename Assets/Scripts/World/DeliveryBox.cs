@@ -11,8 +11,8 @@ namespace TwoMoons
         public Product Product;
         public int Amount;
 
-        /// <summary>Einzelstück (z. B. ein Booster aus dem Regal) statt eines ganzen Kartons.</summary>
-        public bool IsSingle => Amount == 1;
+        /// <summary>Einzelstück aus dem Regal (z. B. ein Booster) statt eines Kartons – sieht aus wie die Ware selbst.</summary>
+        public bool IsSingle;
 
         SpriteRenderer look;
         bool? shownSingle;

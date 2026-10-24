@@ -60,7 +60,7 @@ namespace TwoMoons
                 // Ein Pack in die Hand nehmen, z. B. um es am Pack-Tisch zu öffnen.
                 var product = Product;
                 Take(1);
-                player.PickUp(WorldFactory.SpawnBox(Cell, product, 1));
+                player.PickUp(WorldFactory.SpawnSingle(Cell, product));
                 return;
             }
 

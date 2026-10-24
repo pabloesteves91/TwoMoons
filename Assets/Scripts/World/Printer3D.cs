@@ -156,7 +156,7 @@ namespace TwoMoons
                 Printing = null;
                 Progress = 0f;
                 Refresh();
-                player.PickUp(WorldFactory.SpawnBox(Cell, product, 1));
+                player.PickUp(WorldFactory.SpawnSingle(Cell, product));
                 game.NotifyPrinted();
                 return;
             }

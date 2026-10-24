@@ -21,6 +21,7 @@ namespace TwoMoons
         public int x, y;
         public int product;
         public int amount;
+        public bool single;
     }
 
     [Serializable]

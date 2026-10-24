@@ -70,7 +70,7 @@ namespace TwoMoons
             Section("Tastatur & Maus",
                 "[W] [A] [S] [D] oder Pfeiltasten – laufen",
                 "[E] – benutzen: putzen, Karton aufheben/einräumen, kassieren, Computer, Vitrine, Pack-Tisch …",
-                "[Q] – getragenen Karton abstellen",
+                "[Q] – Getragenes abstellen (Karton oder einzelnes Stück)",
                 "[B] – Bau-Modus: Möbel aufstellen (Linksklick), nochmal [B] wechselt das Möbelstück. Morgens: Möbel anklicken zum Verschieben",
                 "Rechtsklick – im Bau-Modus abbrechen",
                 "[C] – Sammelbuch",
@@ -117,7 +117,7 @@ namespace TwoMoons
         static void Cards()
         {
             Section("Packs öffnen & Sammelbuch",
-                "Am Pack-Tisch hinter der Theke öffnest du Packs aus dem Regal oder aus einem getragenen Karton.",
+                "Nimm mit [E] einen Booster aus dem Regal und öffne ihn am Pack-Tisch hinter der Theke.",
                 "Jedes Pack hat 10 Karten, die beste zuletzt. Ultra-Seltene glänzen.",
                 "Im Sammelbuch [C] siehst du alle Karten pro Spiel (Monstera, Spellforge, Soul Clash).");
             Section("Vitrine",
