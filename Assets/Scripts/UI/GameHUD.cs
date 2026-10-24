@@ -230,43 +230,94 @@ namespace TwoMoons
             UiKit.EndWindow();
         }
 
+        /// <summary>
+        /// Schlanke Kopfzeile: Tag & Uhrzeit, Geld, Ruf und ein XP-Balken. Details (Gemütlichkeit, genaue XP)
+        /// erscheinen erst, wenn die Maus darüber ist. Turnier und Tagesereignis in einer kleinen zweiten Zeile.
+        /// </summary>
         void DrawTopBar(float width)
         {
             string phase;
             switch (Game.Phase)
             {
-                case GamePhase.Preparation: phase = "Vorbereitung (geschlossen)"; break;
-                case GamePhase.Open: phase = "Geöffnet"; break;
+                case GamePhase.Preparation: phase = "geschlossen"; break;
+                case GamePhase.Open: phase = "geöffnet"; break;
                 case GamePhase.Closing: phase = "Ladenschluss"; break;
                 default: phase = "Feierabend"; break;
             }
-            string line = $"Tag {Game.Day}  ·  {Game.ClockText}  ·  {phase}  ·  Geld: {Money.Format(Game.MoneyCents)}  ·  Ruf: {Game.ReputationName}  ·  [Esc] Menü";
-            line += "\n" + LevelLine();
-            string tournamentLine = Game.Tournament.StatusLine;
-            if (tournamentLine != null) line += "\n" + tournamentLine;
-            string eventLine = DailyEvents.Short(Game.TodayEvent);
-            if (eventLine != null) line += "\nHeute: " + eventLine;
-            // Platz lassen für die Aufgabenliste rechts.
-            float barWidth = Mathf.Min(760f, width - PanelWidth - 3f * Margin);
-            var content = new GUIContent(line);
-            float barHeight = Mathf.Max(34f, panel.CalcHeight(content, barWidth));
-            GUI.Box(new Rect(Margin, Margin, barWidth, barHeight), content, panel);
-        }
 
-        /// <summary>Store-Level, XP-Fortschritt und was für den nächsten Aufstieg fehlt.</summary>
-        static string LevelLine()
-        {
             int level = Game.StoreLevel;
-            string line = $"Store-Level {level}: {StoreLevels.Title(level)}  ·  Gemütlichkeit {Game.Coziness}";
-            if (level >= StoreLevels.Max) return line + "  ·  Höchstes Level!";
+            bool maxLevel = level >= StoreLevels.Max;
+            int from = StoreLevels.XpFor(level), to = maxLevel ? from : StoreLevels.XpFor(level + 1);
+            float xpFill = maxLevel ? 1f : Mathf.Clamp01((Game.Xp - from) / (float)Mathf.Max(1, to - from));
+            string xpTip = maxLevel
+                ? $"Store-Level {level}: {StoreLevels.Title(level)} – höchstes Level!"
+                : $"Store-Level {level}: {StoreLevels.Title(level)}\n{Game.Xp} / {to} XP bis Level {level + 1}" +
+                  (Game.Xp >= to && !Game.ChapterComplete ? "\nXP reichen – jetzt noch die Kapitel-Aufgaben!" : "");
 
-            int from = StoreLevels.XpFor(level), to = StoreLevels.XpFor(level + 1);
-            int filled = Mathf.Clamp(Mathf.FloorToInt(10f * (Game.Xp - from) / (to - from)), 0, 10);
-            line += $"  ·  XP {new string('|', filled)}{new string('.', 10 - filled)} {Game.Xp}/{to}";
-            if (Game.Xp >= to && !Game.ChapterComplete)
-                line += "  ·  Kapitel-Aufgaben erledigen!";
-            return line;
+            var dayStyle = bold;
+            var moneyStyle = new GUIStyle(bold) { normal = { textColor = UiKit.Gold } };
+            var items = new (string text, GUIStyle style, string tip)[]
+            {
+                ($"Tag {Game.Day}  {Game.ClockText}", dayStyle, null),
+                (phase, text, null),
+                (Money.Format(Game.MoneyCents), moneyStyle, null),
+                ($"Ruf: {Game.ReputationName}", text, $"Ruf {Game.Reputation} · Gemütlichkeit {Game.Coziness}\nZufriedene Kunden und Deko bringen Ruf."),
+                ($"Level {level}", bold, xpTip),
+            };
+
+            const float gap = 16f, barWidth = 90f, padding = 12f, height = 32f;
+            float total = padding * 2f + barWidth + 8f;
+            foreach (var item in items) total += item.style.CalcSize(new GUIContent(item.text)).x + gap;
+
+            var area = new Rect(Margin, Margin, total, height);
+            GUI.Box(area, GUIContent.none, panel);
+            float x = area.x + padding;
+            string hoverTip = null;
+            var mouse = Event.current.mousePosition;
+            for (int i = 0; i < items.Length; i++)
+            {
+                var item = items[i];
+                var size = item.style.CalcSize(new GUIContent(item.text));
+                var rect = new Rect(x, area.y + (height - size.y) / 2f, size.x, size.y);
+                GUI.Label(rect, item.text, item.style);
+                x += size.x;
+                if (i == items.Length - 1)
+                {
+                    // XP-Balken direkt hinter „Level X“
+                    var bar = new Rect(x + 8f, area.y + height / 2f - 4f, barWidth, 8f);
+                    UiKit.DrawRect(bar, new Color(0f, 0f, 0f, 0.5f));
+                    bool ready = !maxLevel && Game.Xp >= to;
+                    UiKit.DrawRect(new Rect(bar.x, bar.y, bar.width * xpFill, bar.height), ready ? UiKit.Good : UiKit.Gold);
+                    rect = new Rect(rect.x, area.y, bar.xMax - rect.x, height);
+                }
+                if (item.tip != null && rect.Contains(mouse)) hoverTip = item.tip;
+                x += gap;
+                if (i < items.Length - 1) UiKit.DrawRect(new Rect(x - gap / 2f, area.y + 9f, 1f, height - 18f), new Color(1f, 1f, 1f, 0.15f));
+            }
+
+            // Zweite, kleine Zeile nur wenn heute etwas los ist.
+            string status = Game.Tournament.StatusLine;
+            string eventLine = DailyEvents.Short(Game.TodayEvent);
+            if (eventLine != null) status = status == null ? $"Heute: {eventLine}" : $"{status}   ·   Heute: {eventLine}";
+            if (status != null)
+            {
+                var statusSize = hint.CalcSize(new GUIContent(status));
+                var statusRect = new Rect(Margin, area.yMax + 4f, statusSize.x + 20f, 24f);
+                GUI.Box(statusRect, GUIContent.none, panel);
+                GUI.Label(statusRect, status, hint);
+            }
+
+            if (hoverTip != null)
+            {
+                var tipContent = new GUIContent(hoverTip);
+                float tipWidth = Mathf.Min(300f, text.CalcSize(tipContent).x + 4f);
+                float tipHeight = text.CalcHeight(tipContent, tipWidth);
+                var tip = new Rect(Mathf.Min(mouse.x + 12f, width - tipWidth - 30f), mouse.y + 18f, tipWidth + 20f, tipHeight + 12f);
+                GUI.Box(tip, GUIContent.none, panel);
+                GUI.Label(new Rect(tip.x + 10f, tip.y + 6f, tipWidth, tipHeight), tipContent, text);
+            }
         }
+
 
         void DrawLevelUp(float width)
         {
