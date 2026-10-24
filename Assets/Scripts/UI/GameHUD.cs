@@ -54,6 +54,7 @@ namespace TwoMoons
             float questsBottom = DrawQuests(width);
             DrawToasts(width, questsBottom + Margin);
             DrawPrompt(width);
+            DrawHoverInfo();
 
             if (Game.ComputerOpen) DrawComputer(width);
             if (Game.Phase == GamePhase.Summary) DrawSummary(width);
@@ -63,6 +64,45 @@ namespace TwoMoons
         }
 
         static bool Button(string label, params GUILayoutOption[] options) => UiKit.Button(label, options);
+
+        /// <summary>Maus über einem Regal, einer Vitrine oder einem Karton: kleines Schild mit dem Inhalt.</summary>
+        void DrawHoverInfo()
+        {
+            var camera = Camera.main;
+            if (camera == null || Game.InputLocked) return;
+            var mouse = GameInput.MousePosition;
+            var cell = ShopGrid.WorldToCell(camera.ScreenToWorldPoint(mouse));
+
+            string info = null;
+            var shelf = Game.Shelves.Find(s => s.Cell == cell);
+            if (shelf != null)
+            {
+                info = shelf.Stock > 0 && shelf.Product != null
+                    ? $"{shelf.Label}: {shelf.Product.Name}\n{shelf.Stock} / {Shelf.Capacity} Stück"
+                    : $"{shelf.Label}: leer (0 / {Shelf.Capacity})";
+            }
+            var showcase = Game.Showcases.Find(s => s.Cell == cell);
+            if (showcase != null)
+            {
+                int filled = 0;
+                foreach (int card in showcase.Cards) if (card >= 0) filled++;
+                info = $"{(showcase.Premium ? "Premium-Vitrine" : "Vitrine")}: {filled} / {showcase.SlotCount} Karten";
+            }
+            if (info == null)
+            {
+                foreach (var box in DeliveryBox.Existing)
+                    if (box.enabled && ShopGrid.WorldToCell(box.transform.position) == cell)
+                        info = $"Karton: {box.Amount}× {box.Product.Name}";
+            }
+            if (info == null) return;
+
+            float scale = Screen.height / UiKit.VirtualHeight;
+            var content = new GUIContent(info);
+            var size = UiKit.Bold.CalcSize(content);
+            var rect = new Rect(mouse.x / scale + 14f, (Screen.height - mouse.y) / scale + 10f, size.x + 16f, size.y + 8f);
+            GUI.Box(rect, GUIContent.none, panel);
+            GUI.Label(new Rect(rect.x + 8f, rect.y + 4f, size.x + 4f, size.y), content, UiKit.Bold);
+        }
 
         /// <summary>Sprechblasen über Kunden, die gerade etwas sagen (verärgert, zu teuer …).</summary>
         void DrawSpeechBubbles()
