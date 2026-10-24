@@ -196,5 +196,9 @@ Nach dem Finale kann man weiterspielen.
 16×16-Pixelbilder ersetzen. Neue Bilder in `Assets/Art` bekommen automatisch die richtigen
 Pixel-Art-Einstellungen. Eigene Bilder werden beim erneuten Einrichten nicht überschrieben.
 
+**Web-Version:** Menü **TwoMoons → Web-Build erstellen** baut das Spiel für den Browser nach `Builds/Web`
+und legt `Builds/TwoMoons-Web.zip` zum Hochladen auf itch.io an (als HTML-Projekt, „played in the browser“).
+Voraussetzung: „Web Build Support“ im Unity Hub installiert. Im Browser werden Spielstände über PlayerPrefs gespeichert.
+
 **Code:** `Assets/Scripts` – der Laden wird komplett aus Code aufgebaut (`GameBootstrap`),
 das Raster steht in `ShopGrid`, Preise und Bestellungen in `Catalog`.

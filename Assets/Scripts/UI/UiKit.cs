@@ -139,6 +139,9 @@ namespace TwoMoons
             return result;
         }
 
+        /// <summary>Im Browser gibt es kein „Beenden“ – man schließt einfach den Tab.</summary>
+        public static bool CanQuit => Application.platform != RuntimePlatform.WebGLPlayer;
+
         public static void QuitGame()
         {
 #if UNITY_EDITOR

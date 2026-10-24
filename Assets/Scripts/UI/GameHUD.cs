@@ -76,7 +76,7 @@ namespace TwoMoons
                     if (UiKit.BigButtonLayout("Speichern")) Game.SaveGame();
                     if (UiKit.BigButtonLayout("Einstellungen")) pauseScreen = PauseScreen.Settings;
                     if (UiKit.BigButtonLayout("Zum Hauptmenü")) pauseScreen = PauseScreen.ConfirmMainMenu;
-                    if (UiKit.BigButtonLayout("Spiel beenden")) pauseScreen = PauseScreen.ConfirmQuit;
+                    if (UiKit.CanQuit && UiKit.BigButtonLayout("Spiel beenden")) pauseScreen = PauseScreen.ConfirmQuit;
                     if (ShowTestTools)
                     {
                         GUILayout.Space(6f);

@@ -98,21 +98,29 @@ namespace TwoMoons
         public DateTime SavedAt => new DateTime(savedAtTicks);
     }
 
-    /// <summary>Drei Speicherplätze im Benutzerordner (Application.persistentDataPath).</summary>
+    /// <summary>
+    /// Drei Speicherplätze. Auf dem Computer als Datei im Benutzerordner (Application.persistentDataPath),
+    /// im Browser über PlayerPrefs (dort sicher dauerhaft gespeichert).
+    /// </summary>
     public static class SaveSystem
     {
         public const int SlotCount = 3;
 
+        static bool InBrowser => Application.platform == RuntimePlatform.WebGLPlayer;
+
         static string PathFor(int slot) => Path.Combine(Application.persistentDataPath, $"spielstand_{slot + 1}.json");
 
-        public static bool Exists(int slot) => File.Exists(PathFor(slot));
+        static string KeyFor(int slot) => $"TwoMoons.Spielstand{slot + 1}";
+
+        public static bool Exists(int slot) => InBrowser ? PlayerPrefs.HasKey(KeyFor(slot)) : File.Exists(PathFor(slot));
 
         public static SaveData Load(int slot)
         {
             if (!Exists(slot)) return null;
             try
             {
-                return JsonUtility.FromJson<SaveData>(File.ReadAllText(PathFor(slot)));
+                string json = InBrowser ? PlayerPrefs.GetString(KeyFor(slot)) : File.ReadAllText(PathFor(slot));
+                return JsonUtility.FromJson<SaveData>(json);
             }
             catch (Exception e)
             {
@@ -124,12 +132,29 @@ namespace TwoMoons
         public static void Save(int slot, SaveData data)
         {
             data.savedAtTicks = DateTime.Now.Ticks;
-            File.WriteAllText(PathFor(slot), JsonUtility.ToJson(data, true));
+            string json = JsonUtility.ToJson(data, true);
+            if (InBrowser)
+            {
+                PlayerPrefs.SetString(KeyFor(slot), json);
+                PlayerPrefs.Save();
+            }
+            else
+            {
+                File.WriteAllText(PathFor(slot), json);
+            }
         }
 
         public static void Delete(int slot)
         {
-            if (Exists(slot)) File.Delete(PathFor(slot));
+            if (InBrowser)
+            {
+                PlayerPrefs.DeleteKey(KeyFor(slot));
+                PlayerPrefs.Save();
+            }
+            else if (Exists(slot))
+            {
+                File.Delete(PathFor(slot));
+            }
         }
 
         /// <summary>Der zuletzt gespeicherte Platz, oder -1 wenn es keinen gibt.</summary>

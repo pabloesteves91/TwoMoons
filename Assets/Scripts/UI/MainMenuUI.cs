@@ -97,7 +97,7 @@ namespace TwoMoons
             if (UiKit.BigButtonLayout("Einstellungen")) screen = MenuScreen.Settings;
             GUILayout.BeginHorizontal();
             if (UiKit.Button("Credits", GUILayout.Height(34f))) screen = MenuScreen.Credits;
-            if (UiKit.Button("Beenden", GUILayout.Height(34f))) UiKit.QuitGame();
+            if (UiKit.CanQuit && UiKit.Button("Beenden", GUILayout.Height(34f))) UiKit.QuitGame();
             GUILayout.EndHorizontal();
 
             UiKit.EndWindow();

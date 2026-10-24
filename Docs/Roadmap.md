@@ -70,9 +70,9 @@ erledigt (entschieden), steigt der Laden ein Level auf → **Level-Up-Bildschirm
 |---|---|---|
 | **1** | Der Traum beginnt | Regal, Kasse, Computer, Pack-Tisch · Monstera · Deko: Topfpflanze, Poster |
 | **2** | Die ersten Stammkunden | **Spellforge** · Vitrine · Zubehör-Ständer (Hüllen, Ordner, Spielmatten) · Deko: Teppich, Wanduhr, Lichterkette |
-| **3** | Das erste Turnier | **Turniere** · Spieltisch · Turnier-Counter (Prizepool) · Turnier-Tafel · **Soul Clash** · Deko: Wimpel, Pokalregal |
+| **3** | Das erste Turnier | **Turniere** · Spieltisch · Turnier-Counter (Prizepool) · Turnier-Tafel · **Soul Clash** · **Couch-&-TV-Ecke mit Konsole** · Getränkekühlschrank · **1 Mitarbeiter** · Deko: Wimpel, Pokalregal |
 | **4** | Handeln & Drucken | **Ankauf** (Kunden bringen Karten) · **3D-Drucker** + Filament · Druck-Regal · Deko: Neon-Schild |
-| **5** | TwoMoons wächst | **Couch-&-TV-Ecke mit Konsole** · Getränkekühlschrank · **Ladenerweiterung** (zweiter Raum) · erster **Mitarbeiter** |
+| **5** | TwoMoons wächst | **Karten-Grading** (Grading-Station) · **Ladenerweiterung** (zweiter Raum) |
 | **6** | Der Ruf eilt voraus | Premium-Vitrine (8 Karten, beleuchtet) · Großturniere (8 statt 4 Spieler pro Tisch-Runde) · schnellerer 3D-Drucker · Deko: Arcade-Automat, Kunstrasen-Ecke |
 | **7** | Das große Turnier | Stadtturnier · Trophäenwand · Two-Moons-Statue · alle Deko-Varianten |
 
@@ -102,9 +102,10 @@ Flecken ziehen Gemütlichkeit ab.
 | 3D-Drucker | 4 | 300 € | druckt Figuren |
 | Druck-Regal | 4 | 70 € | verkauft 3D-Drucke |
 | Neon-Schild „TwoMoons“ | 4 | 90 € | +5 Gemütlichkeit |
-| Couch | 5 | 200 € | Couch-Ecke |
-| TV + Konsole | 5 | 250 € + 180 € | Couch-Ecke |
-| Getränkekühlschrank | 5 | 160 € | verkauft Getränke |
+| Couch | 3 | 200 € | Couch-Ecke |
+| TV + Konsole | 3 | 250 € + 180 € | Couch-Ecke |
+| Getränkekühlschrank | 3 | 160 € | verkauft Getränke |
+| Grading-Station | 5 | 400 € | Karten bewerten und versiegeln |
 | Ladenerweiterung | 5 | 1.000 € | zweiter Raum (+10 Spalten) |
 | Premium-Vitrine | 6 | 250 € | 8 Karten, Sammler zahlen +10 % |
 | Arcade-Automat | 6 | 400 € | +6, Kunden spielen 1 € pro Runde |
@@ -159,7 +160,7 @@ Flecken ziehen Gemütlichkeit ab.
 
 ---
 
-## 7. Couch-&-TV-Ecke (ab Level 5)
+## 7. Couch-&-TV-Ecke (ab Level 3)
 
 - **Couch + TV + Konsole** aufstellen.
 - Kunden setzen sich und **zocken** (Bildschirm flackert, Controller-Animation). Sie bleiben länger im Laden,
@@ -170,6 +171,29 @@ Flecken ziehen Gemütlichkeit ab.
 - Ab und zu **Konsolen-Abend**: kleine Bonusaufgabe, die Ecke voll zu bekommen.
 
 ---
+
+## 7b. Mitarbeiter (ab Level 3)
+
+- **1 Mitarbeiter** ab Level 3, kostet Lohn pro Tag (z. B. 30 €, wird bei der Abrechnung abgezogen).
+- Man legt seine Aufgabe fest: **Kasse** (kassiert selbst) oder **Regale** (füllt aus Kartons nach).
+- Er hat einen Namen und kleine Sprüche – und gehört später zur Story (er lernt Papa kennen).
+
+## 7c. Karten-Grading (ab Level 5)
+
+1. **Grading-Station** kaufen (400 €) und aufstellen.
+2. Eine Karte aus der Sammlung einlegen, Grading kostet **5 € pro Karte**.
+3. Prüfen dauert **1 Spielstunde** – Fortschrittsbalken über der Station (Lupe, Licht, Messung).
+4. Ergebnis: **Note 1–10**, die Karte wird in einer Schutzhülle versiegelt („Slab“).
+5. Bewertete Karten sind in der Vitrine mehr wert:
+   | Note | Wert |
+   |---|---|
+   | 10 (makellos) | × 5 |
+   | 9 | × 3 |
+   | 8 | × 2 |
+   | 7 | × 1,5 |
+   | 6 oder weniger | × 1 |
+6. Sammler kaufen bevorzugt bewertete Karten; eine **10er Ultra-Seltene** ist ein Highlight mit eigenem Sound.
+7. Im Sammelbuch sieht man die beste Note jeder Karte.
 
 ## 8. Fähigkeiten
 
@@ -182,7 +206,7 @@ Mit jedem Level-Aufstieg gibt es **1 Fähigkeitspunkt** (insgesamt 6). Man wähl
 | Lagerprofi | 2 Kartons gleichzeitig tragen |
 | Verhandlungsgeschick | Ankauf 15 % günstiger, Sammler zahlen 10 % mehr |
 | Turnier-Organisator | +2 Plätze pro Turnier, Hersteller schickt mehr Packs |
-| Tüftler | 3D-Drucke 25 % schneller, weniger Druckfehler |
+| Tüftler | 3D-Drucke und Grading 25 % schneller, weniger Druckfehler |
 | Ordnungsfanatiker | Weniger neue Flecken pro Tag |
 | Glückspilz | Etwas mehr „NEU!“-Karten beim Pack-Öffnen |
 
@@ -207,9 +231,9 @@ Mit jedem Level-Aufstieg gibt es **1 Fähigkeitspunkt** (insgesamt 6). Man wähl
 |---|---|---|
 | **A** ✅ | Store-Level, XP-Leiste, Level-Up-Bildschirm, Freischalt-System, Tab „Einrichtung“, Deko & Gemütlichkeit | Grundgerüst für alles Weitere (umgesetzt: Pflanze, Poster, Teppich, Wanduhr, Lichterkette) |
 | **B** | Kapitel 2 (Level 2): Spellforge, Zubehör-Ständer, erste Papa-Szene | Level 1 → 2 spielbar |
-| **C** | Kapitel 3 (Level 3): Spieltische, Turnier-Counter, Hersteller-Packs, Turnierablauf, Siegerehrung, Soul Clash | Turniere spielbar |
+| **C** | Kapitel 3 (Level 3): Spieltische, Turnier-Counter, Hersteller-Packs, Turnierablauf, Siegerehrung, Soul Clash, Couch-&-TV-Ecke, Getränke, 1 Mitarbeiter | Turniere und Couch-Ecke spielbar |
 | **D** | Kapitel 4 (Level 4): 3D-Drucker, Filament, Druck-Regal, Ankauf | Drucken & Handeln |
-| **E** | Kapitel 5 (Level 5): Couch-&-TV-Ecke, Kühlschrank, Ladenerweiterung, Mitarbeiter | Laden wird groß |
+| **E** | Kapitel 5 (Level 5): Karten-Grading, Ladenerweiterung | Laden wird groß |
 | **F** | Kapitel 6–7: Großturniere, Premium-Deko, Finale mit Papa und der Two-Moons-Karte | Story fertig |
 | **G** | Fähigkeiten-Menü, Feinschliff, Balance | Rund und fertig |
 
