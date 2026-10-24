@@ -244,6 +244,8 @@ namespace TwoMoons
             line += "\n" + LevelLine();
             string tournamentLine = Game.Tournament.StatusLine;
             if (tournamentLine != null) line += "\n" + tournamentLine;
+            string eventLine = DailyEvents.Short(Game.TodayEvent);
+            if (eventLine != null) line += "\nHeute: " + eventLine;
             // Platz lassen für die Aufgabenliste rechts.
             float barWidth = Mathf.Min(760f, width - PanelWidth - 3f * Margin);
             var content = new GUIContent(line);

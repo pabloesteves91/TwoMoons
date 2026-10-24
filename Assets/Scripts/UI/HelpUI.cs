@@ -89,7 +89,14 @@ namespace TwoMoons
                 "Kunden nehmen Ware aus dem Regal und stellen sich an der Kasse an. Drück dort [E].",
                 "Das Gesicht über dem Kopf zeigt die Laune: froh → neutral → verärgert. Danach gehen sie (Ruf −1).",
                 "Ist ein Regal leer, schauen sie im nächsten. Ist alles leer, gehen sie.",
-                "Manchmal kleckert ein Kunde – Flecken mit [E] wegwischen, sonst werden alle ungeduldiger.");
+                "Manchmal kleckert ein Kunde – Flecken mit [E] wegwischen, sonst werden alle ungeduldiger.",
+                "Ladendiebe: Wer „*pfeif*“ macht und ohne zu zahlen zur Tür schleicht, hat etwas eingesteckt. Hinlaufen und [E] drücken!");
+            Section("Tagesereignisse (ab Tag 2)",
+                "Regentag – weniger Kunden, aber geduldiger.",
+                "Schulschluss-Ansturm – 13 bis 15 Uhr kommen viel mehr Kunden.",
+                "Influencer-Besuch – gut bedienen bringt viel Ruf, sonst gibt es Ärger.",
+                "Großhändler-Aktion – alle Ware 20 % günstiger.",
+                "Sammlertag – Kunden kaufen ein Pack mehr, mehr Sammler an der Vitrine.");
             Section("Preise",
                 "Bis zum Marktwert kaufen alle. Darüber geht ein Teil der Kunden: +30 % etwa jeder Zweite, ab +60 % keiner.",
                 "Unter 85 % ist es ein Schnäppchen: der Kunde nimmt ein Pack mehr und der Ruf steigt schneller.");

@@ -11,7 +11,7 @@ namespace TwoMoons
     {
         public static readonly List<Customer> Active = new List<Customer>();
 
-        enum State { ToShelf, Browsing, ToQueue, Queued, Leaving, ToCouch, Gaming }
+        enum State { ToShelf, Browsing, ToQueue, Queued, Leaving, ToCouch, Gaming, Sneaking }
 
         const float Speed = 2.2f;
         const float BrowseSeconds = 2f;
@@ -71,6 +71,14 @@ namespace TwoMoons
         /// <summary>Kommt nur, um sich fürs Turnier anzumelden (zahlt Startgeld an der Kasse).</summary>
         public bool IsTournamentEntrant;
 
+        /// <summary>Ladendieb: steckt Packs ein und schleicht zum Ausgang. Mit [E] erwischen!</summary>
+        public bool IsThief;
+        public bool IsSneaking => state == State.Sneaking;
+        /// <summary>Influencerin (Tagesereignis): gut bedient gibt es viel Ruf, sonst Ärger.</summary>
+        public bool IsInfluencer;
+        bool influencerReported;
+        const float SneakSpeed = 1.3f;
+
         /// <summary>Will dir Karten verkaufen (Ankauf ab Level 4).</summary>
         public bool IsSeller;
         public readonly List<CardDef> OfferCards = new List<CardDef>();
@@ -103,6 +111,13 @@ namespace TwoMoons
             moodIcon.enabled = false;
             GetComponent<YSort>().Collect();
 
+            if (IsThief) gameObject.AddComponent<ThiefCatch>().Init(this);
+            if (IsInfluencer)
+            {
+                spriteRenderer.color = new Color(1f, 0.75f, 0.95f);
+                Say("Hey Leute, ich bin heute bei TwoMoons!", 4f);
+            }
+
             if (IsTournamentEntrant)
             {
                 unitPrice = TournamentManager.EntryFee;
@@ -120,8 +135,9 @@ namespace TwoMoons
 
             // Bewertete Karten locken mehr Sammler an.
             var showcases = Game.Showcases.FindAll(s => s.HasCards);
-            float collectorChance = CollectorChance + (showcases.Exists(s => s.HasGradedCards) ? 0.1f : 0f);
-            if (showcases.Count > 0 && Random.value < collectorChance) PickShowcase(showcases);
+            float collectorChance = CollectorChance + (showcases.Exists(s => s.HasGradedCards) ? 0.1f : 0f) +
+                                    (Game.TodayEvent == DayEvent.Collectors ? 0.2f : 0f);
+            if (!IsThief && showcases.Count > 0 && Random.value < collectorChance) PickShowcase(showcases);
             else PickShelf();
         }
 
@@ -241,7 +257,7 @@ namespace TwoMoons
                     // Preis mit dem Marktwert vergleichen.
                     unitPrice = Game.GetPrice(product);
                     float ratio = unitPrice / (float)product.MarketValue;
-                    if (Random.value < Mathf.Clamp01((ratio - 1f) / PainRange))
+                    if (!IsThief && Random.value < Mathf.Clamp01((ratio - 1f) / PainRange))
                     {
                         Say($"{Money.Format(unitPrice)}? Viel zu teuer!");
                         Leave(false, $"Ein Kunde fand {product.Name} zu teuer ({Money.Format(unitPrice)}).");
@@ -252,11 +268,30 @@ namespace TwoMoons
                     int wanted = product.Category == ProductCategory.Accessory || product.Category == ProductCategory.Print ? 1 : Random.Range(1, 3);
                     // Nach dem Zocken: nur ein Getränk.
                     if (hasGamed) wanted = 1;
-                    itemCount = shelf.Take(wanted + (bargain ? 1 : 0));
+                    else if (Game.TodayEvent == DayEvent.Collectors) wanted++;
+                    if (IsThief) wanted = Random.Range(1, 4);
+                    itemCount = shelf.Take(wanted + (bargain && !IsThief ? 1 : 0));
 
                     if (itemCount == 0 && TryOtherShelf()) break;
                     if (itemCount == 0) Leave(false, "Ein Kunde ist gegangen: Das Regal war leer.");
+                    else if (IsThief) StartSneaking();
                     else JoinQueue();
+                    break;
+
+                case State.Sneaking:
+                    // Erst kurz umschauen, dann langsam Richtung Ausgang.
+                    if (timer > 0f)
+                    {
+                        timer -= Time.deltaTime;
+                        if (timer <= 0f && !WalkTo(ShopGrid.SpawnCell)) Destroy(gameObject);
+                        break;
+                    }
+                    if (Arrived)
+                    {
+                        Game.ThiefEscaped(product, itemCount);
+                        itemCount = 0;
+                        Destroy(gameObject);
+                    }
                     break;
 
                 case State.ToQueue:
@@ -364,7 +399,8 @@ namespace TwoMoons
             Vector3 target = ShopGrid.CellToWorld(path[pathIndex]);
             Vector3 step = target - transform.position;
             if (Mathf.Abs(step.x) > 0.01f) spriteRenderer.flipX = step.x < 0;
-            transform.position = Vector3.MoveTowards(transform.position, target, Speed * Time.deltaTime);
+            float speed = state == State.Sneaking ? SneakSpeed : Speed;
+            transform.position = Vector3.MoveTowards(transform.position, target, speed * Time.deltaTime);
             if ((transform.position - target).sqrMagnitude < 0.0001f) pathIndex++;
         }
 
@@ -482,6 +518,7 @@ namespace TwoMoons
             {
                 Game.Register.Remove(this);
                 Game.CustomerLeftHappy(bargain);
+                ReportInfluencer(true);
                 hasGamed = true;
                 Couch = couch;
                 moodIcon.enabled = false;
@@ -513,11 +550,41 @@ namespace TwoMoons
             {
                 if (happy) Game.CustomerLeftHappy(bargain);
                 else Game.CustomerLeftUnhappy(reason);
+                ReportInfluencer(happy);
             }
 
             MaybeMakeMess();
             state = State.Leaving;
             if (!WalkTo(ShopGrid.SpawnCell)) Destroy(gameObject);
+        }
+
+        void ReportInfluencer(bool happy)
+        {
+            if (!IsInfluencer || influencerReported) return;
+            influencerReported = true;
+            Say(happy ? "Daumen hoch für TwoMoons!" : "Hmm … das war nichts.", 3f);
+            Game.InfluencerLeft(happy);
+        }
+
+        /// <summary>Packs eingesteckt: pfeifend umschauen, dann ohne zu bezahlen zum Ausgang.</summary>
+        void StartSneaking()
+        {
+            state = State.Sneaking;
+            timer = Random.Range(2.5f, 4f);
+            Say("*pfeif* …", 4f);
+            Game.HintOnce("ersterDieb", "Psst! Jemand hat gerade Packs eingesteckt und schleicht zur Tür. Lauf hin und drück [E]!");
+        }
+
+        /// <summary>Vom Spieler erwischt: Ware zurück ins Regal, peinlich berührt raus.</summary>
+        public void Caught()
+        {
+            if (state != State.Sneaking) return;
+            if (itemCount > 0 && shelf != null) shelf.PutBack(product, itemCount);
+            itemCount = 0;
+            Say("Ertappt … tut mir leid!", 3f);
+            Game.ThiefCaught();
+            state = State.Queued;
+            Leave(true, null, alreadyRewarded: true);
         }
 
         /// <summary>Ab und zu hinterlässt ein Kunde einen Fleck (Krümel, verschüttete Limo …), den man aufwischen muss.</summary>

@@ -119,6 +119,8 @@ namespace TwoMoons
         /// <summary>Tagesphase (GamePhase) und Sekunden seit Ladenöffnung.</summary>
         public int phase;
         public float dayTime;
+        public int dayEvent;
+        public int influencerMinute = -1;
         public DayStats today;
         public int chapter = 1;
         public int[] questProgress;

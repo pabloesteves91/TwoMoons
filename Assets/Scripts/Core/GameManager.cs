@@ -110,6 +110,11 @@ namespace TwoMoons
         public Tutorial Guide => tutorial != null ? tutorial : tutorial = GetComponent<Tutorial>();
         bool TutorialAsking => Guide != null && Guide.Asking;
         public float DayTime { get; private set; }
+
+        /// <summary>Zufalls-Ereignis des heutigen Tages.</summary>
+        public DayEvent TodayEvent { get; private set; }
+        /// <summary>Uhrzeit (Minuten), zu der die Influencerin kommt; danach -1.</summary>
+        public int InfluencerMinute { get; private set; } = -1;
         public DayStats Today { get; private set; } = new DayStats();
 
         readonly Dictionary<ProductId, int> prices = new Dictionary<ProductId, int>();
@@ -217,11 +222,27 @@ namespace TwoMoons
         /// </summary>
         public float CustomerPatience =>
             (15f + 5f * ReputationStage) * Mathf.Max(0.5f, 1f - 0.08f * DirtSpot.Existing.Count) *
-            (1f + Mathf.Min(0.3f, Coziness * 0.02f)) * (Skills.Has(Skill.Charmer) ? 1.2f : 1f);
+            (1f + Mathf.Min(0.3f, Coziness * 0.02f)) * (Skills.Has(Skill.Charmer) ? 1.2f : 1f) *
+            (TodayEvent == DayEvent.Rain ? 1.3f : 1f);
+
+        /// <summary>Wie oft heute Kunden kommen (kleiner = öfter).</summary>
+        public float SpawnIntervalFactor
+        {
+            get
+            {
+                if (TodayEvent == DayEvent.Rain) return 1.4f;
+                if (TodayEvent == DayEvent.Rush && ClockMinutes >= 13 * 60 && ClockMinutes < 15 * 60) return 0.4f;
+                return 1f;
+            }
+        }
 
         /// <summary>Einkaufspreis einer Bestellung, mit Lagerprofi-Rabatt auf Ware.</summary>
-        public int CostOf(OrderOption option) =>
-            option.Kind == OrderKind.ProductBox && Skills.Has(Skill.StockPro) ? Mathf.RoundToInt(option.Cost * 0.9f) : option.Cost;
+        public int CostOf(OrderOption option)
+        {
+            if (option.Kind != OrderKind.ProductBox) return option.Cost;
+            float factor = (Skills.Has(Skill.StockPro) ? 0.9f : 1f) * (TodayEvent == DayEvent.Sale ? 0.8f : 1f);
+            return Mathf.RoundToInt(option.Cost * factor);
+        }
 
         /// <summary>Kapitel-Aufgaben des aktuellen Levels erledigt? (Kapitel 2–7 folgen.)</summary>
         Chapters chapters;
@@ -320,6 +341,13 @@ namespace TwoMoons
             PapaHelping = false;
             if (papaHelper != null) Destroy(papaHelper);
             ShowToast("Papa: „Das war der schönste Tag seit Langem. Danke.“", 6f);
+        }
+
+        /// <summary>Ein Hinweis, der pro Spielstand nur einmal kommt.</summary>
+        public void HintOnce(string id, string text)
+        {
+            if (IsDemo || !seenStories.Add(id)) return;
+            ShowToast(text, 7f);
         }
 
         /// <summary>Spielt eine Story-Szene genau einmal pro Spielstand.</summary>
@@ -535,6 +563,8 @@ namespace TwoMoons
             Phase = phase == GamePhase.Open || phase == GamePhase.Closing || phase == GamePhase.Summary ? phase : GamePhase.Preparation;
             DayLength = DayLengthFor(StoreLevel);
             DayTime = Mathf.Clamp(data.dayTime, 0f, DayLengthSeconds);
+            TodayEvent = (DayEvent)data.dayEvent;
+            InfluencerMinute = data.influencerMinute;
             if (data.today != null) Today = data.today;
             ShowToast($"Willkommen zurück, {PlayerName}! Tag {Day}, {ClockText}.");
         }
@@ -552,6 +582,8 @@ namespace TwoMoons
                 xp = Xp,
                 phase = (int)Phase,
                 dayTime = DayTime,
+                dayEvent = (int)TodayEvent,
+                influencerMinute = InfluencerMinute,
                 today = Today,
                 chapter = ChapterProgress.Chapter,
                 questProgress = ChapterProgress.SaveProgress(),
@@ -876,6 +908,46 @@ namespace TwoMoons
             if (reason != null) ShowToast(reason);
         }
 
+        /// <summary>Die Influencerin ist da – ab jetzt kommt sie heute nicht mehr.</summary>
+        public void InfluencerArrived() => InfluencerMinute = -1;
+
+        public void InfluencerLeft(bool happy)
+        {
+            if (IsDemo) return;
+            if (happy)
+            {
+                ChangeReputation(8);
+                AddXp(40);
+                ShowToast("Die Influencerin postet ein Video über TwoMoons: „Bester Kartenladen der Stadt!“ Ruf +8", 6f);
+                SoundManager.Play(Sfx.Fanfare);
+            }
+            else
+            {
+                ChangeReputation(-6);
+                ShowToast("Die Influencerin war enttäuscht und erzählt es ihren Followern … Ruf −6", 6f);
+            }
+        }
+
+        /// <summary>Ladendieb erwischt: Ware zurück, ein bisschen Ruf für die Aufmerksamkeit.</summary>
+        public void ThiefCaught()
+        {
+            if (IsDemo) return;
+            ChangeReputation(2);
+            AddXp(15);
+            ShowToast("Ladendieb erwischt! Die Ware ist zurück im Regal. Ruf +2", 5f);
+            SoundManager.Play(Sfx.Quest);
+            ThiefStopped?.Invoke();
+        }
+
+        public void ThiefEscaped(Product product, int count)
+        {
+            if (IsDemo) return;
+            ShowToast($"Ein Ladendieb ist mit {count}× {product.Name} entkommen!", 5f);
+            SoundManager.Play(Sfx.Error);
+        }
+
+        public event Action ThiefStopped;
+
         public void ChangeReputation(int delta)
         {
             int before = ReputationStage;
@@ -906,6 +978,14 @@ namespace TwoMoons
             {
                 ChangeReputation(cozyBonus);
                 ShowToast($"Dein gemütlicher Laden spricht sich herum: Ruf +{cozyBonus}");
+            }
+
+            TodayEvent = DailyEvents.Roll();
+            InfluencerMinute = TodayEvent == DayEvent.Influencer ? UnityEngine.Random.Range(10 * 60, 16 * 60) : -1;
+            if (TodayEvent != DayEvent.None)
+            {
+                ShowDialog(new[] { $"Heute: {DailyEvents.Title(TodayEvent)}", DailyEvents.Description(TodayEvent) });
+                SoundManager.Play(Sfx.Quest);
             }
 
             int dirt = Skills.Has(Skill.Tidy) ? UnityEngine.Random.Range(0, 2) : UnityEngine.Random.Range(1, 4);
