@@ -53,7 +53,8 @@ namespace TwoMoons
 
         static readonly (int points, string name)[] ReputationStages =
         {
-            (0, "Unbekannt"), (20, "Geheimtipp"), (60, "Beliebt"), (150, "Stadtbekannt"), (300, "Legendär"),
+            // Grob auf die Kapitel abgestimmt: Geheimtipp in Kapitel 2, Beliebt in 3, Stadtbekannt in 5, Legendär in 7.
+            (0, "Unbekannt"), (60, "Geheimtipp"), (250, "Beliebt"), (800, "Stadtbekannt"), (2000, "Legendär"),
         };
 
         public static GameManager Instance { get; private set; }
@@ -904,7 +905,7 @@ namespace TwoMoons
         public void CustomerLeftHappy(bool bargain)
         {
             if (IsDemo) return;
-            ChangeReputation(bargain ? 3 : 2);
+            ChangeReputation(bargain ? 2 : 1);
             AddXp(5);
         }
 
@@ -924,15 +925,15 @@ namespace TwoMoons
             if (IsDemo) return;
             if (happy)
             {
-                ChangeReputation(8);
+                ChangeReputation(20);
                 AddXp(40);
-                ShowToast("Die Influencerin postet ein Video über TwoMoons: „Bester Kartenladen der Stadt!“ Ruf +8", 6f);
+                ShowToast("Die Influencerin postet ein Video über TwoMoons: „Bester Kartenladen der Stadt!“ Ruf +20", 6f);
                 SoundManager.Play(Sfx.Fanfare);
             }
             else
             {
-                ChangeReputation(-6);
-                ShowToast("Die Influencerin war enttäuscht und erzählt es ihren Followern … Ruf −6", 6f);
+                ChangeReputation(-10);
+                ShowToast("Die Influencerin war enttäuscht und erzählt es ihren Followern … Ruf −10", 6f);
             }
         }
 

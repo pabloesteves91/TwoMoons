@@ -337,9 +337,9 @@ namespace TwoMoons
             if (hadPrizes)
             {
                 int xp = (IsBig ? 100 : 60) + (players >= Seats ? 20 : 0);
-                Game.ChangeReputation(3 + players);
+                Game.ChangeReputation(5 + 2 * players);
                 Game.AddXp(xp);
-                Game.ShowToast($"Tolles {Kind}! Ruf +{3 + players}, +{xp} XP", 6f);
+                Game.ShowToast($"Tolles {Kind}! Ruf +{5 + 2 * players}, +{xp} XP", 6f);
             }
             else
             {

@@ -163,7 +163,7 @@ namespace TwoMoons
 
             Completed = true;
             SoundManager.Play(Sfx.Fanfare);
-            game.ChangeReputation(10);
+            game.ChangeReputation(25);
             game.ChapterFinished(Chapter);
         }
     }
