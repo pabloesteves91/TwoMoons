@@ -44,14 +44,37 @@ namespace TwoMoons.EditorTools
         [MenuItem("TwoMoons/Bilder und Sounds aktualisieren")]
         public static void RefreshArt()
         {
+            // Ersetzte Bilder sicher neu einlesen (Größe/Pixel pro Einheit passen sich an).
+            AssetDatabase.ImportAsset(SpriteFolder, ImportAssetOptions.ImportRecursive | ImportAssetOptions.ForceUpdate);
             int createdSprites = CreateMissingSprites();
             int createdSounds = CreateMissingSounds();
-            CreateOrUpdateLibrary();
-            CreateOrUpdateAudioLibrary();
+            var library = CreateOrUpdateLibrary();
+            var audioLibrary = CreateOrUpdateAudioLibrary();
+            int linked = LinkLibraries(library, audioLibrary);
+
+            string sceneHint = linked > 0
+                ? "Die Bibliotheken sind mit der Szene verbunden."
+                : $"Achtung: In der offenen Szene gibt es kein TwoMoons-Objekt. Öffne {ScenePath} und klick den Menüpunkt nochmal.";
             EditorUtility.DisplayDialog("TwoMoons",
-                $"Fertig: {createdSprites} neue Platzhalter-Bilder, {createdSounds} neue Sounds.\n\n" +
+                $"Fertig: {createdSprites} neue Platzhalter-Bilder, {createdSounds} neue Sounds.\n{sceneHint}\n\n" +
                 $"Eigene Bilder: PNG mit genau demselben Namen in {SpriteFolder} ersetzen (z. B. shelf.png).",
                 "OK");
+        }
+
+        /// <summary>Trägt die Bibliotheken bei jedem TwoMoons-Objekt der offenen Szene ein und speichert sie.</summary>
+        static int LinkLibraries(SpriteLibrary library, AudioLibrary audioLibrary)
+        {
+            var bootstraps = Object.FindObjectsByType<GameBootstrap>(FindObjectsSortMode.None);
+            foreach (var bootstrap in bootstraps)
+            {
+                var serialized = new SerializedObject(bootstrap);
+                serialized.FindProperty("sprites").objectReferenceValue = library;
+                serialized.FindProperty("sounds").objectReferenceValue = audioLibrary;
+                serialized.ApplyModifiedPropertiesWithoutUndo();
+                EditorSceneManager.MarkSceneDirty(bootstrap.gameObject.scene);
+            }
+            if (bootstraps.Length > 0) EditorSceneManager.SaveOpenScenes();
+            return bootstraps.Length;
         }
 
         /// <summary>Schreibt nur Bilder, die es noch nicht gibt – eigene Bilder werden nie überschrieben.</summary>
