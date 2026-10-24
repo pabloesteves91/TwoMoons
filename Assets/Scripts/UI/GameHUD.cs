@@ -302,30 +302,61 @@ namespace TwoMoons
 
             var open = chapters.OpenQuests;
             int rows = questsExpanded ? open.Count : Mathf.Min(1, open.Count);
+            float innerWidth = PanelWidth - 20f;
+            var wrap = new GUIStyle(text) { wordWrap = true };
+            var titleStyle = new GUIStyle(bold) { wordWrap = true };
 
-            var area = new Rect(width - PanelWidth - Margin, Margin, PanelWidth, 34f + rows * 22f);
-            GUI.Box(area, GUIContent.none, panel);
-            GUI.Label(new Rect(area.x + 10f, area.y + 6f, area.width - 90f, 22f), chapters.Header, bold);
-            GUI.Label(new Rect(area.xMax - 84f, area.y + 6f, 44f, 22f), $"{open.Count} offen", hint);
-            if (GUI.Button(new Rect(area.xMax - 36f, area.y + 5f, 28f, 24f), questsExpanded ? "▲" : "▼", button))
-                ToggleQuests();
-
-            float y = area.y + 30f;
+            // Höhen vorher messen, damit lange Titel und Aufgaben umbrechen statt abgeschnitten zu werden.
+            string stageTitle = chapters.Stage.Title;
+            float titleHeight = titleStyle.CalcHeight(new GUIContent(stageTitle), innerWidth);
+            var rowHeights = new float[rows];
+            float rowsHeight = 0f;
             for (int i = 0; i < rows; i++)
             {
-                DrawQuestRow(open[i], area.x + 10f, y, area.width - 20f);
-                y += 22f;
+                rowHeights[i] = Mathf.Max(22f, wrap.CalcHeight(new GUIContent(QuestLine(open[i])), innerWidth));
+                rowsHeight += rowHeights[i];
+            }
+
+            var area = new Rect(width - PanelWidth - Margin, Margin, PanelWidth, 32f + titleHeight + rowsHeight + 8f);
+            GUI.Box(area, GUIContent.none, panel);
+            int stage = Mathf.Min(chapters.StageIndex + 1, chapters.Stages.Count);
+            GUI.Label(new Rect(area.x + 10f, area.y + 6f, area.width - 100f, 22f), $"Kapitel {chapters.Chapter} · Etappe {stage}/{chapters.Stages.Count}", hint.WithAlignment(TextAnchor.MiddleLeft));
+            GUI.Label(new Rect(area.xMax - 92f, area.y + 6f, 52f, 22f), $"{open.Count} offen", hint);
+            var toggle = new Rect(area.xMax - 36f, area.y + 5f, 28f, 24f);
+            if (GUI.Button(toggle, GUIContent.none, button)) ToggleQuests();
+            DrawToggleArrow(toggle, questsExpanded);
+
+            GUI.color = UiKit.Gold;
+            GUI.Label(new Rect(area.x + 10f, area.y + 28f, innerWidth, titleHeight), stageTitle, titleStyle);
+            GUI.color = Color.white;
+
+            float y = area.y + 30f + titleHeight;
+            for (int i = 0; i < rows; i++)
+            {
+                GUI.color = open[i].Done ? UiKit.Good : Color.white;
+                GUI.Label(new Rect(area.x + 10f, y, innerWidth, rowHeights[i]), QuestLine(open[i]), wrap);
+                GUI.color = Color.white;
+                y += rowHeights[i];
             }
             return area.yMax;
         }
 
-        void DrawQuestRow(Quest quest, float x, float y, float rowWidth)
+        static string QuestLine(Quest quest)
         {
             string progress = quest.Target > 1 ? $" ({quest.Progress}/{quest.Target})" : "";
-            string mark = quest.Done ? "[x]" : "[  ]";
-            GUI.color = quest.Done ? UiKit.Good : Color.white;
-            GUI.Label(new Rect(x, y, rowWidth, 22f), $"{mark} {quest.Text}{progress}", text);
-            GUI.color = Color.white;
+            return $"{(quest.Done ? "[x]" : "[  ]")} {quest.Text}{progress}";
+        }
+
+        /// <summary>Kleines Dreieck im Aufklapp-Knopf (aus Rechtecken, weil die Schrift keine Pfeilzeichen hat).</summary>
+        static void DrawToggleArrow(Rect button, bool up)
+        {
+            float cx = button.center.x, cy = button.center.y;
+            for (int i = 0; i < 5; i++)
+            {
+                float half = 6f - i * 1.3f;
+                float y = up ? cy + 3f - i * 1.6f : cy - 4f + i * 1.6f;
+                UiKit.DrawRect(new Rect(cx - half, y, half * 2f, 1.6f), Color.white);
+            }
         }
 
         void ToggleQuests()

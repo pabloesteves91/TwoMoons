@@ -180,7 +180,7 @@ namespace TwoMoons
             if (Game.HasTwoMoons)
             {
                 GUI.color = UiKit.Gold;
-                if (UiKit.Button("★ Two Moons", GUILayout.Width(120f), GUILayout.Height(28f))) selectedCard = CardDatabase.TwoMoons.Id;
+                if (UiKit.Button("Two Moons", GUILayout.Width(110f), GUILayout.Height(28f))) selectedCard = CardDatabase.TwoMoons.Id;
                 GUI.color = Color.white;
             }
             GUILayout.FlexibleSpace();
@@ -205,7 +205,7 @@ namespace TwoMoons
                     if (best > 0)
                     {
                         GUI.color = UiKit.Gold;
-                        GUI.Label(new Rect(rect.x + 3f, rect.y + 1f, rect.width, 18f), $"★{best}", UiKit.Bold);
+                        GUI.Label(new Rect(rect.x + 3f, rect.y + 1f, rect.width, 18f), $"{best}/10", UiKit.Bold);
                         GUI.color = Color.white;
                     }
                 }
