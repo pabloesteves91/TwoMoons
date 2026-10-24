@@ -228,7 +228,7 @@ namespace TwoMoons
 
             DrawTextBox(width);
 
-            if (GUI.Button(new Rect(width - 150f, 12f, 138f, 30f), "Überspringen [Esc]", UiKit.ButtonStyle))
+            if (GUI.Button(new Rect(width - 222f, 12f, 210f, 32f), "Überspringen [Esc]", UiKit.ButtonStyle))
             {
                 SoundManager.Play(Sfx.UiClick);
                 Finish();
