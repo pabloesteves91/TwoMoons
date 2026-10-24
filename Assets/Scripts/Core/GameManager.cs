@@ -551,6 +551,11 @@ namespace TwoMoons
                 var deco = Decos.Find(d => d.Type == Furniture.Printer3D && d.Cell == new Vector2Int(saved.x, saved.y));
                 if (deco != null) deco.GetComponent<Printer3D>().Restore(saved.filament, saved.model, saved.progress, saved.jammed);
             }
+            foreach (var saved in data.bins)
+            {
+                var deco = Decos.Find(d => d.Type == Furniture.TrashBin && d.Cell == new Vector2Int(saved.x, saved.y));
+                if (deco != null) deco.GetComponent<TrashBin>().Restore(saved.fill);
+            }
             foreach (var saved in data.graders)
             {
                 var deco = Decos.Find(d => d.Type == Furniture.GradingStation && d.Cell == new Vector2Int(saved.x, saved.y));
@@ -627,6 +632,9 @@ namespace TwoMoons
                 var grader = deco.GetComponent<GradingStation>();
                 data.graders.Add(new SavedGrader { x = deco.Cell.x, y = deco.Cell.y, card = grader.CardId, progress = grader.Progress });
             }
+            foreach (var deco in Decos)
+                if (deco.Type == Furniture.TrashBin)
+                    data.bins.Add(new SavedBin { x = deco.Cell.x, y = deco.Cell.y, fill = deco.GetComponent<TrashBin>().Fill });
             data.expanded = ShopGrid.Expanded;
             data.slabs.AddRange(Slabs);
             data.employee = Staff != null ? (int)Staff.Job : -1;
@@ -947,6 +955,17 @@ namespace TwoMoons
         }
 
         public event Action ThiefStopped;
+        public event Action TrashTakenOut;
+
+        /// <summary>Voller Müllsack im Container: ordentlicher Laden, etwas Ruf.</summary>
+        public void TrashDisposed()
+        {
+            if (IsDemo) return;
+            ChangeReputation(1);
+            AddXp(10);
+            ShowToast("Müll entsorgt – der Laden bleibt sauber. Ruf +1", 3f);
+            TrashTakenOut?.Invoke();
+        }
 
         public void ChangeReputation(int delta)
         {

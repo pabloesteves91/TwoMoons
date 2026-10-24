@@ -257,6 +257,7 @@ namespace TwoMoons
             go.GetComponent<PrizeCounter>()?.SetCell(cell);
             go.GetComponent<Printer3D>()?.SetCell(cell);
             go.GetComponent<GradingStation>()?.SetCell(cell);
+            go.GetComponent<TrashBin>()?.SetCell(cell);
             SetListed(game, go, true);
             SetVisible(go, true);
         }

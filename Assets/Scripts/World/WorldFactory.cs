@@ -166,6 +166,7 @@ namespace TwoMoons
             if (type == Furniture.PrizeCounter) go.AddComponent<PrizeCounter>().Init(cell);
             if (type == Furniture.Printer3D) go.AddComponent<Printer3D>().Init(cell);
             if (type == Furniture.GradingStation) go.AddComponent<GradingStation>().Init(cell);
+            if (type == Furniture.TrashBin) go.AddComponent<TrashBin>().Init(cell);
             Game.Decos.Add(deco);
             return deco;
         }

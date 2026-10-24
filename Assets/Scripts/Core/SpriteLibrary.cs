@@ -46,6 +46,11 @@ namespace TwoMoons
         public Sprite trophyWall;
         public Sprite moonStatue;
         public Sprite trophy;
+        public Sprite table;
+        public Sprite chair;
+        public Sprite trashBin;
+        public Sprite trashBinFull;
+        public Sprite container;
 
         [Header("Deko")]
         public Sprite plant;
@@ -73,6 +78,7 @@ namespace TwoMoons
         public Sprite playmat;
         public Sprite cardIcon;
         public Sprite slabIcon;
+        public Sprite trashBag;
 
         [Header("Kunden-Laune")]
         public Sprite moodHappy;
@@ -95,7 +101,7 @@ namespace TwoMoons
             "floor", "wall", "street", "door", "sign", "signBoard", "counter", "register", "computer", "shelf", "box", "package", "dirt",
             "packTable", "showcase",
             "plant", "poster", "rug", "wallClock", "fairyLights",
-            "packMonstera", "packSpellforge", "sleeves", "binder", "playmat", "accessoryStand", "gameTable", "prizeCounter", "tournamentBoard", "fridge", "couch", "tv", "console", "packSoulClash", "soda", "energyDrink", "employee", "printer3d", "printShelf", "neonSign", "filament", "printSmall", "printMedium", "printLarge", "cardIcon", "gradingStation", "beanBag", "slabIcon", "floor2", "premiumShowcase", "arcade", "turf", "trophyWall", "moonStatue", "trophy", "papa",
+            "packMonstera", "packSpellforge", "sleeves", "binder", "playmat", "accessoryStand", "gameTable", "prizeCounter", "tournamentBoard", "fridge", "couch", "tv", "console", "packSoulClash", "soda", "energyDrink", "employee", "printer3d", "printShelf", "neonSign", "filament", "printSmall", "printMedium", "printLarge", "cardIcon", "gradingStation", "beanBag", "slabIcon", "floor2", "premiumShowcase", "arcade", "turf", "trophyWall", "moonStatue", "trophy", "papa", "table", "chair", "trashBin", "trashBinFull", "trashBag", "container",
             "moodHappy", "moodNeutral", "moodAngry",
             "player1", "player2", "player3", "customer1", "customer2", "customer3",
         };

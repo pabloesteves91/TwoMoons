@@ -137,6 +137,10 @@ namespace TwoMoons
                 "Morgens schickt der Hersteller Turnier-Packs – zum Turnier-Counter tragen, dort den Prizepool verteilen.",
                 "Ab 13 Uhr melden sich Spieler an der Kasse an (5 € Startgeld). Um 18 Uhr Siegerehrung am Counter mit [E].",
                 "Ab Level 6 werden es Großturniere, in Kapitel 7 kommt das Stadtturnier.");
+            Section("Tische, Stühle & Müll (ab Level 2)",
+                "Stell Stühle direkt neben einen Tisch. Kunden, die Booster gekauft haben, setzen sich, öffnen sie und tauschen mit anderen am Tisch.",
+                "Danach werfen sie die Folie in den Mülleimer. Ohne Mülleimer – oder wenn er voll ist – landet sie auf dem Boden.",
+                "Voller Mülleimer: Sack mit [E] herausnehmen (ein neuer ist sofort drin) und zum Container draußen links vom Eingang bringen.");
             Section("Spielecke",
                 "Couch + Fernseher + Konsole: Kunden zocken nach dem Kauf und holen sich danach gern ein Getränk.",
                 "Arcade-Automat (Level 6): Kunden spielen für 1 € pro Runde.");

@@ -5,10 +5,10 @@ namespace TwoMoons
 
     /// <summary>Neue Waren immer hinten anhängen – die Nummern stehen in Spielständen.</summary>
     public enum ProductId { MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat, TournamentPack, SoulClashPack, Soda, EnergyDrink,
-        Filament, PrintSmall, PrintMedium, PrintLarge }
+        Filament, PrintSmall, PrintMedium, PrintLarge, TrashBag }
 
     /// <summary>Wo eine Ware im Laden steht: Packs ins Regal, Zubehör in den Zubehör-Ständer.</summary>
-    public enum ProductCategory { Pack, Accessory, Promo, Drink, Supply, Print }
+    public enum ProductCategory { Pack, Accessory, Promo, Drink, Supply, Print, Trash }
 
     public enum OrderKind { ProductBox, Furniture }
 
@@ -110,6 +110,12 @@ namespace TwoMoons
         public static readonly Product PrintMedium = Print(ProductId.PrintMedium, "Flammfalke-Figur", "printMedium", 1800);
         public static readonly Product PrintLarge = Print(ProductId.PrintLarge, "Zwielichtdrache-Statue", "printLarge", 4500);
 
+        /// <summary>Voller Müllsack aus dem Mülleimer – gehört in den Container draußen.</summary>
+        public static readonly Product TrashBag = new Product
+        {
+            Id = ProductId.TrashBag, Name = "Müllsack", SpriteKey = "trashBag", Category = ProductCategory.Trash, MinLevel = 2,
+        };
+
         static Product Print(ProductId id, string name, string sprite, int value) => new Product
         {
             Id = id, Name = name, SpriteKey = sprite, Category = ProductCategory.Print, MarketValue = value, MinLevel = 4,
@@ -119,7 +125,7 @@ namespace TwoMoons
         public static readonly Product[] Products =
         {
             MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat, TournamentPack, SoulClashPack, Soda, EnergyDrink,
-            Filament, PrintSmall, PrintMedium, PrintLarge,
+            Filament, PrintSmall, PrintMedium, PrintLarge, TrashBag,
         };
 
         /// <summary>Tab „Ware“ am Computer.</summary>
@@ -146,6 +152,9 @@ namespace TwoMoons
             Furnishing(Furniture.AccessoryStand, "Für Hüllen, Ordner und Spielmatten", 5000, 2),
             Furnishing(Furniture.Rug, "Man kann darüber laufen · Gemütlichkeit +3", 4000, 2),
             Furnishing(Furniture.WallClock, "Für die Wand · Gemütlichkeit +1", 2000, 2),
+            Furnishing(Furniture.Table, "Kunden setzen sich, öffnen Booster und tauschen Karten · Stühle direkt daneben stellen", 3000, 2),
+            Furnishing(Furniture.Chair, "Sitzplatz – muss direkt neben einem Tisch stehen", 1000, 2),
+            Furnishing(Furniture.TrashBin, "Für den Pack-Müll der Kunden · volle Säcke in den Container vor der Tür", 1500, 2),
             Furnishing(Furniture.FairyLights, "Für die Wand, funkelt · Gemütlichkeit +3", 2500, 2),
             Furnishing(Furniture.GameTable, "4 Plätze für Turniere", 12000, 3),
             Furnishing(Furniture.PrizeCounter, "Prizepool vorbereiten und Preise verteilen", 15000, 3),

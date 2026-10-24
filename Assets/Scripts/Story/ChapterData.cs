@@ -62,6 +62,7 @@ namespace TwoMoons
             new Quest { Text = "Das Stadtturnier ausrichten (nächstes Turnier)", Key = TournamentManager.CityTournamentKey };
         static Quest TableSeats(int seats) =>
             new Quest { Text = "Turnier-Plätze an Spieltischen", Target = seats, Poll = () => Game.Tournament.Seats };
+        static Quest TakeOutTrash(int count) => new Quest { Text = "Müllsack in den Container bringen", Target = count, Key = "trash" };
         static Quest CatchThief(int count) => new Quest { Text = "Einen Ladendieb erwischen", Target = count, Key = "thief" };
         static Quest BestDay(int packs) => new Quest { Text = "An einem Tag Packs verkaufen", Target = packs, Key = "bestDay" };
 
@@ -151,7 +152,7 @@ namespace TwoMoons
                         new QuestStage
                         {
                             Title = "Stammkunden",
-                            Quests = new List<Quest> { Serve(80), SellAccessories(10), Cozy(10), ProfitDays(3) },
+                            Quests = new List<Quest> { Serve(80), SellAccessories(10), Cozy(10), ProfitDays(3), Furnished(Furniture.Table, 1), TakeOutTrash(1) },
                         },
                     };
 

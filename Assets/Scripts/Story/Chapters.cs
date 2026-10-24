@@ -59,6 +59,7 @@ namespace TwoMoons
             };
             game.ShopExpanded += () => Advance("expanded", 1);
             game.ThiefStopped += () => Advance("thief", 1);
+            game.TrashTakenOut += () => Advance("trash", 1);
             game.CityTournamentHeld += () => Advance(TournamentManager.CityTournamentKey, 1);
             game.TournamentHeld += () => Advance("tournament", 1);
             game.EmployeeHired += () => Advance("hired", 1);

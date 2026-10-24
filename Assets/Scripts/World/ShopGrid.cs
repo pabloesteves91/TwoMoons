@@ -22,6 +22,8 @@ namespace TwoMoons
         public static readonly Vector2Int SpawnCell = new Vector2Int(BaseWidth / 2, 0);
         public static readonly Vector2Int DoorCell = new Vector2Int(BaseWidth / 2, 1);
         public static readonly Vector2Int SignCell = new Vector2Int(BaseWidth / 2 - 1, 1);
+        /// <summary>Müllcontainer draußen auf dem Gehweg, links vom Eingang.</summary>
+        public static readonly Vector2Int ContainerCell = new Vector2Int(BaseWidth / 2 - 1, 0);
         public static readonly Vector2Int RegisterCell = new Vector2Int(3, 7);
         public static readonly Vector2Int ComputerCell = new Vector2Int(1, 9);
         public static readonly Vector2Int PackTableCell = new Vector2Int(4, 9);

@@ -373,6 +373,43 @@ namespace TwoMoons
                     Rect(9, 11, 1, 1, new Color32(30, 20, 25, 255));
                     Rect(6, 9, 4, 1, new Color32(200, 200, 205, 255));
                     break;
+                case "table":
+                    Rect(1, 6, 14, 8, new Color32(150, 100, 60, 255));
+                    Rect(1, 12, 14, 2, new Color32(180, 125, 80, 255));
+                    Rect(2, 0, 2, 6, new Color32(110, 70, 40, 255));
+                    Rect(12, 0, 2, 6, new Color32(110, 70, 40, 255));
+                    break;
+                case "chair":
+                    Rect(4, 0, 2, 6, new Color32(110, 70, 40, 255));
+                    Rect(10, 0, 2, 6, new Color32(110, 70, 40, 255));
+                    Rect(3, 6, 10, 3, new Color32(170, 110, 65, 255));
+                    Rect(3, 9, 2, 6, new Color32(150, 95, 55, 255));
+                    Rect(11, 9, 2, 6, new Color32(150, 95, 55, 255));
+                    Rect(3, 12, 10, 3, new Color32(170, 110, 65, 255));
+                    break;
+                case "trashBin":
+                    Rect(4, 0, 8, 11, new Color32(90, 110, 100, 255));
+                    Frame(4, 0, 8, 11, new Color32(50, 65, 60, 255));
+                    Rect(3, 11, 10, 2, new Color32(60, 75, 70, 255));
+                    break;
+                case "trashBinFull":
+                    Rect(4, 0, 8, 11, new Color32(90, 110, 100, 255));
+                    Frame(4, 0, 8, 11, new Color32(50, 65, 60, 255));
+                    Rect(3, 11, 10, 2, new Color32(60, 75, 70, 255));
+                    Rect(5, 13, 6, 3, new Color32(40, 40, 45, 255));
+                    Rect(7, 13, 2, 2, new Color32(240, 200, 80, 255));
+                    break;
+                case "trashBag":
+                    Circle(8, 6, 5, new Color32(40, 40, 45, 255));
+                    Rect(7, 11, 2, 3, new Color32(40, 40, 45, 255));
+                    Rect(6, 13, 4, 1, new Color32(90, 90, 100, 255));
+                    break;
+                case "container":
+                    Rect(0, 0, 16, 12, new Color32(50, 110, 70, 255));
+                    Frame(0, 0, 16, 12, new Color32(25, 60, 35, 255));
+                    Rect(0, 12, 16, 3, new Color32(35, 80, 50, 255));
+                    Rect(3, 4, 10, 1, new Color32(25, 60, 35, 255));
+                    break;
                 case "neonSign":
                     Rect(1, 5, 14, 7, new Color32(30, 20, 40, 255));
                     Rect(2, 7, 4, 3, new Color32(255, 90, 160, 255));

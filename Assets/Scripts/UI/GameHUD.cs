@@ -88,6 +88,12 @@ namespace TwoMoons
                 foreach (int card in showcase.Cards) if (card >= 0) filled++;
                 info = $"{(showcase.Premium ? "Premium-Vitrine" : "Vitrine")}: {filled} / {showcase.SlotCount} Karten";
             }
+            var binDeco = Game.Decos.Find(d => d.Type == Furniture.TrashBin && d.Cell == cell);
+            if (binDeco != null)
+            {
+                var bin = binDeco.GetComponent<TrashBin>();
+                info = bin.IsFull ? "Mülleimer: voll! Sack mit [E] herausnehmen" : $"Mülleimer: {bin.Fill} / {TrashBin.Capacity}";
+            }
             if (info == null)
             {
                 foreach (var box in DeliveryBox.Existing)
@@ -255,12 +261,17 @@ namespace TwoMoons
                   (Game.Xp >= to && !Game.ChapterComplete ? "\nXP reichen – jetzt noch die Kapitel-Aufgaben!" : "");
 
             var dayStyle = bold;
-            var moneyStyle = new GUIStyle(bold) { normal = { textColor = UiKit.Gold } };
+            // Geld grün, wenn der Tag bisher Gewinn bringt (zählt für „Tage mit Gewinn“), rot bei Verlust.
+            int todayProfit = Game.Today.Income - Game.Today.Expenses;
+            var moneyColor = todayProfit > 0 ? UiKit.Good : todayProfit < 0 ? UiKit.Bad : UiKit.Gold;
+            var moneyStyle = new GUIStyle(bold) { normal = { textColor = moneyColor } };
+            string moneyTip = $"Heute: Einnahmen {Money.Format(Game.Today.Income)} · Ausgaben {Money.Format(Game.Today.Expenses)}\n" +
+                              (todayProfit >= 0 ? $"Gewinn bisher: {Money.Format(todayProfit)}" : $"Verlust bisher: {Money.Format(-todayProfit)}");
             var items = new (string text, GUIStyle style, string tip)[]
             {
                 ($"Tag {Game.Day}  {Game.ClockText}", dayStyle, null),
                 (phase, text, null),
-                (Money.Format(Game.MoneyCents), moneyStyle, null),
+                (Money.Format(Game.MoneyCents), moneyStyle, moneyTip),
                 ($"Ruf: {Game.ReputationName}", text, $"Ruf {Game.Reputation} · Gemütlichkeit {Game.Coziness}\nZufriedene Kunden und Deko bringen Ruf."),
                 ($"Level {level}", bold, xpTip),
             };

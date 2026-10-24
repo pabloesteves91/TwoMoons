@@ -11,7 +11,7 @@ namespace TwoMoons
     {
         public static readonly List<Customer> Active = new List<Customer>();
 
-        enum State { ToShelf, Browsing, ToQueue, Queued, Leaving, ToCouch, Gaming, Sneaking }
+        enum State { ToShelf, Browsing, ToQueue, Queued, Leaving, ToCouch, Gaming, Sneaking, ToBin }
 
         const float Speed = 2.2f;
         const float BrowseSeconds = 2f;
@@ -24,6 +24,17 @@ namespace TwoMoons
 
         /// <summary>Anteil der Kunden, die nach dem Bezahlen noch eine Runde auf der Couch zocken.</summary>
         const float CouchChance = 0.35f;
+        /// <summary>Anteil der Pack-Käufer, die sich an einen Tisch setzen, ihre Booster öffnen und tauschen.</summary>
+        const float TableChance = 0.45f;
+
+        static readonly string[] PullLines = { "Ooh, eine Seltene!", "Schon wieder die Mooskröte …", "Endlich! Die fehlte mir!", "Glänzt die etwa?!", "Nicht schlecht!" };
+        static readonly string[] TradeLines = { "Tauschst du die?", "Deal!", "Zwei gegen eine?", "Die hab ich doppelt!", "Abgemacht!" };
+
+        /// <summary>Folie der geöffneten Booster, die in den Mülleimer muss.</summary>
+        bool carriesTrash;
+        bool saidPull, saidTrade;
+        float seatTime;
+        TrashBin bin;
 
         /// <summary>Bis zu diesem Anteil vom Marktwert gilt der Preis als Schnäppchen.</summary>
         const float BargainRatio = 0.85f;
@@ -312,20 +323,29 @@ namespace TwoMoons
 
                 case State.ToCouch:
                     if (!Arrived) break;
-                    // Auf die Couch setzen (am Arcade-Automaten davor stehen bleiben) und zocken.
-                    if (Couch.Type == Furniture.Couch)
+                    // Auf Couch oder Stuhl setzen (am Arcade-Automaten davor stehen bleiben).
+                    if (Couch.Type == Furniture.Couch || Couch.Type == Furniture.Chair)
                         transform.position = ShopGrid.CellToWorld(DecoCell(Couch)) + new Vector3(0f, 0.1f, 0f);
                     state = State.Gaming;
-                    timer = Random.Range(20f, 40f);
-                    moodIcon.enabled = true;
+                    bool atTable = Couch.Type == Furniture.Chair;
+                    timer = atTable ? Random.Range(14f, 22f) : Random.Range(20f, 40f);
+                    seatTime = timer;
+                    moodIcon.enabled = !atTable;
                     moodIcon.sprite = Art.Get("moodHappy");
+                    if (atTable) Say("*ratsch* … mal sehen!", 2.5f);
                     break;
 
                 case State.Gaming:
                     timer -= Time.deltaTime;
-                    moodIcon.enabled = Mathf.Repeat(timer, 3f) < 1.5f;
+                    if (Couch != null && Couch.Type == Furniture.Chair) TableTalk();
+                    else moodIcon.enabled = Mathf.Repeat(timer, 3f) < 1.5f;
                     if (timer > 0f) break;
                     FinishGaming();
+                    break;
+
+                case State.ToBin:
+                    if (!Arrived) break;
+                    ThrowAwayTrash();
                     break;
             }
         }
@@ -471,6 +491,13 @@ namespace TwoMoons
             if (seat.Type == Furniture.Arcade) Game.RegisterArcade(Random.Range(2, 6));
             else transform.position = ShopGrid.CellToWorld(DecoCell(seat));
             Game.ChangeReputation(1);
+            if (seat.Type == Furniture.Chair)
+            {
+                // Am Tisch wurden Booster geöffnet: Folie in den Mülleimer.
+                carriesTrash = true;
+                GoToBin();
+                return;
+            }
             var drinks = Game.Shelves.FindAll(s => s.Stock > 0 && s.Category == ProductCategory.Drink);
             if (drinks.Count > 0 && Random.value < 0.7f)
             {
@@ -507,13 +534,15 @@ namespace TwoMoons
 
             // Wer sich beschwert hat, ist jetzt erleichtert; die Sprechblase verschwindet bald.
             if (complained) Say("Na endlich!", 2f);
+            bool boughtPacks = card == null && product != null && product.Category == ProductCategory.Pack && itemCount > 0;
             if (card != null) Game.RegisterCardSale(card, unitPrice, cardGrade);
             else Game.RegisterSale(Total, itemCount, product);
             itemCount = 0;
             card = null;
 
-            // Ab und zu noch eine Runde auf der Couch oder am Arcade-Automaten.
-            var couch = !hasGamed && Random.value < CouchChance ? FreeGamingSpot() : null;
+            // Pack-Käufer setzen sich gern an einen Tisch, sonst ab und zu Couch oder Arcade-Automat.
+            var couch = !hasGamed && boughtPacks && Random.value < TableChance ? FreeChair() : null;
+            if (couch == null) couch = !hasGamed && Random.value < CouchChance ? FreeGamingSpot() : null;
             if (couch != null)
             {
                 Game.Register.Remove(this);
@@ -556,6 +585,81 @@ namespace TwoMoons
             MaybeMakeMess();
             state = State.Leaving;
             if (!WalkTo(ShopGrid.SpawnCell)) Destroy(gameObject);
+        }
+
+        /// <summary>Freier Stuhl direkt neben einem Tisch.</summary>
+        static DecoItem FreeChair()
+        {
+            var free = Game.Decos.FindAll(d => d.Type == Furniture.Chair && !d.InUse && TableNextTo(d.Cell) != null);
+            return free.Count > 0 ? free[Random.Range(0, free.Count)] : null;
+        }
+
+        static DecoItem TableNextTo(Vector2Int cell) =>
+            Game.Decos.Find(d => d.Type == Furniture.Table && Mathf.Abs(d.Cell.x - cell.x) + Mathf.Abs(d.Cell.y - cell.y) == 1);
+
+        /// <summary>Am Tisch: erst Booster öffnen und kommentieren, dann mit anderen am selben Tisch tauschen.</summary>
+        void TableTalk()
+        {
+            if (!saidPull && timer < seatTime * 0.65f)
+            {
+                saidPull = true;
+                Say(PullLines[Random.Range(0, PullLines.Length)], 2.5f);
+            }
+            if (!saidTrade && timer < seatTime * 0.35f)
+            {
+                saidTrade = true;
+                var table = TableNextTo(Couch.Cell);
+                bool partner = table != null && Active.Exists(c => c != this && c.Couch != null && c.Couch.Type == Furniture.Chair && TableNextTo(c.Couch.Cell) == table);
+                if (partner)
+                {
+                    Say(TradeLines[Random.Range(0, TradeLines.Length)], 2.5f);
+                    Game.ChangeReputation(1);
+                }
+            }
+        }
+
+        /// <summary>Zum nächsten Mülleimer mit Platz (sonst zum nächsten überhaupt).</summary>
+        void GoToBin()
+        {
+            var bins = new List<TrashBin>();
+            foreach (var deco in Game.Decos)
+                if (deco.Type == Furniture.TrashBin) bins.Add(deco.GetComponent<TrashBin>());
+            bins.Sort((a, b) => (a.IsFull ? 1 : 0).CompareTo(b.IsFull ? 1 : 0) != 0
+                ? (a.IsFull ? 1 : 0).CompareTo(b.IsFull ? 1 : 0)
+                : (a.Cell - CurrentCell).sqrMagnitude.CompareTo((b.Cell - CurrentCell).sqrMagnitude));
+            foreach (var candidate in bins)
+            {
+                if (!WalkNextTo(candidate.Cell)) continue;
+                bin = candidate;
+                state = State.ToBin;
+                return;
+            }
+            // Kein Mülleimer: die Folie landet auf dem Boden.
+            DropTrash("Wo ist denn hier ein Mülleimer?");
+            state = State.Queued;
+            Leave(true, null, alreadyRewarded: true);
+        }
+
+        void ThrowAwayTrash()
+        {
+            if (bin != null && bin.Add())
+            {
+                carriesTrash = false;
+                SoundManager.Play(Sfx.Drop);
+            }
+            else DropTrash("Mülleimer voll …");
+            state = State.Queued;
+            Leave(true, null, alreadyRewarded: true);
+        }
+
+        void DropTrash(string complaint)
+        {
+            if (!carriesTrash) return;
+            carriesTrash = false;
+            Say(complaint, 2.5f);
+            var cell = CurrentCell;
+            if (ShopGrid.IsInterior(cell) && !DirtSpot.Existing.Exists(d => ShopGrid.WorldToCell(d.transform.position) == cell))
+                WorldFactory.SpawnDirt(cell);
         }
 
         void ReportInfluencer(bool happy)

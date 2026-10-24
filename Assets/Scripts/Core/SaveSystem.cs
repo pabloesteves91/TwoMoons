@@ -48,6 +48,13 @@ namespace TwoMoons
     }
 
     [Serializable]
+    public class SavedBin
+    {
+        public int x, y;
+        public int fill;
+    }
+
+    [Serializable]
     public class SavedGrader
     {
         public int x, y;
@@ -146,6 +153,7 @@ namespace TwoMoons
         public List<SavedCard> bestGrades = new List<SavedCard>();
         public List<SavedGrader> graders = new List<SavedGrader>();
         public List<int> skills = new List<int>();
+        public List<SavedBin> bins = new List<SavedBin>();
         public long savedAtTicks;
 
         public DateTime SavedAt => new DateTime(savedAtTicks);
