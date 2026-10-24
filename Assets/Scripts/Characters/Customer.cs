@@ -57,6 +57,8 @@ namespace TwoMoons
         string speech;
         float speechUntil;
         bool complained;
+        /// <summary>Wie oft der Kunde schon ein anderes Regal gesucht hat, weil eins leer war.</summary>
+        int shelfRetries;
 
         static readonly string[] AngryLines = { "Geht das heute noch?", "Ich warte schon ewig!", "Hallo?! Kasse!", "Wird das noch was?" };
 
@@ -154,6 +156,30 @@ namespace TwoMoons
             else state = State.ToShelf;
         }
 
+        /// <summary>
+        /// Das Regal ist leer: erst in einem anderen Regal derselben Art schauen (z. B. das zweite Pack-Regal),
+        /// sonst in irgendeinem gefüllten Pack-Regal. Gibt false zurück, wenn es keins gibt.
+        /// </summary>
+        bool TryOtherShelf()
+        {
+            if (shelfRetries >= 2) return false;
+            var category = shelf != null ? shelf.Category : ProductCategory.Pack;
+            var others = Game.Shelves.FindAll(s => s != shelf && s.Stock > 0 && s.Category == category);
+            if (others.Count == 0) others = Game.Shelves.FindAll(s => s != shelf && s.Stock > 0 && s.Category == ProductCategory.Pack);
+            others.Sort((a, b) => (a.Cell - CurrentCell).sqrMagnitude.CompareTo((b.Cell - CurrentCell).sqrMagnitude));
+            foreach (var other in others)
+            {
+                if (!WalkNextTo(other.Cell)) continue;
+                shelfRetries++;
+                shelf = other;
+                product = null;
+                state = State.ToShelf;
+                Say("Leer … mal da drüben schauen.", 2f);
+                return true;
+            }
+            return false;
+        }
+
         bool WalkNextTo(Vector2Int target)
         {
             List<Vector2Int> best = null;
@@ -203,7 +229,8 @@ namespace TwoMoons
                         BuyFromShowcase();
                         break;
                     }
-                    product = shelf != null ? shelf.Product : null;
+                    product = shelf != null && shelf.Stock > 0 ? shelf.Product : null;
+                    if (product == null && TryOtherShelf()) break;
                     if (product == null)
                     {
                         Say("Leer?! Schade …");
@@ -227,6 +254,7 @@ namespace TwoMoons
                     if (hasGamed) wanted = 1;
                     itemCount = shelf.Take(wanted + (bargain ? 1 : 0));
 
+                    if (itemCount == 0 && TryOtherShelf()) break;
                     if (itemCount == 0) Leave(false, "Ein Kunde ist gegangen: Das Regal war leer.");
                     else JoinQueue();
                     break;
