@@ -167,7 +167,7 @@ namespace TwoMoons
             else
             {
                 GUI.color = UiKit.Good;
-                GUI.Label(new Rect(area.x + 10f, y, area.width - 20f, 22f), "Alle Aufgaben erledigt!", text);
+                GUI.Label(new Rect(area.x + 10f, y, area.width - 20f, 22f), "Kapitel geschafft! Alle Aufgaben: [Tab]", text);
                 GUI.color = Color.white;
             }
             return area.yMax;
