@@ -49,6 +49,7 @@ namespace TwoMoons
             hint = UiKit.Hint;
             button = UiKit.ButtonStyle;
 
+            DrawSpeechBubbles();
             DrawTopBar(width);
             float questsBottom = DrawQuests(width);
             DrawToasts(width, questsBottom + Margin);
@@ -62,6 +63,31 @@ namespace TwoMoons
         }
 
         static bool Button(string label, params GUILayoutOption[] options) => UiKit.Button(label, options);
+
+        /// <summary>Sprechblasen über Kunden, die gerade etwas sagen (verärgert, zu teuer …).</summary>
+        void DrawSpeechBubbles()
+        {
+            var camera = Camera.main;
+            if (camera == null) return;
+            float scale = Screen.height / UiKit.VirtualHeight;
+            var style = new GUIStyle(UiKit.Bold) { alignment = TextAnchor.MiddleCenter, wordWrap = false, fontSize = 13 };
+            style.normal.textColor = new Color(0.15f, 0.08f, 0.06f);
+            foreach (var customer in Customer.Active)
+            {
+                string speech = customer.Speech;
+                if (speech == null) continue;
+                var screen = camera.WorldToScreenPoint(customer.transform.position + new Vector3(0f, 1.35f, 0f));
+                float x = screen.x / scale, y = (Screen.height - screen.y) / scale;
+                var size = style.CalcSize(new GUIContent(speech));
+                var bubble = new Rect(x - size.x / 2f - 8f, y - size.y - 10f, size.x + 16f, size.y + 8f);
+                UiKit.DrawRect(new Rect(bubble.x - 2f, bubble.y - 2f, bubble.width + 4f, bubble.height + 4f), new Color(0.15f, 0.08f, 0.06f));
+                UiKit.DrawRect(bubble, new Color(1f, 0.97f, 0.9f));
+                // Kleine Spitze zum Kopf
+                UiKit.DrawRect(new Rect(x - 3f, bubble.yMax, 6f, 4f), new Color(1f, 0.97f, 0.9f));
+                UiKit.DrawRect(new Rect(x - 1f, bubble.yMax + 4f, 2f, 3f), new Color(1f, 0.97f, 0.9f));
+                GUI.Label(bubble, speech, style);
+            }
+        }
 
         void DrawPause(float width)
         {

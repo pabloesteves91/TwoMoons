@@ -47,6 +47,20 @@ namespace TwoMoons
 
         public int Total => card != null ? unitPrice : itemCount * unitPrice;
 
+        /// <summary>Was der Kunde gerade sagt (Sprechblase über dem Kopf), null = nichts.</summary>
+        public string Speech => Time.time < speechUntil ? speech : null;
+        string speech;
+        float speechUntil;
+        bool complained;
+
+        static readonly string[] AngryLines = { "Geht das heute noch?", "Ich warte schon ewig!", "Hallo?! Kasse!", "Wird das noch was?" };
+
+        public void Say(string text, float seconds = 3f)
+        {
+            speech = text;
+            speechUntil = Time.time + seconds;
+        }
+
         /// <summary>Kommt nur, um sich fürs Turnier anzumelden (zahlt Startgeld an der Kasse).</summary>
         public bool IsTournamentEntrant;
 
@@ -187,6 +201,7 @@ namespace TwoMoons
                     product = shelf != null ? shelf.Product : null;
                     if (product == null)
                     {
+                        Say("Leer?! Schade …");
                         Leave(false, "Ein Kunde ist gegangen: Das Regal war leer.");
                         break;
                     }
@@ -196,6 +211,7 @@ namespace TwoMoons
                     float ratio = unitPrice / (float)product.MarketValue;
                     if (Random.value < Mathf.Clamp01((ratio - 1f) / PainRange))
                     {
+                        Say($"{Money.Format(unitPrice)}? Viel zu teuer!");
                         Leave(false, $"Ein Kunde fand {product.Name} zu teuer ({Money.Format(unitPrice)}).");
                         break;
                     }
@@ -215,7 +231,11 @@ namespace TwoMoons
                     state = State.Queued;
                     timer -= Time.deltaTime;
                     UpdateMood();
-                    if (timer <= 0f) Leave(false, "Ein Kunde ist gegangen: Er hat zu lange gewartet.");
+                    if (timer <= 0f)
+                    {
+                        Say("Mir reicht's, ich gehe!");
+                        Leave(false, "Ein Kunde ist gegangen: Er hat zu lange gewartet.");
+                    }
                     break;
 
                 case State.Leaving:
@@ -264,6 +284,7 @@ namespace TwoMoons
             float ratio = price / fairValue;
             if (Random.value < Mathf.Clamp01((ratio - 1f) / PainRange))
             {
+                Say($"{Money.Format(price)} für {wanted.Name}? Nein danke!");
                 Leave(false, $"Ein Sammler fand {wanted.Name} zu teuer ({Money.Format(price)}).");
                 return;
             }
@@ -296,6 +317,12 @@ namespace TwoMoons
             float left = timer / patience;
             string key = left > 2f / 3f ? "moodHappy" : left > 1f / 3f ? "moodNeutral" : "moodAngry";
             moodIcon.sprite = Art.Get(key);
+            // Beim roten Emoji beschwert sich der Kunde laut – bis er dran ist.
+            if (key == "moodAngry" && !complained)
+            {
+                complained = true;
+                Say(AngryLines[Random.Range(0, AngryLines.Length)], 60f);
+            }
         }
 
         void MoveAlongPath()
@@ -409,6 +436,8 @@ namespace TwoMoons
                 return;
             }
 
+            // Wer sich beschwert hat, ist jetzt erleichtert; die Sprechblase verschwindet bald.
+            if (complained) Say("Na endlich!", 2f);
             if (card != null) Game.RegisterCardSale(card, unitPrice, cardGrade);
             else Game.RegisterSale(Total, itemCount, product);
             itemCount = 0;

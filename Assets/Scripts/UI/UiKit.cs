@@ -66,6 +66,15 @@ namespace TwoMoons
             GUI.color = Color.white;
         }
 
+        /// <summary>Einfarbiges Rechteck (z. B. Sprechblasen).</summary>
+        public static void DrawRect(Rect rect, Color color)
+        {
+            EnsureStyles();
+            GUI.color = color;
+            GUI.DrawTexture(rect, overlay);
+            GUI.color = Color.white;
+        }
+
         public static void DrawSprite(Sprite sprite, Rect rect)
         {
             var texture = sprite.texture;
