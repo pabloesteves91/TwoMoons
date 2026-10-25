@@ -328,6 +328,9 @@ namespace TwoMoons
                     // Auf Couch oder Stuhl setzen (am Arcade-Automaten davor stehen bleiben).
                     if (Couch.Type == Furniture.Couch || Couch.Type == Furniture.Chair)
                         transform.position = ShopGrid.CellToWorld(DecoCell(Couch)) + new Vector3(0f, 0.1f, 0f);
+                    // Am Tisch zum Tisch schauen, damit sich die Gäste gegenübersitzen.
+                    var facingTable = Couch.Type == Furniture.Chair ? TableNextTo(Couch.Cell) : null;
+                    if (facingTable != null && facingTable.Cell.x != Couch.Cell.x) spriteRenderer.flipX = facingTable.Cell.x < Couch.Cell.x;
                     state = State.Gaming;
                     bool atTable = Couch.Type == Furniture.Chair;
                     timer = atTable ? Random.Range(14f, 22f) : Random.Range(20f, 40f);
