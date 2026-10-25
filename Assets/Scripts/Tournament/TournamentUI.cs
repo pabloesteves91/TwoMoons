@@ -7,8 +7,10 @@ namespace TwoMoons
     {
         static readonly string[] PlaceNames = { "1. Platz", "2. Platz", "3. Platz", "Teilnahme" };
 
+        /// <summary>Siegerehrung noch nicht begonnen (eigener Wert, damit „fertig“ = -1 nicht wieder von vorn anfängt).</summary>
+        const int CeremonyNotStarted = -2;
         /// <summary>Siegerehrung: welcher Platz als Nächstes seinen Preis bekommt (2 = 3. Platz … -1 = fertig).</summary>
-        int ceremonyStep = -1;
+        int ceremonyStep = CeremonyNotStarted;
         bool pickingCard;
         Vector2 scroll;
 
@@ -19,7 +21,7 @@ namespace TwoMoons
         {
             if (!Game.PrizeCounterOpen)
             {
-                ceremonyStep = -1;
+                ceremonyStep = CeremonyNotStarted;
                 pickingCard = false;
             }
         }
@@ -107,7 +109,7 @@ namespace TwoMoons
         void DrawCeremony(float width)
         {
             var players = Tournament.Players;
-            if (ceremonyStep < 0) ceremonyStep = Mathf.Min(2, players.Count - 1);
+            if (ceremonyStep == CeremonyNotStarted) ceremonyStep = Mathf.Min(2, players.Count - 1);
 
             UiKit.BeginWindow(UiKit.Centered(width, 460f, 400f));
             GUILayout.Label("Siegerehrung!", UiKit.BigTitle.WithFontSize(32));
