@@ -793,15 +793,17 @@ namespace TwoMoons
             CustomerServed?.Invoke();
         }
 
-        public const int MinPrice = 100;
-        public const int MaxPrice = 1000;
+        /// <summary>Preisspanne je Ware: von einem Viertel bis zum 2,5-fachen Marktwert, in 10-Cent-Schritten.</summary>
+        public static int MinPriceFor(Product product) => Mathf.Max(10, Mathf.RoundToInt(product.MarketValue * 0.25f / 10f) * 10);
+
+        public static int MaxPriceFor(Product product) => Mathf.Max(100, Mathf.RoundToInt(product.MarketValue * 2.5f / 10f) * 10);
 
         /// <summary>Verkaufspreis pro Stück. Ohne eigene Einstellung gilt der Marktwert.</summary>
         public int GetPrice(Product product) =>
             prices.TryGetValue(product.Id, out int cents) ? cents : product.MarketValue;
 
         public void SetPrice(Product product, int cents) =>
-            prices[product.Id] = Mathf.Clamp(cents, MinPrice, MaxPrice);
+            prices[product.Id] = Mathf.Clamp(cents, MinPriceFor(product), MaxPriceFor(product));
 
         /// <summary>Einzelkarte aus der Vitrine verkauft (<paramref name="grade"/> 0 = nicht bewertet).</summary>
         public void RegisterCardSale(CardDef card, int cents, int grade)

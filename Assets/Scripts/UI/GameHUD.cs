@@ -686,7 +686,8 @@ namespace TwoMoons
             GUILayout.Space(4f);
             foreach (var product in Catalog.Products)
             {
-                if (product.MinLevel > Game.StoreLevel || product.Category == ProductCategory.Promo || product.Category == ProductCategory.Supply) continue;
+                if (product.MinLevel > Game.StoreLevel || product.Category == ProductCategory.Promo ||
+                    product.Category == ProductCategory.Supply || product.Category == ProductCategory.Trash) continue;
                 int price = Game.GetPrice(product);
                 int profit = price - product.BuyPrice;
 
@@ -699,14 +700,15 @@ namespace TwoMoons
                 GUILayout.BeginHorizontal();
                 GUILayout.Label("Dein Preis", text, GUILayout.Width(80f));
                 // Schieberegler in 10-Cent-Schritten.
-                float euros = GUILayout.HorizontalSlider(price / 100f, GameManager.MinPrice / 100f, GameManager.MaxPrice / 100f, GUILayout.Height(20f));
+                float euros = GUILayout.HorizontalSlider(price / 100f, GameManager.MinPriceFor(product) / 100f, GameManager.MaxPriceFor(product) / 100f, GUILayout.Height(20f));
                 int newPrice = Mathf.RoundToInt(euros * 10f) * 10;
                 if (newPrice != price) Game.SetPrice(product, newPrice);
                 GUILayout.Label(Money.Format(price), bold, GUILayout.Width(70f));
                 GUILayout.EndHorizontal();
 
                 GUI.color = profit > 0 ? UiKit.Good : UiKit.Bad;
-                GUILayout.Label($"Gewinn pro Pack: {Money.Format(profit)}   ·   {PriceVerdict(price, product.MarketValue)}", text);
+                string unit = product.Category == ProductCategory.Pack ? "Pack" : "Stück";
+                GUILayout.Label($"Gewinn pro {unit}: {Money.Format(profit)}   ·   {PriceVerdict(price, product.MarketValue)}", text);
                 GUI.color = Color.white;
                 GUILayout.Space(10f);
             }
