@@ -61,6 +61,7 @@ namespace TwoMoons
             if (Game.DialogLines != null) DrawDialog(width);
             if (Game.LevelUpShown > 0) DrawLevelUp(width);
             if (Game.PauseOpen) DrawPause(width);
+            if (!Game.InputLocked) DrawTopBarTip(width);
         }
 
         static bool Button(string label, params GUILayoutOption[] options) => UiKit.Button(label, options);
@@ -326,15 +327,23 @@ namespace TwoMoons
                 GUI.Label(statusRect, status, hint);
             }
 
-            if (hoverTip != null)
-            {
-                var tipContent = new GUIContent(hoverTip);
-                float tipWidth = Mathf.Min(300f, text.CalcSize(tipContent).x + 4f);
-                float tipHeight = text.CalcHeight(tipContent, tipWidth);
-                var tip = new Rect(Mathf.Min(mouse.x + 12f, width - tipWidth - 30f), mouse.y + 18f, tipWidth + 20f, tipHeight + 12f);
-                GUI.Box(tip, GUIContent.none, panel);
-                GUI.Label(new Rect(tip.x + 10f, tip.y + 6f, tipWidth, tipHeight), tipContent, text);
-            }
+            topBarTip = hoverTip;
+        }
+
+        /// <summary>Tooltip der Kopfzeile – ganz zum Schluss gezeichnet, damit nichts darüber liegt.</summary>
+        string topBarTip;
+
+        void DrawTopBarTip(float width)
+        {
+            if (topBarTip == null) return;
+            var mouse = Event.current.mousePosition;
+            var tipContent = new GUIContent(topBarTip);
+            float tipWidth = Mathf.Min(320f, text.CalcSize(tipContent).x + 4f);
+            float tipHeight = text.CalcHeight(tipContent, tipWidth);
+            var tip = new Rect(Mathf.Clamp(mouse.x + 12f, Margin, width - tipWidth - 30f), mouse.y + 18f, tipWidth + 20f, tipHeight + 12f);
+            UiKit.DrawRect(tip, new Color(0.16f, 0.1f, 0.08f, 0.97f));
+            GUI.Box(tip, GUIContent.none, panel);
+            GUI.Label(new Rect(tip.x + 10f, tip.y + 6f, tipWidth, tipHeight), tipContent, text);
         }
 
 
