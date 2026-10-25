@@ -22,6 +22,18 @@ namespace TwoMoons
         static GameBootstrap instance;
         GameObject world;
 
+        /// <summary>
+        /// Sicherheitsnetz: Fehlt in der gestarteten Szene das TwoMoons-Objekt (z. B. eine leere oder neue Szene),
+        /// wird es automatisch angelegt – dann startet das Spiel trotzdem (mit Platzhalter-Bildern und -Sounds).
+        /// </summary>
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        static void EnsureBootstrap()
+        {
+            if (FindAnyObjectByType<GameBootstrap>() != null) return;
+            Debug.LogWarning("TwoMoons: Diese Szene hat kein TwoMoons-Objekt – lege eins an. Für eigene Bilder die Szene Assets/Scenes/Kapitel1 öffnen.");
+            new GameObject("TwoMoons").AddComponent<GameBootstrap>();
+        }
+
         void Awake()
         {
             instance = this;
