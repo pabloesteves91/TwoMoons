@@ -399,6 +399,13 @@ namespace TwoMoons
                     Rect(5, 13, 6, 3, new Color32(40, 40, 45, 255));
                     Rect(7, 13, 2, 2, new Color32(240, 200, 80, 255));
                     break;
+                case "wrappers":
+                    Rect(3, 3, 6, 7, new Color32(60, 170, 90, 255));
+                    Rect(7, 5, 6, 7, new Color32(90, 60, 170, 255));
+                    Rect(5, 2, 5, 4, new Color32(200, 50, 40, 255));
+                    Rect(4, 8, 2, 1, new Color32(250, 220, 80, 255));
+                    Rect(10, 9, 2, 1, new Color32(220, 220, 230, 255));
+                    break;
                 case "trashBag":
                     Circle(8, 6, 5, new Color32(40, 40, 45, 255));
                     Rect(7, 11, 2, 3, new Color32(40, 40, 45, 255));

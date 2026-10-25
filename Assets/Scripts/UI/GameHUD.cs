@@ -88,6 +88,14 @@ namespace TwoMoons
                 foreach (int card in showcase.Cards) if (card >= 0) filled++;
                 info = $"{(showcase.Premium ? "Premium-Vitrine" : "Vitrine")}: {filled} / {showcase.SlotCount} Karten";
             }
+            var tableDeco = Game.Decos.Find(d => d.Type == Furniture.Table && d.Cell == cell);
+            if (tableDeco != null)
+            {
+                int trash = tableDeco.GetComponent<TableTrash>().Count;
+                info = trash == 0 ? "Tisch: sauber"
+                    : trash >= TableTrash.TooMessy ? $"Tisch: {trash}× Müll – so setzt sich keiner hin!"
+                    : $"Tisch: {trash}× Müll";
+            }
             var binDeco = Game.Decos.Find(d => d.Type == Furniture.TrashBin && d.Cell == cell);
             if (binDeco != null)
             {

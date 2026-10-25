@@ -47,13 +47,31 @@ namespace TwoMoons
             if (look != null) look.sprite = Art.Get(IsFull ? "trashBinFull" : "trashBin");
         }
 
-        public override string GetPrompt(PlayerController player) =>
-            IsFull ? "Vollen Müllsack herausnehmen" : $"Mülleimer ({Fill}/{Capacity})";
+        static bool CarriesWrappers(PlayerController player) =>
+            player.Carried != null && player.Carried.Product == Catalog.Wrappers;
 
-        public override bool CanInteract(PlayerController player) => IsFull && player.Carried == null;
+        public override string GetPrompt(PlayerController player)
+        {
+            if (CarriesWrappers(player)) return IsFull ? "Mülleimer voll – erst den Sack herausnehmen" : "Folien in den Mülleimer werfen";
+            return IsFull ? "Vollen Müllsack herausnehmen" : $"Mülleimer ({Fill}/{Capacity})";
+        }
+
+        public override bool CanInteract(PlayerController player) =>
+            CarriesWrappers(player) ? !IsFull : IsFull && player.Carried == null;
 
         public override void Interact(PlayerController player)
         {
+            if (CarriesWrappers(player))
+            {
+                // Vom Tisch eingesammelte Folien: so viel wie reinpasst, der Rest bleibt in der Hand.
+                var wrappers = player.Carried;
+                int put = Mathf.Min(wrappers.Amount, Capacity - Fill);
+                for (int i = 0; i < put; i++) Add();
+                wrappers.Amount -= put;
+                if (wrappers.Amount <= 0) player.DestroyCarried();
+                SoundManager.Play(Sfx.Drop);
+                return;
+            }
             // Sack raus, neuer leerer Sack rein.
             Fill = 0;
             Refresh();

@@ -557,6 +557,11 @@ namespace TwoMoons
                 var deco = Decos.Find(d => d.Type == Furniture.TrashBin && d.Cell == new Vector2Int(saved.x, saved.y));
                 if (deco != null) deco.GetComponent<TrashBin>().Restore(saved.fill);
             }
+            foreach (var saved in data.tableTrash)
+            {
+                var deco = Decos.Find(d => d.Type == Furniture.Table && d.Cell == new Vector2Int(saved.x, saved.y));
+                if (deco != null) deco.GetComponent<TableTrash>().Restore(saved.fill);
+            }
             foreach (var saved in data.graders)
             {
                 var deco = Decos.Find(d => d.Type == Furniture.GradingStation && d.Cell == new Vector2Int(saved.x, saved.y));
@@ -636,6 +641,9 @@ namespace TwoMoons
             foreach (var deco in Decos)
                 if (deco.Type == Furniture.TrashBin)
                     data.bins.Add(new SavedBin { x = deco.Cell.x, y = deco.Cell.y, fill = deco.GetComponent<TrashBin>().Fill });
+            foreach (var deco in Decos)
+                if (deco.Type == Furniture.Table && deco.GetComponent<TableTrash>().Count > 0)
+                    data.tableTrash.Add(new SavedBin { x = deco.Cell.x, y = deco.Cell.y, fill = deco.GetComponent<TableTrash>().Count });
             data.expanded = ShopGrid.Expanded;
             data.slabs.AddRange(Slabs);
             data.employee = Staff != null ? (int)Staff.Job : -1;
@@ -959,6 +967,9 @@ namespace TwoMoons
 
         public event Action ThiefStopped;
         public event Action TrashTakenOut;
+        public event Action TableCleaned;
+
+        public void NotifyTableCleaned() => TableCleaned?.Invoke();
 
         /// <summary>Voller Müllsack im Container: ordentlicher Laden, etwas Ruf.</summary>
         public void TrashDisposed()

@@ -154,6 +154,8 @@ namespace TwoMoons
         public List<SavedGrader> graders = new List<SavedGrader>();
         public List<int> skills = new List<int>();
         public List<SavedBin> bins = new List<SavedBin>();
+        /// <summary>Liegengelassener Müll auf Tischen (fill = Anzahl).</summary>
+        public List<SavedBin> tableTrash = new List<SavedBin>();
         public long savedAtTicks;
 
         public DateTime SavedAt => new DateTime(savedAtTicks);

@@ -140,6 +140,7 @@ namespace TwoMoons
             Section("Tische, Stühle & Müll (ab Level 2)",
                 "Stell Stühle direkt neben einen Tisch. Kunden, die Booster gekauft haben, setzen sich, öffnen sie und tauschen mit anderen am Tisch.",
                 "Danach werfen sie die Folie in den Mülleimer. Ohne Mülleimer – oder wenn er voll ist – landet sie auf dem Boden.",
+                "Manche Kunden lassen ihre Folien auf dem Tisch liegen: mit [E] einsammeln und in den Mülleimer werfen. An einen vermüllten Tisch setzt sich keiner.",
                 "Voller Mülleimer: Sack mit [E] herausnehmen (ein neuer ist sofort drin) und zum Container draußen links vom Eingang bringen.");
             Section("Spielecke",
                 "Couch + Fernseher + Konsole: Kunden zocken nach dem Kauf und holen sich danach gern ein Getränk.",

@@ -26,6 +26,8 @@ namespace TwoMoons
         const float CouchChance = 0.35f;
         /// <summary>Anteil der Pack-Käufer, die sich an einen Tisch setzen, ihre Booster öffnen und tauschen.</summary>
         const float TableChance = 0.45f;
+        /// <summary>So oft lässt ein Kunde seine Folien einfach auf dem Tisch liegen.</summary>
+        const float LitterChance = 0.3f;
 
         static readonly string[] PullLines = { "Ooh, eine Seltene!", "Schon wieder die Mooskröte …", "Endlich! Die fehlte mir!", "Glänzt die etwa?!", "Nicht schlecht!" };
         static readonly string[] TradeLines = { "Tauschst du die?", "Deal!", "Zwei gegen eine?", "Die hab ich doppelt!", "Abgemacht!" };
@@ -493,8 +495,19 @@ namespace TwoMoons
             Game.ChangeReputation(1);
             if (seat.Type == Furniture.Chair)
             {
-                // Am Tisch wurden Booster geöffnet: Folie in den Mülleimer.
+                // Am Tisch wurden Booster geöffnet: Folie in den Mülleimer – oder einfach liegen lassen.
                 carriesTrash = true;
+                var table = TableNextTo(seat.Cell);
+                if (table != null && Random.value < LitterChance)
+                {
+                    carriesTrash = false;
+                    table.GetComponent<TableTrash>().Add();
+                    Say("*lässt die Folie liegen*", 2.5f);
+                    Game.HintOnce("ersterTischMuell", "Ein Kunde hat seinen Müll auf dem Tisch liegen lassen. Mit [E] einsammeln und in den Mülleimer werfen!");
+                    state = State.Queued;
+                    Leave(true, null, alreadyRewarded: true);
+                    return;
+                }
                 GoToBin();
                 return;
             }
@@ -590,7 +603,13 @@ namespace TwoMoons
         /// <summary>Freier Stuhl direkt neben einem Tisch.</summary>
         static DecoItem FreeChair()
         {
-            var free = Game.Decos.FindAll(d => d.Type == Furniture.Chair && !d.InUse && TableNextTo(d.Cell) != null);
+            // An einen vermüllten Tisch setzt sich keiner.
+            var free = Game.Decos.FindAll(d =>
+            {
+                if (d.Type != Furniture.Chair || d.InUse) return false;
+                var table = TableNextTo(d.Cell);
+                return table != null && table.GetComponent<TableTrash>().Count < TableTrash.TooMessy;
+            });
             return free.Count > 0 ? free[Random.Range(0, free.Count)] : null;
         }
 

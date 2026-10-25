@@ -5,7 +5,7 @@ namespace TwoMoons
 
     /// <summary>Neue Waren immer hinten anhängen – die Nummern stehen in Spielständen.</summary>
     public enum ProductId { MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat, TournamentPack, SoulClashPack, Soda, EnergyDrink,
-        Filament, PrintSmall, PrintMedium, PrintLarge, TrashBag }
+        Filament, PrintSmall, PrintMedium, PrintLarge, TrashBag, Wrappers }
 
     /// <summary>Wo eine Ware im Laden steht: Packs ins Regal, Zubehör in den Zubehör-Ständer.</summary>
     public enum ProductCategory { Pack, Accessory, Promo, Drink, Supply, Print, Trash }
@@ -116,6 +116,12 @@ namespace TwoMoons
             Id = ProductId.TrashBag, Name = "Müllsack", SpriteKey = "trashBag", Category = ProductCategory.Trash, MinLevel = 2,
         };
 
+        /// <summary>Booster-Folien, die ein Kunde auf dem Tisch liegen gelassen hat – in den Mülleimer damit.</summary>
+        public static readonly Product Wrappers = new Product
+        {
+            Id = ProductId.Wrappers, Name = "Booster-Folien", SpriteKey = "wrappers", Category = ProductCategory.Trash, MinLevel = 2,
+        };
+
         static Product Print(ProductId id, string name, string sprite, int value) => new Product
         {
             Id = id, Name = name, SpriteKey = sprite, Category = ProductCategory.Print, MarketValue = value, MinLevel = 4,
@@ -125,7 +131,7 @@ namespace TwoMoons
         public static readonly Product[] Products =
         {
             MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat, TournamentPack, SoulClashPack, Soda, EnergyDrink,
-            Filament, PrintSmall, PrintMedium, PrintLarge, TrashBag,
+            Filament, PrintSmall, PrintMedium, PrintLarge, TrashBag, Wrappers,
         };
 
         /// <summary>Tab „Ware“ am Computer.</summary>

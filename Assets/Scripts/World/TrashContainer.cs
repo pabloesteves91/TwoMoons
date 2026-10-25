@@ -6,7 +6,7 @@ namespace TwoMoons
         public override string GetPrompt(PlayerController player)
         {
             var carried = player.Carried;
-            if (carried != null && carried.Product.Category == ProductCategory.Trash) return "Müllsack in den Container werfen";
+            if (carried != null && carried.Product.Category == ProductCategory.Trash) return $"{carried.Product.Name} in den Container werfen";
             return "Müllcontainer";
         }
 
