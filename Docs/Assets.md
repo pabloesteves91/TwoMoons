@@ -2,7 +2,7 @@
 
 ## So geht's
 
-1. In Unity einmal **TwoMoons → Bilder und Sounds aktualisieren** klicken.
+1. In Unity einmal **TwoMoons → Aktualisieren** klicken.
    Danach liegt für jedes Bild ein Platzhalter in `Assets/Art/Sprites/` (z. B. `shelf.png`).
 2. Bild malen (z. B. coddy.tech Pixel-Editor, **16×16**), als **PNG mit transparentem Hintergrund** exportieren.
    Die Export-Größe ist egal (16×16 oder 256×256) – das Spiel macht jedes Bild genau ein Feld groß.

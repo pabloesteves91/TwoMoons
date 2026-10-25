@@ -188,7 +188,7 @@ Nach dem Finale kann man weiterspielen.
 ## Prototyp starten (Kapitel 1)
 
 1. Projekt in Unity 6 öffnen und warten, bis die Skripte kompiliert sind.
-2. Im Menü oben **TwoMoons → Kapitel 1 einrichten** wählen. Das legt an:
+2. Im Menü oben **TwoMoons → Aktualisieren** wählen. Das legt an:
    - Platzhalter-Bilder in `Assets/Art/Sprites` (16×16 PNG)
    - Platzhalter-Sounds in `Assets/Art/Audio` (WAV)
    - `Assets/Art/SpriteLibrary.asset` und `Assets/Art/AudioLibrary.asset` (verknüpfen alle Bilder und Sounds)

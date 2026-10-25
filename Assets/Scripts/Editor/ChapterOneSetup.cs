@@ -6,7 +6,11 @@ using UnityEngine;
 
 namespace TwoMoons.EditorTools
 {
-    /// <summary>Menü „TwoMoons → Kapitel 1 einrichten“: legt Platzhalter-Bilder und -Sounds, die Bibliotheken und die Szene an.</summary>
+    /// <summary>
+    /// Menü „TwoMoons → Aktualisieren“: ein Knopf für alles. Legt fehlende Platzhalter-Bilder und -Sounds an,
+    /// liest geänderte Bilder neu ein, aktualisiert die Bibliotheken, legt die Szene Kapitel1 an bzw. öffnet sie
+    /// und verbindet alles. Eigene Bilder und Sounds werden nie überschrieben.
+    /// </summary>
     public static class ChapterOneSetup
     {
         const string SpriteFolder = PixelArtImporter.ArtFolder + "Sprites";
@@ -15,50 +19,45 @@ namespace TwoMoons.EditorTools
         const string AudioLibraryPath = PixelArtImporter.ArtFolder + "AudioLibrary.asset";
         const string ScenePath = "Assets/Scenes/Kapitel1.unity";
 
-        [MenuItem("TwoMoons/Kapitel 1 einrichten")]
-        public static void Setup()
-        {
-            if (File.Exists(ScenePath) &&
-                !EditorUtility.DisplayDialog("TwoMoons", "Die Szene Kapitel1 gibt es schon. Neu anlegen?", "Ja", "Abbrechen"))
-                return;
-            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
+        [MenuItem("TwoMoons/Aktualisieren", priority = 0)]
+        public static void UpdateMenu() => PrepareProject(true);
 
+        /// <summary>Bringt Bilder, Sounds und Szene auf den neuesten Stand. False, wenn abgebrochen wurde.</summary>
+        public static bool PrepareProject(bool showDialog)
+        {
+            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return false;
+
+            AssetDatabase.Refresh();
+            // Ersetzte Bilder sicher neu einlesen (Größe/Pixel pro Einheit passen sich an).
+            if (AssetDatabase.IsValidFolder(SpriteFolder))
+                AssetDatabase.ImportAsset(SpriteFolder, ImportAssetOptions.ImportRecursive | ImportAssetOptions.ForceUpdate);
             int createdSprites = CreateMissingSprites();
             int createdSounds = CreateMissingSounds();
             var library = CreateOrUpdateLibrary();
             var audioLibrary = CreateOrUpdateAudioLibrary();
-            CreateScene(library, audioLibrary);
 
-            EditorUtility.DisplayDialog("TwoMoons",
-                $"Kapitel 1 ist eingerichtet ({createdSprites} neue Platzhalter-Bilder, {createdSounds} neue Sounds).\n\n" +
-                "Drücke jetzt auf Play.\n\n" +
-                $"Eigene 16×16-Pixelbilder: die PNGs in {SpriteFolder} mit demselben Namen ersetzen.\n" +
-                $"Eigene Sounds: die WAVs in {AudioFolder} mit demselben Namen ersetzen.",
-                "OK");
+            // Szene anlegen, falls es sie noch nicht gibt, sonst öffnen.
+            bool newScene = !File.Exists(ScenePath);
+            if (newScene) CreateScene(library, audioLibrary);
+            else if (EditorSceneManager.GetActiveScene().path != ScenePath) EditorSceneManager.OpenScene(ScenePath);
+            LinkLibraries(library, audioLibrary);
+            AddSceneToBuild();
+
+            if (showDialog)
+                EditorUtility.DisplayDialog("TwoMoons",
+                    "Alles aktuell!" + (newScene ? " Die Szene Kapitel1 wurde neu angelegt." : "") + "\n\n" +
+                    $"{createdSprites} neue Platzhalter-Bilder, {createdSounds} neue Sounds.\n\n" +
+                    $"Eigene Bilder: PNG mit genau demselben Namen in {SpriteFolder} ersetzen (z. B. shelf.png), " +
+                    "dann nochmal „TwoMoons → Aktualisieren“ und Play.",
+                    "OK");
+            return true;
         }
 
-        /// <summary>
-        /// Menü „TwoMoons → Bilder und Sounds aktualisieren“: legt Platzhalter für neue Bilder/Sounds an und
-        /// trägt alles in die Bibliotheken ein. Eigene Bilder bleiben, die Szene wird nicht angefasst.
-        /// </summary>
-        [MenuItem("TwoMoons/Bilder und Sounds aktualisieren")]
-        public static void RefreshArt()
+        static void AddSceneToBuild()
         {
-            // Ersetzte Bilder sicher neu einlesen (Größe/Pixel pro Einheit passen sich an).
-            AssetDatabase.ImportAsset(SpriteFolder, ImportAssetOptions.ImportRecursive | ImportAssetOptions.ForceUpdate);
-            int createdSprites = CreateMissingSprites();
-            int createdSounds = CreateMissingSounds();
-            var library = CreateOrUpdateLibrary();
-            var audioLibrary = CreateOrUpdateAudioLibrary();
-            int linked = LinkLibraries(library, audioLibrary);
-
-            string sceneHint = linked > 0
-                ? "Die Bibliotheken sind mit der Szene verbunden."
-                : $"Achtung: In der offenen Szene gibt es kein TwoMoons-Objekt. Öffne {ScenePath} und klick den Menüpunkt nochmal.";
-            EditorUtility.DisplayDialog("TwoMoons",
-                $"Fertig: {createdSprites} neue Platzhalter-Bilder, {createdSounds} neue Sounds.\n{sceneHint}\n\n" +
-                $"Eigene Bilder: PNG mit genau demselben Namen in {SpriteFolder} ersetzen (z. B. shelf.png).",
-                "OK");
+            var scenes = EditorBuildSettings.scenes.Where(s => s.path != ScenePath).ToList();
+            scenes.Insert(0, new EditorBuildSettingsScene(ScenePath, true));
+            EditorBuildSettings.scenes = scenes.ToArray();
         }
 
         /// <summary>Trägt die Bibliotheken bei jedem TwoMoons-Objekt der offenen Szene ein und speichert sie.</summary>
@@ -194,11 +193,8 @@ namespace TwoMoons.EditorTools
             serialized.FindProperty("sounds").objectReferenceValue = audioLibrary;
             serialized.ApplyModifiedPropertiesWithoutUndo();
 
+            Directory.CreateDirectory(Path.GetDirectoryName(ScenePath));
             EditorSceneManager.SaveScene(scene, ScenePath);
-
-            var scenes = EditorBuildSettings.scenes.Where(s => s.path != ScenePath).ToList();
-            scenes.Insert(0, new EditorBuildSettingsScene(ScenePath, true));
-            EditorBuildSettings.scenes = scenes.ToArray();
         }
     }
 }

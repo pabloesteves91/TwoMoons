@@ -7,7 +7,7 @@ using UnityEngine;
 namespace TwoMoons.EditorTools
 {
     /// <summary>
-    /// Menü „TwoMoons → Web-Build erstellen“: setzt die Web-Einstellungen, baut das Spiel für den Browser
+    /// Menü „TwoMoons → Web-Build erstellen“: aktualisiert erst alles, setzt die Web-Einstellungen, baut das Spiel für den Browser
     /// und packt alles als ZIP zum Hochladen auf itch.io.
     /// </summary>
     public static class WebBuild
@@ -15,7 +15,7 @@ namespace TwoMoons.EditorTools
         const string OutputFolder = "Builds/Web";
         const string ZipPath = "Builds/TwoMoons-Web.zip";
 
-        [MenuItem("TwoMoons/Web-Build erstellen")]
+        [MenuItem("TwoMoons/Web-Build erstellen (für itch.io)", priority = 20)]
         public static void Build()
         {
             if (!BuildPipeline.IsBuildTargetSupported(BuildTargetGroup.WebGL, BuildTarget.WebGL))
@@ -28,13 +28,10 @@ namespace TwoMoons.EditorTools
                 return;
             }
 
+            // Vorher automatisch alles aktualisieren (Bilder, Sounds, Szene) – dann ist der Build immer auf dem neuesten Stand.
+            if (!ChapterOneSetup.PrepareProject(false)) return;
+
             var scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray();
-            if (scenes.Length == 0)
-            {
-                EditorUtility.DisplayDialog("TwoMoons – Web-Build",
-                    "Es ist keine Szene zum Bauen eingetragen. Bitte zuerst „TwoMoons → Kapitel 1 einrichten“ ausführen.", "OK");
-                return;
-            }
 
             // Einstellungen, mit denen der Build auf itch.io, GitHub Pages und Netlify ohne Zusatzaufwand läuft.
             PlayerSettings.WebGL.compressionFormat = WebGLCompressionFormat.Gzip;
