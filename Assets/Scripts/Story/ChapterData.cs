@@ -262,7 +262,7 @@ namespace TwoMoons
                         new QuestStage
                         {
                             Title = "Großturniere",
-                            Quests = new List<Quest> { TableSeats(8), Tournaments(2), BestDay(40), Serve(250) },
+                            Quests = new List<Quest> { TableSeats(6), Tournaments(2), BestDay(40), Serve(250) },
                             Outro = new[] { "{0}: Acht Spieler gleichzeitig! Papa hätte Tränen in den Augen." },
                         },
                         new QuestStage
@@ -284,7 +284,7 @@ namespace TwoMoons
                         new QuestStage
                         {
                             Title = "Bereit für das große Turnier",
-                            Quests = new List<Quest> { Furnished(Furniture.MoonStatue, 1), TableSeats(12), Tournaments(1), Money(3000), Cozy(45) },
+                            Quests = new List<Quest> { Furnished(Furniture.MoonStatue, 1), TableSeats(10), Tournaments(1), Money(3000), Cozy(45) },
                             Outro = new[]
                             {
                                 "Der Hersteller bestätigt: Das nächste Turnier bei TwoMoons ist das Stadtturnier!",

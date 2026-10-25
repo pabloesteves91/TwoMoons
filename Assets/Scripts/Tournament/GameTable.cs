@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace TwoMoons
 {
-    /// <summary>Spieltisch: bis zu 4 Plätze auf den freien Feldern rundherum.</summary>
+    /// <summary>Spieltisch für 2 Spieler: einer links, einer rechts. Diese beiden Felder müssen frei bleiben.</summary>
     public class GameTable : MonoBehaviour
     {
         public Vector2Int Cell { get; private set; }
@@ -15,9 +15,13 @@ namespace TwoMoons
         public List<Vector2Int> Seats()
         {
             var seats = new List<Vector2Int>();
-            foreach (var cell in GameManager.Instance.Grid.WalkableNeighbours(Cell))
-                if (!ShopGrid.IsReserved(cell)) seats.Add(cell);
+            var grid = GameManager.Instance.Grid;
+            foreach (var cell in SeatCells(Cell))
+                if (grid.IsWalkable(cell) && !ShopGrid.IsReserved(cell)) seats.Add(cell);
             return seats;
         }
+
+        /// <summary>Die beiden Spielerplätze eines Spieltischs: links und rechts daneben.</summary>
+        public static Vector2Int[] SeatCells(Vector2Int table) => new[] { table + Vector2Int.left, table + Vector2Int.right };
     }
 }

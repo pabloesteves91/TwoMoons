@@ -321,7 +321,12 @@ namespace TwoMoons
                 case Placement.Rug:
                     return ShopGrid.IsInterior(cell) && game.Grid.IsWalkable(cell) && !HasDeco(game, cell, Placement.Rug);
                 default:
-                    return CanPlaceBlocking(cell);
+                    if (!CanPlaceBlocking(cell)) return false;
+                    // Spieltisch: links und rechts muss Platz für die beiden Spieler sein.
+                    if (furniture == Furniture.GameTable)
+                        foreach (var seat in GameTable.SeatCells(cell))
+                            if (!game.Grid.IsWalkable(seat) || ShopGrid.IsReserved(seat) || !ShopGrid.IsInterior(seat)) return false;
+                    return true;
             }
         }
 
@@ -343,6 +348,9 @@ namespace TwoMoons
             foreach (var customer in Customer.Active)
                 if (ShopGrid.WorldToCell(customer.transform.position) == cell) return false;
             if (HasDeco(game, cell, Placement.Rug)) return false;
+            // Die Spielerplätze links und rechts von Spieltischen bleiben frei.
+            foreach (var deco in game.Decos)
+                if (deco.Type == Furniture.GameTable && System.Array.IndexOf(GameTable.SeatCells(deco.Cell), cell) >= 0) return false;
 
             // Probeweise blockieren und prüfen, ob noch alles erreichbar ist.
             grid.SetBlocked(cell, true);
