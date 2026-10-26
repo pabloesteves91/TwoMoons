@@ -446,11 +446,12 @@ namespace TwoMoons
                     Rect(12, 6, 1, 4, new Color32(120, 120, 130, 255));
                     break;
                 case "couch":
-                    Rect(0, 2, 16, 9, new Color32(150, 60, 50, 255));
-                    Rect(0, 8, 16, 5, new Color32(120, 45, 40, 255));
-                    Rect(0, 2, 2, 9, new Color32(110, 40, 35, 255));
-                    Rect(14, 2, 2, 9, new Color32(110, 40, 35, 255));
-                    Rect(3, 5, 4, 3, new Color32(240, 200, 80, 255));
+                    // Von oben gesehen, Blick nach oben zum Fernseher: Rückenlehne unten, Sitzfläche oben.
+                    Rect(0, 3, 16, 9, new Color32(150, 60, 50, 255));
+                    Rect(0, 1, 16, 5, new Color32(120, 45, 40, 255));
+                    Rect(0, 3, 2, 9, new Color32(110, 40, 35, 255));
+                    Rect(14, 3, 2, 9, new Color32(110, 40, 35, 255));
+                    Rect(3, 8, 4, 3, new Color32(240, 200, 80, 255));
                     break;
                 case "tv":
                     Rect(1, 4, 14, 10, new Color32(25, 25, 30, 255));
@@ -458,10 +459,11 @@ namespace TwoMoons
                     Rect(7, 2, 2, 2, new Color32(25, 25, 30, 255));
                     break;
                 case "console":
-                    Rect(3, 3, 10, 5, new Color32(40, 40, 50, 255));
-                    Rect(4, 6, 2, 1, new Color32(120, 220, 140, 255));
-                    Rect(2, 9, 5, 3, new Color32(60, 60, 70, 255));
-                    Rect(9, 9, 5, 3, new Color32(60, 60, 70, 255));
+                    // Konsole oben (zum Fernseher), Controller unten (zur Couch).
+                    Rect(3, 8, 10, 5, new Color32(40, 40, 50, 255));
+                    Rect(4, 9, 2, 1, new Color32(120, 220, 140, 255));
+                    Rect(2, 3, 5, 3, new Color32(60, 60, 70, 255));
+                    Rect(9, 3, 5, 3, new Color32(60, 60, 70, 255));
                     break;
                 case "employee":
                     Person(new Color32(60, 140, 90, 255), new Color32(30, 30, 35, 255));
