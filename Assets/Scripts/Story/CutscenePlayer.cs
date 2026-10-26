@@ -214,9 +214,10 @@ namespace TwoMoons
             float alpha = Mathf.Clamp01((t - 0.9f) / 0.8f) * (1f - Mathf.Clamp01((t - (TitleCardSeconds - FadeSeconds)) / FadeSeconds));
             float grow = Mathf.Lerp(0.85f, 1f, Mathf.SmoothStep(0f, 1f, Mathf.Clamp01((t - 0.9f) / 0.8f)));
             GUI.color = new Color(1f, 1f, 1f, alpha);
-            GUI.Label(new Rect(0f, 250f, width, 70f), $"Kapitel {titleCardChapter}", UiKit.BigTitle.WithFontSize(Mathf.RoundToInt(56 * grow)));
+            float middle = UiKit.VirtualHeight / 2f;
+            GUI.Label(new Rect(0f, middle - 20f, width, 70f), $"Kapitel {titleCardChapter}", UiKit.BigTitle.WithFontSize(Mathf.RoundToInt(56 * grow)));
             string title = titleCardChapter < Cutscenes.ChapterTitles.Length ? Cutscenes.ChapterTitles[titleCardChapter] : "";
-            GUI.Label(new Rect(0f, 320f, width, 40f), title, UiKit.Title.WithAlignment(TextAnchor.MiddleCenter).WithFontSize(26));
+            GUI.Label(new Rect(0f, middle + 50f, width, 40f), title, UiKit.Title.WithAlignment(TextAnchor.MiddleCenter).WithFontSize(26));
             GUI.color = Color.white;
         }
 

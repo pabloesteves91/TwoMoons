@@ -49,12 +49,25 @@ namespace TwoMoons
             hint = UiKit.Hint;
             button = UiKit.ButtonStyle;
 
-            DrawSpeechBubbles();
-            DrawTopBar(width);
-            float questsBottom = DrawQuests(width);
-            DrawToasts(width, questsBottom + Margin);
-            DrawPrompt(width);
-            DrawHoverInfo();
+            // Große Fenster (Sammelbuch, Vitrine, Pack öffnen …) bekommen den ganzen Bildschirm:
+            // Kopfzeile, Aufgaben und Hinweise verschwinden so lange.
+            bool windowOpen = Game.CollectionOpen || Game.OpenShowcase != null || Game.OpenedPack != null ||
+                              Game.PrizeCounterOpen || Game.OpenPrinter != null || Game.OpenGrading != null ||
+                              Game.GradeReveal != null || Game.SellerOffer != null || Game.ComputerOpen || Game.PauseOpen;
+            if (!windowOpen)
+            {
+                DrawSpeechBubbles();
+                DrawTopBar(width);
+                float questsBottom = DrawQuests(width);
+                DrawToasts(width, questsBottom + Margin);
+                DrawPrompt(width);
+                DrawHoverInfo();
+            }
+            else
+            {
+                topBarTip = null;
+                DrawToasts(width, Margin);
+            }
 
             if (Game.ComputerOpen) DrawComputer(width);
             if (Game.Phase == GamePhase.Summary) DrawSummary(width);

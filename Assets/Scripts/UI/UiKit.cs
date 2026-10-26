@@ -4,11 +4,12 @@ namespace TwoMoons
 {
     /// <summary>
     /// Gemeinsame Stile und Helfer für alle Menüs (Unity IMGUI), in den Farben des TwoMoons-Logos.
-    /// Alles wird auf eine virtuelle Höhe von 540 Pixeln skaliert.
+    /// Alles wird auf eine virtuelle Höhe von 620 Pixeln skaliert.
     /// </summary>
     public static class UiKit
     {
-        public const float VirtualHeight = 540f;
+        /// <summary>Höhe der Oberfläche in virtuellen Pixeln – größer = alles etwas kleiner und mehr Platz.</summary>
+        public const float VirtualHeight = 620f;
         public const float Margin = 10f;
 
         // Logo-Farben: Dunkelbraun, Rot-Orange, Gold.
