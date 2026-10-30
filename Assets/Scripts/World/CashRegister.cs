@@ -33,6 +33,9 @@ namespace TwoMoons
         /// <summary>Wartet vorne ein Kunde, der kassiert werden kann?</summary>
         public bool CanServe => Front != null && !Front.IsSeller;
 
+        /// <summary>Vorne wartet jemand, der Karten verkaufen will (für den Mitarbeiter).</summary>
+        public Customer FrontSeller => Front != null && Front.IsSeller ? Front : null;
+
         public void ServeFront()
         {
             var front = Front;

@@ -75,6 +75,18 @@ namespace TwoMoons
                 WalkTo(post);
                 return;
             }
+            // Verkäufer: Kai handelt selbst (erst 15 % weniger, sonst der normale Preis) – außer du bist gerade dran.
+            var seller = Game.Register.FrontSeller;
+            if (seller != null && Game.SellerOffer == null)
+            {
+                timer -= Time.deltaTime;
+                if (timer <= 0f)
+                {
+                    timer = ServeSeconds;
+                    Game.EmployeeBuysCards(seller);
+                }
+                return;
+            }
             if (!Game.Register.CanServe)
             {
                 timer = ServeSeconds;

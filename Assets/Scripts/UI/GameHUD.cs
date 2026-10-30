@@ -663,7 +663,7 @@ namespace TwoMoons
                 : $"{Employee.Name} arbeitet bei dir · Lohn {Money.Format(Employee.DailyWage)} pro Tag", text);
             GUILayout.Space(8f);
             GUILayout.Label("Aufgabe:", bold);
-            if (Button(staff != null && staff.Job == Employee.Role.Register ? "[x] An der Kasse kassieren" : "An der Kasse kassieren", GUILayout.Height(32f)))
+            if (Button(staff != null && staff.Job == Employee.Role.Register ? "[x] An der Kasse kassieren und Karten ankaufen" : "An der Kasse kassieren und Karten ankaufen", GUILayout.Height(32f)))
                 Game.Hire(Employee.Role.Register);
             if (Button(staff != null && staff.Job == Employee.Role.Restock ? "[x] Regale aus Kartons auffüllen" : "Regale aus Kartons auffüllen", GUILayout.Height(32f)))
                 Game.Hire(Employee.Role.Restock);

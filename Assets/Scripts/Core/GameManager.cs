@@ -1114,6 +1114,37 @@ namespace TwoMoons
             CardsBought?.Invoke();
         }
 
+        /// <summary>
+        /// Der Mitarbeiter an der Kasse kauft Karten an: erst ein Gegenangebot (−15 %), sonst der verlangte Preis.
+        /// Die Karten kommen gleich in freie Vitrinen-Fächer (zum Marktwert), der Rest ins Sammelbuch.
+        /// </summary>
+        public void EmployeeBuysCards(Customer seller)
+        {
+            var cards = new List<CardDef>(seller.OfferCards);
+            bool haggled = seller.TryCounterOffer();
+            int price = seller.AskingPrice;
+            if (MoneyCents < price)
+            {
+                ShowToast($"{Employee.Name}: „Dafür reicht das Geld in der Kasse nicht.“ Ankauf abgelehnt.", 4f);
+                seller.ResolveOffer(false);
+                return;
+            }
+            seller.ResolveOffer(true);
+
+            int placed = 0;
+            foreach (var card in cards)
+            {
+                var showcase = Showcases.Find(s => System.Array.IndexOf(s.Cards, -1) >= 0);
+                if (showcase == null) break;
+                if (!Collection.Remove(card.Id)) continue;
+                showcase.Put(System.Array.IndexOf(showcase.Cards, -1), card, card.Value);
+                placed++;
+            }
+            ShowToast($"{Employee.Name} hat {cards.Count} Karten für {Money.Format(price)} angekauft" +
+                      (haggled ? " (−15 % gehandelt)" : "") +
+                      (placed > 0 ? $" und {placed} in die Vitrine gelegt." : "."), 5f);
+        }
+
         public void Hire(Employee.Role role)
         {
             if (Staff != null)
