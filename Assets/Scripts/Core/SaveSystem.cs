@@ -79,12 +79,26 @@ namespace TwoMoons
     }
 
     [Serializable]
+    public class SavedTournamentPlayer
+    {
+        public string name;
+        public string sprite;
+        public int x, y;
+    }
+
+    [Serializable]
     public class SavedTournament
     {
         public int nextDay;
         public int[] prizes = new int[4];
         public int bonusCard = -1;
         public int held;
+        /// <summary>Laufendes Turnier (TournamentManager.State), damit es nach dem Laden weitergeht.</summary>
+        public int state;
+        public int expectedPlayers;
+        public int spawnedEntrants;
+        public float ceremonyTimer;
+        public List<SavedTournamentPlayer> players = new List<SavedTournamentPlayer>();
     }
 
     [Serializable]

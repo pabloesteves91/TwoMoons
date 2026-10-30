@@ -162,15 +162,52 @@ namespace TwoMoons
             Held = saved.held;
             BonusCard = saved.bonusCard;
             for (int i = 0; i < Prizes.Length && i < saved.prizes.Length; i++) Prizes[i] = saved.prizes[i];
+
+            // Ein laufendes Turnier geht nach dem Laden genau dort weiter, wo es war.
+            Current = (State)saved.state;
+            if (Current == State.None || saved.players == null) return;
+            expectedPlayers = saved.expectedPlayers;
+            spawnedEntrants = Mathf.Min(saved.spawnedEntrants, saved.players.Count);
+            ceremonyTimer = saved.ceremonyTimer > 0f ? saved.ceremonyTimer : CeremonyPatience;
+            foreach (var savedPlayer in saved.players)
+            {
+                var seat = new Vector2Int(savedPlayer.x, savedPlayer.y);
+                var player = WorldFactory.SpawnTournamentPlayer(ShopGrid.CellToWorld(seat), Art.Get(savedPlayer.sprite), savedPlayer.name);
+                player.Seat = seat;
+                Players.Add(player);
+            }
+            if (Current == State.Ceremony)
+            {
+                var counter = Counter();
+                var spots = counter != null ? new List<Vector2Int>(Game.Grid.WalkableNeighbours(counter.Cell)) : new List<Vector2Int>();
+                for (int i = 0; i < Players.Count; i++) Players[i].GoCheer(spots.Count > 0 ? spots[i % spots.Count] : Players[i].Seat);
+            }
+            if (Current == State.Registration && IsCityTournament) SpawnPapa();
         }
 
-        public SavedTournament Save() => new SavedTournament
+        public SavedTournament Save()
         {
-            nextDay = NextDay,
-            held = Held,
-            bonusCard = BonusCard,
-            prizes = (int[])Prizes.Clone(),
-        };
+            var saved = new SavedTournament
+            {
+                nextDay = NextDay,
+                held = Held,
+                bonusCard = BonusCard,
+                prizes = (int[])Prizes.Clone(),
+                state = (int)Current,
+                expectedPlayers = expectedPlayers,
+                spawnedEntrants = spawnedEntrants,
+                ceremonyTimer = ceremonyTimer,
+            };
+            foreach (var player in Players)
+            {
+                var sprite = player.GetComponent<SpriteRenderer>().sprite;
+                saved.players.Add(new SavedTournamentPlayer
+                {
+                    name = player.Name, sprite = sprite != null ? sprite.name : "customer1", x = player.Seat.x, y = player.Seat.y,
+                });
+            }
+            return saved;
+        }
 
         /// <summary>Jeden Morgen: Turnier planen und am Turniertag die Hersteller-Packs liefern.</summary>
         public void OnNewDay()

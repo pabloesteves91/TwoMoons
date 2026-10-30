@@ -31,7 +31,8 @@ namespace TwoMoons
             icon.transform.localScale = Vector3.one * 0.5f;
             icon.enabled = false;
             GetComponent<YSort>().Collect();
-            WalkTo(Seat);
+            // Nach dem Laden kann ein Spieler schon bei der Siegerehrung sein – dann nicht erst zum Platz.
+            if (state == State.ToSeat) WalkTo(Seat);
         }
 
         void WalkTo(Vector2Int cell)
