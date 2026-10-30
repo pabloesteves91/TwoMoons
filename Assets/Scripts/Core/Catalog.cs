@@ -103,7 +103,7 @@ namespace TwoMoons
         public static readonly Product Filament = new Product
         {
             Id = ProductId.Filament, Name = "Filament", SpriteKey = "filament",
-            Category = ProductCategory.Supply, BuyPrice = 1500, MinLevel = 4,
+            Category = ProductCategory.Supply, BuyPrice = 500, MinLevel = 4,
         };
 
         public static readonly Product PrintSmall = Print(ProductId.PrintSmall, "Mooskröte-Figur", "printSmall", 800);
