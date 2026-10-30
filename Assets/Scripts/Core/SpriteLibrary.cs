@@ -11,7 +11,7 @@ namespace TwoMoons
     {
         [Header("Laden")]
         public Sprite floor;
-        [Tooltip("Boden im zweiten Raum (Ladenerweiterung)")]
+        [Tooltip("Zusätzliche Boden-Variante (derzeit nicht verwendet)")]
         public Sprite floor2;
         public Sprite wall;
         public Sprite street;

@@ -84,7 +84,7 @@ erledigt (entschieden), steigt der Laden ein Level auf → **Level-Up-Bildschirm
 | **2** | Die ersten Stammkunden | **Spellforge** · Vitrine · Zubehör-Ständer (Hüllen, Ordner, Spielmatten) · Deko: Teppich, Wanduhr, Lichterkette |
 | **3** | Das erste Turnier | **Turniere** · Spieltisch · Turnier-Counter (Prizepool) · Turnier-Tafel · **Soul Clash** · **Couch-&-TV-Ecke mit Konsole** · Getränkekühlschrank · **1 Mitarbeiter** · Deko: Wimpel, Pokalregal |
 | **4** | Handeln & Drucken | **Ankauf** (Kunden bringen Karten) · **3D-Drucker** + Filament · Druck-Regal · Deko: Neon-Schild |
-| **5** | TwoMoons wächst | **Karten-Grading** (Grading-Station) · **Ladenerweiterung** (zweiter Raum) |
+| **5** | TwoMoons wächst | **Karten-Grading** (Grading-Station) · **Ladenerweiterung** (Laden wird größer) |
 | **6** | Der Ruf eilt voraus | Premium-Vitrine (8 Karten, beleuchtet) · Großturniere (8 statt 4 Spieler pro Tisch-Runde) · schnellerer 3D-Drucker · Deko: Arcade-Automat, Kunstrasen-Ecke |
 | **7** | Das große Turnier | Stadtturnier · Trophäenwand · Two-Moons-Statue · alle Deko-Varianten |
 
@@ -118,7 +118,7 @@ Flecken ziehen Gemütlichkeit ab.
 | TV + Konsole | 3 | 250 € + 180 € | Couch-Ecke |
 | Getränkekühlschrank | 3 | 160 € | verkauft Getränke |
 | Grading-Station | 5 | 400 € | Karten bewerten und versiegeln |
-| Ladenerweiterung | 5 | 1.000 € | zweiter Raum (+10 Spalten) |
+| Ladenerweiterung | 5 | 1.000 € | Laden wird größer (+10 Spalten) |
 | Premium-Vitrine | 6 | 250 € | 8 Karten, Sammler zahlen +10 % |
 | Arcade-Automat | 6 | 400 € | +6, Kunden spielen 1 € pro Runde |
 | Trophäenwand | 7 | 300 € | +8, zeigt alle Turniersiege |

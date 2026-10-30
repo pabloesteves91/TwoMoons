@@ -917,7 +917,7 @@ namespace TwoMoons
         public const int ExtensionLevel = 5;
 
         /// <summary>
-        /// Ladenerweiterung: zweiter Raum rechts. Der Laden wird gespeichert und mit dem neuen Raum neu aufgebaut,
+        /// Ladenerweiterung: der Laden wird nach rechts breiter. Er wird gespeichert und größer neu aufgebaut,
         /// deshalb nur morgens, solange noch keine Kunden da sind.
         /// </summary>
         public void BuildExtension()
@@ -937,7 +937,7 @@ namespace TwoMoons
             SaveGame();
             ShowDialog(new[]
             {
-                "Die Handwerker sind fertig: Rechts ist die Wand durchbrochen – TwoMoons hat jetzt einen zweiten Raum!",
+                "Die Handwerker sind fertig: Die rechte Wand ist weiter nach außen gerückt – TwoMoons ist jetzt viel größer!",
                 $"{PlayerName}: So viel Platz! Hier passen neue Regale, Vitrinen und eine richtige Spielecke rein.",
             });
         }

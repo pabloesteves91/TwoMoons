@@ -6,7 +6,7 @@ namespace TwoMoons
     /// <summary>
     /// Das Raster des Ladens. Ein Feld = 1 Unity-Einheit = 16 Pixel.
     /// Innenraum: x 1–20, y 2–9 (20×8 Felder, passend zum Breitbild). y = 0 ist die Straße, y = 1 die untere Wand mit der Tür.
-    /// Mit der Ladenerweiterung (Level 5) kommt rechts ein zweiter Raum dazu: x 22–30, durch einen Durchgang verbunden.
+    /// Mit der Ladenerweiterung (Level 5) wird der Laden nach rechts um 10 Spalten breiter (ein großer Raum).
     /// </summary>
     public class ShopGrid : MonoBehaviour
     {
@@ -63,12 +63,11 @@ namespace TwoMoons
             }
         }
 
-        /// <summary>Außenwände, und nach der Erweiterung die Zwischenwand mit Durchgang (y 4–7).</summary>
+        /// <summary>Außenwände. Nach der Erweiterung rückt die rechte Wand einfach nach außen – ein großer Raum.</summary>
         public static bool IsWall(Vector2Int c)
         {
             if (c.y == 0) return false;
-            if (c.x == 0 || c.x == Width - 1 || c.y == 1 || c.y == Height - 1) return true;
-            return Expanded && c.x == BaseWidth - 1 && (c.y <= 3 || c.y >= 8);
+            return c.x == 0 || c.x == Width - 1 || c.y == 1 || c.y == Height - 1;
         }
 
         public static bool InBounds(Vector2Int c) => c.x >= 0 && c.x < Width && c.y >= 0 && c.y < Height;

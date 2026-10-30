@@ -25,7 +25,7 @@ namespace TwoMoons
             new[] { "Spellforge-Booster und Spellforge-Karten", "Brettspiele: Inselsiedler, Drachenburg, Sternenhändler", "Zubehör-Ständer: Hüllen, Ordner, Spielmatten", "Vitrine für Einzelkarten", "Deko: Teppich, Wanduhr, Lichterkette" },
             new[] { "Turniere jeden 2. Tag: Spieltisch, Turnier-Counter, Turnier-Tafel", "Gratis Turnier-Packs vom Hersteller", "Soul-Clash-Booster und -Karten", "Couch-&-TV-Ecke mit Konsole, Getränkekühlschrank", "Dein erster Mitarbeiter (Computer → Team)" },
             new[] { "3D-Drucker, Filament und Druck-Regal", "Ankauf: Kunden verkaufen dir Karten", "Deko: Neon-Schild" },
-            new[] { "Grading-Station: Karten bewerten lassen (Note 1–10, bis ×5 Wert)", "Ladenerweiterung: zweiter Raum (Computer → Einrichtung)", "Deko: Sitzsack" },
+            new[] { "Grading-Station: Karten bewerten lassen (Note 1–10, bis ×5 Wert)", "Ladenerweiterung: der Laden wird größer (Computer → Einrichtung)", "Deko: Sitzsack" },
             new[] { "Großturniere (ab 4 Spieltischen): mehr Spieler, mehr XP", "Premium-Vitrine (8 Karten, Sammler zahlen mehr)", "Arcade-Automat: Kunden zocken für 1 € pro Runde", "3D-Drucker druckt 50 % schneller", "Deko: Kunstrasen" },
             new[] { "Das Stadtturnier – das große Finale", "Trophäenwand mit deinen Pokalen", "Two-Moons-Statue" },
         };

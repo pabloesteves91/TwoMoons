@@ -164,9 +164,7 @@ namespace TwoMoons
                 }
                 else
                 {
-                    // Der neue Raum bekommt einen eigenen Boden.
-                    string floor = x >= ShopGrid.BaseWidth - 1 ? "floor2" : "floor";
-                    WorldFactory.CreateSprite("Boden", floor, position, WorldFactory.FloorOrder, root);
+                    WorldFactory.CreateSprite("Boden", "floor", position, WorldFactory.FloorOrder, root);
                 }
             }
 

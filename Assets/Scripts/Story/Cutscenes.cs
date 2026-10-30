@@ -209,11 +209,11 @@ namespace TwoMoons
                 Draw = (c, t) => c.DrawShopNight(t, phoneCall: true),
                 Lines = new[]
                 {
-                    ((string)null, "Nach Ladenschluss. Der neue Raum ist still, nur die Neonschrift summt."),
+                    ((string)null, "Nach Ladenschluss. Der große, neue Laden ist still, nur die Neonschrift summt."),
                     (null, "{0} ruft Papa an. Es dauert lange, bis er abnimmt."),
                     (Papa, "Hallo, mein Schatz … entschuldige. Ich war beim Arzt. Es war ein langer Tag."),
                     (Kid, "Papa, was hat er gesagt?"),
-                    (Papa, "Dass ich mich schonen soll. Aber weißt du was? Ich hab Fotos von deinem neuen Raum gesehen."),
+                    (Papa, "Dass ich mich schonen soll. Aber weißt du was? Ich hab Fotos von deinem vergrößerten Laden gesehen."),
                     (Papa, "Die Leute stehen bis auf die Straße. Ich bin so stolz, dass ich es kaum aushalte."),
                     (Kid, "Ruh dich aus, Papa. Und dann zeig ich dir alles. Persönlich."),
                 },

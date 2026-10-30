@@ -240,7 +240,7 @@ namespace TwoMoons
                         {
                             Title = "TwoMoons wächst",
                             Quests = new List<Quest> { Extension(), Shelves(8), Showcases(3), Decos(12) },
-                            Outro = new[] { "Der neue Raum ist voll mit Leuten. {0} macht ein Foto und schickt es Papa." },
+                            Outro = new[] { "Der vergrößerte Laden ist voll mit Leuten. {0} macht ein Foto und schickt es Papa." },
                         },
                         new QuestStage
                         {

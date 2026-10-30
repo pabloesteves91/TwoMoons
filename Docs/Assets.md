@@ -15,7 +15,7 @@ Tipp: Unten im Bild „stehen“ – Figuren und Möbel sollten die unterste Pix
 
 | Datei | Was | Hinweis |
 |---|---|---|
-| floor.png / floor2.png | Boden / Boden im zweiten Raum | Kachel, nahtlos |
+| floor.png | Boden | Kachel, nahtlos |
 | wall.png, street.png, door.png | Wand, Straße, Tür | Kachel |
 | sign.png, signBoard.png | Türschild, Hintergrund vom Ladenschild außen | |
 | counter.png, register.png, computer.png, packTable.png | Theke, Kasse, Computer, Pack-Tisch | |

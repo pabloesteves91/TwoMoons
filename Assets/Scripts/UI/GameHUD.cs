@@ -635,8 +635,8 @@ namespace TwoMoons
             GUILayout.BeginVertical();
             GUILayout.Label($"Ladenerweiterung – {Money.Format(GameManager.ExtensionCost)}", bold);
             GUILayout.Label(ShopGrid.Expanded
-                ? "Der zweite Raum ist gebaut."
-                : "Zweiter Raum rechts (+10 Spalten) · Umbau nur morgens vor Ladenöffnung", text);
+                ? "Der Laden ist vergrößert."
+                : "Der Laden wird nach rechts 10 Felder breiter · Umbau nur morgens vor Ladenöffnung", text);
             GUILayout.EndVertical();
             GUI.color = Color.white;
             GUILayout.FlexibleSpace();
