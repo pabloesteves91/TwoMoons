@@ -79,6 +79,45 @@ namespace TwoMoons
             return true;
         }
 
+        /// <summary>Lagerraum hinter der linken Wand: Ware, die gerade nicht im Laden steht.</summary>
+        public readonly Dictionary<ProductId, int> Storage = new Dictionary<ProductId, int>();
+        public bool StorageBuilt { get; private set; }
+        public bool StorageOpen;
+        public const int StorageCost = 6000;
+
+        public int StorageTotal
+        {
+            get
+            {
+                int total = 0;
+                foreach (var count in Storage.Values) total += count;
+                return total;
+            }
+        }
+
+        public int StorageCount(ProductId id) => Storage.TryGetValue(id, out int count) ? count : 0;
+
+        public void AddToStorage(Product product, int amount) => Storage[product.Id] = StorageCount(product.Id) + amount;
+
+        /// <summary>Ware aus dem Lager holen: ein Karton mit höchstens <paramref name="max"/> Stück vor der Lagertür.</summary>
+        public DeliveryBox TakeFromStorage(Product product, int max)
+        {
+            int amount = Mathf.Min(max, StorageCount(product.Id));
+            if (amount <= 0) return null;
+            Storage[product.Id] = StorageCount(product.Id) - amount;
+            if (Storage[product.Id] <= 0) Storage.Remove(product.Id);
+            return WorldFactory.SpawnBox(ShopGrid.StorageFrontCell, product, amount);
+        }
+
+        public void BuildStorage()
+        {
+            if (StorageBuilt || !Spend(StorageCost)) return;
+            StorageBuilt = true;
+            WorldFactory.SpawnStorageDoor();
+            SoundManager.Play(Sfx.Build);
+            ShowToast("Der Lagerraum ist fertig: die Tür in der linken Wand. Kartons mit [E] hineinstellen, mit leeren Händen [E] zum Herausnehmen.", 7f);
+        }
+
         /// <summary>Bewertete Karten, die gerade nicht in einer Vitrine liegen.</summary>
         public readonly List<Slab> Slabs = new List<Slab>();
 
@@ -184,13 +223,13 @@ namespace TwoMoons
             Phase == GamePhase.MainMenu || Phase == GamePhase.CharacterSelect || Phase == GamePhase.Intro || Phase == GamePhase.Summary ||
             DialogLines != null || ComputerOpen || PauseOpen || BuildMode ||
             CollectionOpen || OpenShowcase != null || OpenedPack != null || LevelUpShown > 0 || CutscenePlaying || PrizeCounterOpen ||
-            OpenPrinter != null || SellerOffer != null || OpenGrading != null || GradeReveal != null || TutorialAsking;
+            OpenPrinter != null || SellerOffer != null || OpenGrading != null || GradeReveal != null || TutorialAsking || StorageOpen;
 
         /// <summary>Menüs, die das Spiel anhalten.</summary>
         bool Paused =>
             DialogLines != null || ComputerOpen || PauseOpen || CollectionOpen || OpenShowcase != null || OpenedPack != null ||
             LevelUpShown > 0 || CutscenePlaying || PrizeCounterOpen || OpenPrinter != null || SellerOffer != null ||
-            OpenGrading != null || GradeReveal != null || TutorialAsking;
+            OpenGrading != null || GradeReveal != null || TutorialAsking || StorageOpen;
 
         public int ToPlace(Furniture furniture) => toPlace.TryGetValue(furniture, out int count) ? count : 0;
 
@@ -428,10 +467,11 @@ namespace TwoMoons
             {
                 // Das Pack-Menü kümmert sich selbst um Tasten.
             }
-            else if (CollectionOpen || OpenShowcase != null || PrizeCounterOpen || OpenPrinter != null || OpenGrading != null || GradeReveal != null)
+            else if (CollectionOpen || OpenShowcase != null || PrizeCounterOpen || OpenPrinter != null || OpenGrading != null || GradeReveal != null || StorageOpen)
             {
                 if (GameInput.ConsumeCancel())
                 {
+                    StorageOpen = false;
                     CollectionOpen = false;
                     OpenShowcase = null;
                     PrizeCounterOpen = false;
@@ -557,6 +597,12 @@ namespace TwoMoons
                 var deco = Decos.Find(d => d.Type == Furniture.TrashBin && d.Cell == new Vector2Int(saved.x, saved.y));
                 if (deco != null) deco.GetComponent<TrashBin>().Restore(saved.fill);
             }
+            if (data.storageBuilt)
+            {
+                StorageBuilt = true;
+                WorldFactory.SpawnStorageDoor();
+            }
+            foreach (var saved in data.storage) AddToStorage(Catalog.Get((ProductId)saved.type), saved.count);
             foreach (var saved in data.tableTrash)
             {
                 var deco = Decos.Find(d => d.Type == Furniture.Table && d.Cell == new Vector2Int(saved.x, saved.y));
@@ -644,6 +690,9 @@ namespace TwoMoons
             foreach (var deco in Decos)
                 if (deco.Type == Furniture.Table && deco.GetComponent<TableTrash>().Count > 0)
                     data.tableTrash.Add(new SavedBin { x = deco.Cell.x, y = deco.Cell.y, fill = deco.GetComponent<TableTrash>().Count });
+            data.storageBuilt = StorageBuilt;
+            foreach (var pair in Storage)
+                if (pair.Value > 0) data.storage.Add(new SavedCount { type = (int)pair.Key, count = pair.Value });
             data.expanded = ShopGrid.Expanded;
             data.slabs.AddRange(Slabs);
             data.employee = Staff != null ? (int)Staff.Job : -1;

@@ -123,6 +123,13 @@ namespace TwoMoons
             return shelf;
         }
 
+        /// <summary>Lagerraum-Tür in der linken Wand (über das Wandstück gezeichnet).</summary>
+        public static StorageDoor SpawnStorageDoor()
+        {
+            var renderer = CreateSprite("Lagerraum", "storageDoor", ShopGrid.CellToWorld(ShopGrid.StorageCell), -(ShopGrid.StorageCell.y * 100) + 5);
+            return renderer.gameObject.AddComponent<StorageDoor>();
+        }
+
         public static Showcase SpawnShowcase(Vector2Int cell, bool premium = false)
         {
             var go = CreateSolid(premium ? "Premium-Vitrine" : "Vitrine", premium ? "premiumShowcase" : "showcase", cell, null);

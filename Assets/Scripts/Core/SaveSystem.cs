@@ -156,6 +156,9 @@ namespace TwoMoons
         public List<SavedBin> bins = new List<SavedBin>();
         /// <summary>Liegengelassener Müll auf Tischen (fill = Anzahl).</summary>
         public List<SavedBin> tableTrash = new List<SavedBin>();
+        /// <summary>Lagerraum gebaut, und was drin ist (type = Ware, count = Stück).</summary>
+        public bool storageBuilt;
+        public List<SavedCount> storage = new List<SavedCount>();
         public long savedAtTicks;
 
         public DateTime SavedAt => new DateTime(savedAtTicks);

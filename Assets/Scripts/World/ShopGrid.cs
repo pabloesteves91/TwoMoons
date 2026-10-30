@@ -22,6 +22,9 @@ namespace TwoMoons
         public static readonly Vector2Int SpawnCell = new Vector2Int(BaseWidth / 2, 0);
         public static readonly Vector2Int DoorCell = new Vector2Int(BaseWidth / 2, 1);
         public static readonly Vector2Int SignCell = new Vector2Int(BaseWidth / 2 - 1, 1);
+        /// <summary>Tür zum Lagerraum in der linken Wand, und das Feld davor (bleibt immer frei).</summary>
+        public static readonly Vector2Int StorageCell = new Vector2Int(0, 5);
+        public static readonly Vector2Int StorageFrontCell = new Vector2Int(1, 5);
         /// <summary>Müllcontainer draußen auf dem Gehweg, links vom Eingang.</summary>
         public static readonly Vector2Int ContainerCell = new Vector2Int(BaseWidth / 2 - 1, 0);
         public static readonly Vector2Int RegisterCell = new Vector2Int(3, 7);
@@ -86,6 +89,7 @@ namespace TwoMoons
         public static bool IsReserved(Vector2Int c)
         {
             if (c == DoorCell + Vector2Int.up) return true;
+            if (c == StorageFrontCell) return true;
             if (c.x <= 4 && c.y >= 8) return true; // hinter der Theke
             foreach (var q in QueueCells) if (q == c) return true;
             foreach (var d in DeliveryCells) if (d == c) return true;

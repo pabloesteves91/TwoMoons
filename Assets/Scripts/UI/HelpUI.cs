@@ -110,6 +110,7 @@ namespace TwoMoons
                 "Ware – Kartons mit Boostern, Zubehör, Getränken, Filament. Sofort am Eingang geliefert.",
                 "Einrichtung – Möbel und Deko. Alles kommt in einem Paket am Eingang: mit [E] auspacken, dann aufstellen. Ab Level 5 auch die Ladenerweiterung.",
                 "Preise – Verkaufspreis jeder Ware einstellen.",
+                "Lagerraum (Einrichtung, 60 €) – Tür in der linken Wand. Kartons ohne Platz mit [E] hineinstellen, mit leeren Händen [E] zum Herausnehmen. Der Mitarbeiter holt dort auch Nachschub. Maus über die Tür zeigt den Bestand.",
                 "Team – ab Level 3 einen Mitarbeiter einstellen (Kasse oder Regale), Lohn wird abends abgezogen.",
                 "Level – was jedes Store-Level freischaltet.",
                 "Talente – Fähigkeitspunkte einlösen (einer pro Level-Aufstieg).");

@@ -30,10 +30,11 @@ namespace TwoMoons
 
         void Start() => body = GetComponent<SpriteRenderer>();
 
-        void WalkTo(Vector2Int cell)
+        bool WalkTo(Vector2Int cell)
         {
             path = Game.Grid.FindPath(ShopGrid.WorldToCell(transform.position), cell);
             pathIndex = 0;
+            return path != null;
         }
 
         bool WalkNextTo(Vector2Int cell)
@@ -111,17 +112,46 @@ namespace TwoMoons
                 return;
             }
 
+            // Am Lagerraum angekommen: passende Ware herausnehmen und zum Regal tragen.
+            if (storageProduct != null)
+            {
+                var product = storageProduct;
+                storageProduct = null;
+                var shelfForStorage = Game.Shelves.Find(s => s.CanTake(product));
+                if (shelfForStorage == null) return;
+                var fromStorage = Game.TakeFromStorage(product, Shelf.Capacity - shelfForStorage.Stock);
+                if (fromStorage == null) return;
+                targetBox = fromStorage;
+                targetShelf = shelfForStorage;
+                return; // nächster Schritt: Karton aufnehmen (steht direkt vor der Lagertür)
+            }
+
             // Neue Arbeit suchen: ein Karton, für den es ein Regal mit Platz gibt.
             foreach (var box in DeliveryBox.Existing)
             {
-                if (!box.enabled || box.Product.Category == ProductCategory.Promo) continue;
+                if (!box.enabled || box.Product.Category == ProductCategory.Promo || box.Product.Category == ProductCategory.Trash) continue;
                 var shelf = Game.Shelves.Find(s => s.CanTake(box.Product));
                 if (shelf == null || !WalkNextTo(ShopGrid.WorldToCell(box.transform.position))) continue;
                 targetBox = box;
                 targetShelf = shelf;
                 return;
             }
+
+            // Kein Karton im Laden: im Lagerraum nach Nachschub schauen.
+            if (!Game.StorageBuilt) return;
+            foreach (var pair in Game.Storage)
+            {
+                if (pair.Value <= 0) continue;
+                var product = Catalog.Get(pair.Key);
+                if (Game.Shelves.Find(s => s.CanTake(product) && s.Stock < Shelf.Capacity / 2) == null) continue;
+                if (ShopGrid.WorldToCell(transform.position) != ShopGrid.StorageFrontCell && !WalkTo(ShopGrid.StorageFrontCell)) continue;
+                storageProduct = product;
+                return;
+            }
         }
+
+        /// <summary>Ware, die der Mitarbeiter gerade aus dem Lagerraum holen will.</summary>
+        Product storageProduct;
 
         void DropBox()
         {

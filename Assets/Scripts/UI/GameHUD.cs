@@ -53,7 +53,8 @@ namespace TwoMoons
             // Kopfzeile, Aufgaben und Hinweise verschwinden so lange.
             bool windowOpen = Game.CollectionOpen || Game.OpenShowcase != null || Game.OpenedPack != null ||
                               Game.PrizeCounterOpen || Game.OpenPrinter != null || Game.OpenGrading != null ||
-                              Game.GradeReveal != null || Game.SellerOffer != null || Game.ComputerOpen || Game.PauseOpen;
+                              Game.GradeReveal != null || Game.SellerOffer != null || Game.ComputerOpen || Game.PauseOpen ||
+                              Game.StorageOpen;
             if (!windowOpen)
             {
                 DrawSpeechBubbles();
@@ -102,6 +103,7 @@ namespace TwoMoons
                 foreach (int card in showcase.Cards) if (card >= 0) filled++;
                 info = $"{(showcase.Premium ? "Premium-Vitrine" : "Vitrine")}: {filled} / {showcase.SlotCount} Karten";
             }
+            if (Game.StorageBuilt && cell == ShopGrid.StorageCell) info = StorageDoor.Summary();
             var gameTable = Game.Decos.Find(d => d.Type == Furniture.GameTable && d.Cell == cell);
             if (gameTable != null)
             {
@@ -566,7 +568,11 @@ namespace TwoMoons
             GUILayout.Label(options == Catalog.Orders
                 ? "Lieferung: sofort an den Eingang"
                 : "Lieferung sofort · mit [B] aufstellen · Deko macht den Laden gemütlicher", hint);
-            if (options == Catalog.Furnishings) DrawExtension();
+            if (options == Catalog.Furnishings)
+            {
+                DrawStorageOffer();
+                DrawExtension();
+            }
             foreach (var option in options)
             {
                 bool locked = option.MinLevel > Game.StoreLevel;
@@ -591,6 +597,29 @@ namespace TwoMoons
                 GUILayout.EndHorizontal();
                 GUILayout.Space(8f);
             }
+        }
+
+        /// <summary>Lagerraum: eine Tür in der linken Wand, kein Möbelstück zum Aufstellen.</summary>
+        void DrawStorageOffer()
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.BeginVertical();
+            GUILayout.Label($"Lagerraum – {Money.Format(GameManager.StorageCost)}", bold);
+            GUILayout.Label(Game.StorageBuilt
+                ? "Gebaut: die Tür in der linken Wand."
+                : "Tür in der linken Wand: Kartons einlagern, du und dein Mitarbeiter holt dort Nachschub", text);
+            GUILayout.EndVertical();
+            GUILayout.FlexibleSpace();
+            if (Game.StorageBuilt)
+                GUILayout.Label("gebaut", hint, GUILayout.Width(90f), GUILayout.Height(36f));
+            else
+            {
+                GUI.enabled = Game.MoneyCents >= GameManager.StorageCost;
+                if (Button("Bauen", GUILayout.Width(90f), GUILayout.Height(36f))) Game.BuildStorage();
+                GUI.enabled = true;
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.Space(8f);
         }
 
         /// <summary>Ladenerweiterung: kein Möbelstück, sondern ein Umbau – deshalb ein eigener Eintrag.</summary>
