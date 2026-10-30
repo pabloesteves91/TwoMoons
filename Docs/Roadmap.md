@@ -136,7 +136,7 @@ Flecken ziehen Gemütlichkeit ab.
 3. **Prizepool vorbereiten:** Den Karton zum **Turnier-Counter** tragen und dort die Preise einteilen:
    1. Platz, 2. Platz, 3. Platz, Teilnahmepreis. Optional eigene Karten aus der Sammlung dazulegen
    → größerer Prizepool lockt mehr Spieler und gibt mehr Ruf.
-4. **Anmeldung:** Über den Tag kommen Turnierspieler und zahlen **5 € Startgeld** an der Kasse (entschieden).
+4. **Anmeldung:** Über den Tag kommen Turnierspieler und zahlen **15 € Startgeld** an der Kasse (entschieden).
    Wie viele kommen, hängt ab von Ruf, Prizepool und Anzahl der Spieltisch-Plätze.
 5. **Turnier (3 Spielstunden, z. B. 14–17 Uhr):** Die Spieler sitzen an den Spieltischen und spielen
    (Karten-Animationen, kleine Jubel- und Ärger-Symbole). Eine Fortschrittsanzeige zeigt Runde 1/3, 2/3, 3/3.

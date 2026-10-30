@@ -137,7 +137,7 @@ namespace TwoMoons
                 "Brauchen Spieltisch und Turnier-Counter. Jeden 2. Tag, 15–18 Uhr.",
                 "Ein Spieltisch hat 2 Plätze: links und rechts daneben. Diese Felder müssen frei bleiben – für mehr Spieler mehr Spieltische.",
                 "Morgens schickt der Hersteller Turnier-Packs – zum Turnier-Counter tragen, dort den Prizepool verteilen.",
-                "Ab 13 Uhr melden sich Spieler an der Kasse an (5 € Startgeld). Um 18 Uhr Siegerehrung am Counter mit [E].",
+                "Ab 13 Uhr melden sich Spieler an der Kasse an (15 € Startgeld). Um 18 Uhr Siegerehrung am Counter mit [E].",
                 "Ab Level 6 werden es Großturniere, in Kapitel 7 kommt das Stadtturnier.");
             Section("Tische, Stühle & Müll (ab Level 2)",
                 "Stell Stühle direkt neben einen Tisch. Kunden, die Booster gekauft haben, setzen sich, öffnen sie und tauschen mit anderen am Tisch.",

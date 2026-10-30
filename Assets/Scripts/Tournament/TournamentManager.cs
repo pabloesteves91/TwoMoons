@@ -6,7 +6,7 @@ namespace TwoMoons
     /// <summary>
     /// Turniere ab Store-Level 3: jeden 2. Tag von 15 bis 18 Uhr (vorerst Monstera).
     /// Morgens kommen Gratis-Packs vom Hersteller für den Prizepool, ab 13 Uhr melden sich Spieler
-    /// an der Kasse an (5 € Startgeld), um 15 Uhr wird an den Spieltischen gespielt,
+    /// an der Kasse an (15 € Startgeld), um 15 Uhr wird an den Spieltischen gespielt,
     /// um 18 Uhr versammeln sich alle am Turnier-Counter zur Siegerehrung.
     /// Ab Level 6 werden daraus Großturniere (mehr Spieler, mehr XP), in Kapitel 7 kommt das Stadtturnier als Finale.
     /// </summary>
@@ -14,7 +14,7 @@ namespace TwoMoons
     {
         public enum State { None, Registration, Running, Ceremony }
 
-        public const int EntryFee = 500;
+        public const int EntryFee = 1500;
         public const int StartMinute = 15 * 60;
         const int RegistrationMinute = 13 * 60;
         const int Rounds = 3;
