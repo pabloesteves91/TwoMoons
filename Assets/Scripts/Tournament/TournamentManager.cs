@@ -83,8 +83,11 @@ namespace TwoMoons
 
         public bool Ready => Game.StoreLevel >= 3 && Tables().Count > 0 && Counter() != null;
 
-        /// <summary>Großturnier ab Level 6: mehr Spieler und mehr Belohnung.</summary>
-        public bool IsBig => Game.StoreLevel >= 6;
+        /// <summary>Spieltische, die man für ein Großturnier braucht.</summary>
+        public const int BigTournamentTables = 4;
+
+        /// <summary>Großturnier ab Level 6 mit mindestens 4 Spieltischen: mehr Spieler und mehr Belohnung.</summary>
+        public bool IsBig => Game.StoreLevel >= 6 && Tables().Count >= BigTournamentTables;
 
         /// <summary>Das nächste Turnier ist das Stadtturnier (letzte Etappe von Kapitel 7).</summary>
         public bool IsCityTournament
@@ -135,7 +138,10 @@ namespace TwoMoons
                     return HasPrizepool
                         ? $"{Kind} heute 15–18 Uhr ({GameName}) · Prizepool: {PrizePackTotal} Packs"
                         : $"{Kind} heute 15 Uhr – Prizepool am Turnier-Counter vorbereiten!";
-                return $"Nächstes {Kind}: Tag {NextDay}, 15 Uhr ({GameName})";
+                string bigHint = Game.StoreLevel >= 6 && !IsBig && !IsCityTournament
+                    ? $" · Für ein Großturnier: {Tables().Count}/{BigTournamentTables} Spieltische"
+                    : "";
+                return $"Nächstes {Kind}: Tag {NextDay}, 15 Uhr ({GameName}){bigHint}";
             }
         }
 
