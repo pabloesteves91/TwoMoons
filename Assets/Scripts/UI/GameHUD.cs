@@ -108,6 +108,15 @@ namespace TwoMoons
                 info = $"{(showcase.Premium ? "Premium-Vitrine" : "Vitrine")}: {filled} / {showcase.SlotCount} Karten";
             }
             if (Game.StorageBuilt && cell == ShopGrid.StorageCell) info = StorageDoor.Summary();
+            var printerDeco = Game.Decos.Find(d => d.Type == Furniture.Printer3D && d.Cell == cell);
+            if (printerDeco != null)
+            {
+                var printer = printerDeco.GetComponent<Printer3D>();
+                info = printer.Printing != null
+                    ? $"3D-Drucker: druckt {printer.Printing.Product.Name} ({Mathf.RoundToInt(printer.Progress * 100f)} %)\nFilament: {printer.Filament} Spulen"
+                    : printer.Filament > 0 ? $"3D-Drucker: bereit\nFilament: {printer.Filament} Spulen"
+                    : "3D-Drucker: kein Filament mehr!\nAm Computer unter „Ware“ nachbestellen";
+            }
             var gameTable = Game.Decos.Find(d => d.Type == Furniture.GameTable && d.Cell == cell);
             if (gameTable != null)
             {

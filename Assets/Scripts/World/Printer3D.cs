@@ -81,6 +81,9 @@ namespace TwoMoons
 
         void Update()
         {
+            // Leer-Hinweis blinken lassen
+            if (Printing == null && Filament <= 0 && statusIcon != null)
+                statusIcon.enabled = Mathf.Repeat(Time.time, 1f) < 0.6f;
             if (Printing == null || Jammed || Done) return;
             // Ab Level 6 druckt der Drucker schneller.
             float speed = (GameManager.Instance.StoreLevel >= 6 ? 1.5f : 1f) * (GameManager.Instance.Skills.Has(Skill.Tinkerer) ? 1.25f : 1f);
@@ -110,8 +113,12 @@ namespace TwoMoons
                 barFill.transform.position = barBack.transform.position + new Vector3(-0.45f * (1f - Progress), 0f, 0f);
                 barFill.color = Jammed ? UiKit.Bad : Done ? UiKit.Good : UiKit.Gold;
             }
-            statusIcon.enabled = Jammed || Done;
-            if (statusIcon.enabled) statusIcon.sprite = Art.Get(Jammed ? "moodAngry" : Printing.Product.SpriteKey);
+            // Kein Filament mehr: rote Spule blinkt über dem Drucker.
+            bool empty = !busy && Filament <= 0;
+            statusIcon.enabled = Jammed || Done || empty;
+            if (!statusIcon.enabled) return;
+            statusIcon.sprite = Art.Get(Jammed ? "moodAngry" : empty ? "filament" : Printing.Product.SpriteKey);
+            statusIcon.color = empty ? new Color(1f, 0.45f, 0.45f) : Color.white;
         }
 
         public override string GetPrompt(PlayerController player)
@@ -141,6 +148,7 @@ namespace TwoMoons
                 Filament += carried.Amount;
                 player.DestroyCarried();
                 SoundManager.Play(Sfx.Stock);
+                Refresh();
                 return;
             }
             if (Jammed)
@@ -158,6 +166,7 @@ namespace TwoMoons
                 Refresh();
                 player.PickUp(WorldFactory.SpawnSingle(Cell, product));
                 game.NotifyPrinted();
+                if (Filament <= 0) game.ShowToast("Der 3D-Drucker hat kein Filament mehr – am Computer unter „Ware“ nachbestellen.", 5f);
                 return;
             }
             game.OpenPrinter = this;
