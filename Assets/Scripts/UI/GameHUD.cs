@@ -102,6 +102,13 @@ namespace TwoMoons
                 foreach (int card in showcase.Cards) if (card >= 0) filled++;
                 info = $"{(showcase.Premium ? "Premium-Vitrine" : "Vitrine")}: {filled} / {showcase.SlotCount} Karten";
             }
+            var gameTable = Game.Decos.Find(d => d.Type == Furniture.GameTable && d.Cell == cell);
+            if (gameTable != null)
+            {
+                int seats = gameTable.GetComponent<GameTable>().Seats().Count;
+                info = seats >= 2 ? "Spieltisch: 2 Turnierplätze (links und rechts)"
+                    : $"Spieltisch: nur {seats} Platz – links/rechts ist etwas im Weg (Möbel, Wand oder Kassen-Schlange). Morgens mit [B] verschieben!";
+            }
             var tableDeco = Game.Decos.Find(d => d.Type == Furniture.Table && d.Cell == cell);
             if (tableDeco != null)
             {
