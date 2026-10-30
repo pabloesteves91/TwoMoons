@@ -126,7 +126,7 @@ namespace TwoMoons
                 "Die Premium-Vitrine (Level 6) hat 8 Fächer, dort zahlen Sammler bis zu 10 % mehr.");
             Section("Ankauf (ab Level 4)",
                 "Manche Kunden wollen dir Karten verkaufen. Kaufen, Gegenangebot (−15 %) oder ablehnen.",
-                "Steht dein Mitarbeiter an der Kasse, kauft er selbst an: erst −15 % versuchen, sonst zum verlangten Preis – und legt die Karten gleich in freie Vitrinen-Fächer.");
+                "Steht dein Mitarbeiter an der Kasse, kauft er selbst an: erst −15 % versuchen, sonst zum verlangten Preis – und legt die Karten in freie Vitrinen-Fächer. Ist keins frei, legt er sie nach und nach nach, sobald eine Karte verkauft wurde.");
             Section("Grading (ab Level 5)",
                 "An der Grading-Station eine Karte bewerten lassen (5 €, 1 Spielstunde).",
                 "Note 10 ×5, 9 ×3, 8 ×2, 7 ×1,5 Wert. Bewertete Karten mögen Sammler besonders.");

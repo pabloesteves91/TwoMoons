@@ -499,6 +499,8 @@ namespace TwoMoons
                 SoundManager.Play(Sfx.UiClick);
             }
 
+            RefillShowcasesFromStaffCards();
+
             if (Phase == GamePhase.Open)
             {
                 DayTime += Time.deltaTime;
@@ -597,6 +599,7 @@ namespace TwoMoons
                 var deco = Decos.Find(d => d.Type == Furniture.TrashBin && d.Cell == new Vector2Int(saved.x, saved.y));
                 if (deco != null) deco.GetComponent<TrashBin>().Restore(saved.fill);
             }
+            if (data.staffCards != null) StaffCards.AddRange(data.staffCards);
             if (data.storageBuilt)
             {
                 StorageBuilt = true;
@@ -690,6 +693,7 @@ namespace TwoMoons
             foreach (var deco in Decos)
                 if (deco.Type == Furniture.Table && deco.GetComponent<TableTrash>().Count > 0)
                     data.tableTrash.Add(new SavedBin { x = deco.Cell.x, y = deco.Cell.y, fill = deco.GetComponent<TableTrash>().Count });
+            data.staffCards.AddRange(StaffCards);
             data.storageBuilt = StorageBuilt;
             foreach (var pair in Storage)
                 if (pair.Value > 0) data.storage.Add(new SavedCount { type = (int)pair.Key, count = pair.Value });
@@ -1114,9 +1118,37 @@ namespace TwoMoons
             CardsBought?.Invoke();
         }
 
+        /// <summary>Vom Mitarbeiter angekaufte Karten, die noch auf ein freies Vitrinen-Fach warten (liegen im Sammelbuch).</summary>
+        public readonly List<int> StaffCards = new List<int>();
+        float staffShowcaseTimer;
+
+        /// <summary>Wird ein Vitrinen-Fach frei, legt der Mitarbeiter die nächste seiner angekauften Karten hinein.</summary>
+        void RefillShowcasesFromStaffCards()
+        {
+            if (Staff == null || StaffCards.Count == 0 || IsDemo) return;
+            staffShowcaseTimer -= Time.deltaTime;
+            if (staffShowcaseTimer > 0f) return;
+            staffShowcaseTimer = 3f;
+
+            var showcase = Showcases.Find(s => System.Array.IndexOf(s.Cards, -1) >= 0);
+            if (showcase == null) return;
+            // Karten, die du inzwischen selbst verwendet hast, fallen aus der Liste.
+            while (StaffCards.Count > 0)
+            {
+                int id = StaffCards[0];
+                StaffCards.RemoveAt(0);
+                var card = CardDatabase.Get(id);
+                if (card == null || !Collection.Remove(id)) continue;
+                showcase.Put(System.Array.IndexOf(showcase.Cards, -1), card, card.Value);
+                ShowToast($"{Employee.Name} legt {card.Name} in die Vitrine.", 3f);
+                return;
+            }
+        }
+
         /// <summary>
         /// Der Mitarbeiter an der Kasse kauft Karten an: erst ein Gegenangebot (−15 %), sonst der verlangte Preis.
-        /// Die Karten kommen gleich in freie Vitrinen-Fächer (zum Marktwert), der Rest ins Sammelbuch.
+        /// Die Karten kommen gleich in freie Vitrinen-Fächer (zum Marktwert); der Rest kommt nach und nach hinein,
+        /// sobald wieder ein Fach frei ist.
         /// </summary>
         public void EmployeeBuysCards(Customer seller)
         {
@@ -1135,7 +1167,11 @@ namespace TwoMoons
             foreach (var card in cards)
             {
                 var showcase = Showcases.Find(s => System.Array.IndexOf(s.Cards, -1) >= 0);
-                if (showcase == null) break;
+                if (showcase == null)
+                {
+                    StaffCards.Add(card.Id);
+                    continue;
+                }
                 if (!Collection.Remove(card.Id)) continue;
                 showcase.Put(System.Array.IndexOf(showcase.Cards, -1), card, card.Value);
                 placed++;

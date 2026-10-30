@@ -158,6 +158,8 @@ namespace TwoMoons
         public List<SavedBin> tableTrash = new List<SavedBin>();
         /// <summary>Lagerraum gebaut, und was drin ist (type = Ware, count = Stück).</summary>
         public bool storageBuilt;
+        /// <summary>Vom Mitarbeiter angekaufte Karten, die noch in die Vitrine sollen.</summary>
+        public List<int> staffCards = new List<int>();
         public List<SavedCount> storage = new List<SavedCount>();
         public long savedAtTicks;
 
