@@ -5,10 +5,10 @@ namespace TwoMoons
 
     /// <summary>Neue Waren immer hinten anhängen – die Nummern stehen in Spielständen.</summary>
     public enum ProductId { MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat, TournamentPack, SoulClashPack, Soda, EnergyDrink,
-        Filament, PrintSmall, PrintMedium, PrintLarge, TrashBag, Wrappers }
+        Filament, PrintSmall, PrintMedium, PrintLarge, TrashBag, Wrappers, IslandSettlers, DragonKeep, StarTraders }
 
     /// <summary>Wo eine Ware im Laden steht: Packs ins Regal, Zubehör in den Zubehör-Ständer.</summary>
-    public enum ProductCategory { Pack, Accessory, Promo, Drink, Supply, Print, Trash }
+    public enum ProductCategory { Pack, Accessory, Promo, Drink, Supply, Print, Trash, BoardGame }
 
     public enum OrderKind { ProductBox, Furniture }
 
@@ -122,6 +122,16 @@ namespace TwoMoons
             Id = ProductId.Wrappers, Name = "Booster-Folien", SpriteKey = "wrappers", Category = ProductCategory.Trash, MinLevel = 2,
         };
 
+        // Brettspiele (ab Level 2): stehen im normalen Regal, Kunden nehmen eins.
+        public static readonly Product IslandSettlers = BoardGame(ProductId.IslandSettlers, "Inselsiedler", "boardGame1", 2000, 3500);
+        public static readonly Product DragonKeep = BoardGame(ProductId.DragonKeep, "Drachenburg", "boardGame2", 2500, 4200);
+        public static readonly Product StarTraders = BoardGame(ProductId.StarTraders, "Sternenhändler", "boardGame3", 1800, 3000);
+
+        static Product BoardGame(ProductId id, string name, string sprite, int buy, int value) => new Product
+        {
+            Id = id, Name = name, SpriteKey = sprite, Category = ProductCategory.BoardGame, BuyPrice = buy, MarketValue = value, MinLevel = 2,
+        };
+
         static Product Print(ProductId id, string name, string sprite, int value) => new Product
         {
             Id = id, Name = name, SpriteKey = sprite, Category = ProductCategory.Print, MarketValue = value, MinLevel = 4,
@@ -131,7 +141,7 @@ namespace TwoMoons
         public static readonly Product[] Products =
         {
             MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat, TournamentPack, SoulClashPack, Soda, EnergyDrink,
-            Filament, PrintSmall, PrintMedium, PrintLarge, TrashBag, Wrappers,
+            Filament, PrintSmall, PrintMedium, PrintLarge, TrashBag, Wrappers, IslandSettlers, DragonKeep, StarTraders,
         };
 
         /// <summary>Tab „Ware“ am Computer.</summary>
@@ -146,6 +156,9 @@ namespace TwoMoons
             Box(Soda, "Limo", "Kiste mit 12 Flaschen · für den Kühlschrank", 12),
             Box(EnergyDrink, "Energy-Drinks", "Kiste mit 12 Dosen · für den Kühlschrank", 12),
             Box(Filament, "Filament-Spulen", "5 Spulen für den 3D-Drucker · zum Drucker tragen", 5),
+            Box(IslandSettlers, "Inselsiedler (Brettspiel)", "4 Spiele · Siedeln, Handeln, Bauen · ins normale Regal", 4),
+            Box(DragonKeep, "Drachenburg (Brettspiel)", "4 Spiele · Helden erkunden ein Dungeon · ins normale Regal", 4),
+            Box(StarTraders, "Sternenhändler (Brettspiel)", "4 Spiele · Handel im Weltraum · ins normale Regal", 4),
         };
 
         /// <summary>Tab „Einrichtung“ am Computer: Möbel und Deko, nach Store-Level freigeschaltet.</summary>

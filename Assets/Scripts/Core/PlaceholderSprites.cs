@@ -406,6 +406,29 @@ namespace TwoMoons
                     Rect(4, 8, 2, 1, new Color32(250, 220, 80, 255));
                     Rect(10, 9, 2, 1, new Color32(220, 220, 230, 255));
                     break;
+                case "boardGame1": // Inselsiedler: blaue Schachtel mit Insel
+                    Rect(1, 3, 14, 10, new Color32(60, 110, 190, 255));
+                    Frame(1, 3, 14, 10, new Color32(30, 50, 100, 255));
+                    Circle(8, 8, 3, new Color32(230, 200, 110, 255));
+                    Rect(7, 8, 2, 2, new Color32(70, 150, 70, 255));
+                    break;
+                case "boardGame2": // Drachenburg: dunkelrote Schachtel mit Burg
+                    Rect(1, 3, 14, 10, new Color32(130, 40, 40, 255));
+                    Frame(1, 3, 14, 10, new Color32(60, 20, 20, 255));
+                    Rect(5, 5, 6, 5, new Color32(170, 170, 180, 255));
+                    Rect(5, 10, 1, 1, new Color32(170, 170, 180, 255));
+                    Rect(10, 10, 1, 1, new Color32(170, 170, 180, 255));
+                    Rect(7, 5, 2, 2, new Color32(40, 30, 30, 255));
+                    break;
+                case "boardGame3": // Sternenhändler: schwarze Schachtel mit Sternen und Raumschiff
+                    Rect(1, 3, 14, 10, new Color32(25, 25, 50, 255));
+                    Frame(1, 3, 14, 10, new Color32(240, 200, 80, 255));
+                    Rect(3, 10, 1, 1, Color.white);
+                    Rect(12, 5, 1, 1, Color.white);
+                    Rect(10, 11, 1, 1, Color.white);
+                    Rect(6, 7, 4, 2, new Color32(200, 200, 220, 255));
+                    Rect(10, 7, 1, 2, new Color32(240, 120, 60, 255));
+                    break;
                 case "storageDoor":
                     Rect(2, 0, 12, 15, new Color32(70, 50, 35, 255));
                     Rect(3, 1, 10, 13, new Color32(140, 100, 60, 255));

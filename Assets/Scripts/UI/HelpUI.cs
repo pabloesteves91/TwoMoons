@@ -107,7 +107,7 @@ namespace TwoMoons
 
         static void Computer() =>
             Section("Der Computer (oben links, [E])",
-                "Ware – Kartons mit Boostern, Zubehör, Getränken, Filament. Sofort am Eingang geliefert.",
+                "Ware – Kartons mit Boostern, Brettspielen (ab Level 2, ins normale Regal), Zubehör, Getränken, Filament. Sofort am Eingang geliefert.",
                 "Einrichtung – Möbel und Deko. Alles kommt in einem Paket am Eingang: mit [E] auspacken, dann aufstellen. Ab Level 5 auch die Ladenerweiterung.",
                 "Preise – Verkaufspreis jeder Ware einstellen.",
                 "Lagerraum (Einrichtung, 60 €) – Tür in der linken Wand. Kartons ohne Platz mit [E] hineinstellen, mit leeren Händen [E] zum Herausnehmen. Der Mitarbeiter holt dort auch Nachschub. Maus über die Tür zeigt den Bestand.",

@@ -39,7 +39,7 @@ namespace TwoMoons
             if (box == null) return Stock > 0 ? $"1× {Product.Name} herausnehmen ({Stock}/{Capacity})" : $"{Label}: leer";
             if (box.Product.Category == ProductCategory.Promo) return "Turnier-Packs gehören zum Turnier-Counter";
             if (box.Product.Category == ProductCategory.Supply) return "Filament gehört in den 3D-Drucker";
-            if (box.Product.Category != Category) return $"{box.Product.Name} gehört in: {LabelFor(box.Product.Category)}";
+            if (!Fits(box.Product.Category)) return $"{box.Product.Name} gehört in: {LabelFor(box.Product.Category)}";
             if (Stock >= Capacity) return $"{Label} ist voll";
             if (Product != null && Product != box.Product) return $"Hier liegt schon {Product.Name}";
             return $"{box.Product.Name} einräumen";
@@ -49,7 +49,7 @@ namespace TwoMoons
         {
             var box = player.Carried;
             if (box == null) return Stock > 0;
-            return box.Product.Category == Category && Stock < Capacity && (Product == null || Product == box.Product);
+            return Fits(box.Product.Category) && Stock < Capacity && (Product == null || Product == box.Product);
         }
 
         public override void Interact(PlayerController player)
@@ -76,7 +76,11 @@ namespace TwoMoons
 
         /// <summary>Passt diese Ware hier hinein (richtige Sorte und noch Platz)?</summary>
         public bool CanTake(Product product) =>
-            product.Category == Category && Stock < Capacity && (Product == null || Product == product);
+            Fits(product.Category) && Stock < Capacity && (Product == null || Product == product);
+
+        /// <summary>Gehört diese Warenart in dieses Regal? Brettspiele stehen im normalen Regal bei den Boostern.</summary>
+        public bool Fits(ProductCategory category) =>
+            category == Category || (Category == ProductCategory.Pack && category == ProductCategory.BoardGame);
 
         /// <summary>Für den Mitarbeiter: so viel wie möglich aus einem Karton einräumen.</summary>
         public void StockFrom(DeliveryBox box)

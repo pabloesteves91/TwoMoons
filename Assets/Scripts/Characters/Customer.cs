@@ -278,7 +278,8 @@ namespace TwoMoons
                     }
                     bargain = ratio <= BargainRatio;
                     // Meist 1–2 Packs (Zubehör: 1 Stück), bei einem Schnäppchen eins mehr.
-                    int wanted = product.Category == ProductCategory.Accessory || product.Category == ProductCategory.Print ? 1 : Random.Range(1, 3);
+                    int wanted = product.Category == ProductCategory.Accessory || product.Category == ProductCategory.Print ||
+                                 product.Category == ProductCategory.BoardGame ? 1 : Random.Range(1, 3);
                     // Nach dem Zocken: nur ein Getränk.
                     if (hasGamed) wanted = 1;
                     else if (Game.TodayEvent == DayEvent.Collectors) wanted++;
