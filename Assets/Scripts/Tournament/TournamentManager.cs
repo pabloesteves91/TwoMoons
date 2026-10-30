@@ -55,16 +55,11 @@ namespace TwoMoons
 
         public bool Busy => Current != State.None;
 
-        /// <summary>Wie viele Plätze die Spieltische bieten (4 pro Tisch).</summary>
-        public int Seats
-        {
-            get
-            {
-                int seats = 0;
-                foreach (var table in Tables()) seats += table.Seats().Count;
-                return seats;
-            }
-        }
+        /// <summary>Wie viele Plätze die Spieltische bieten (2 pro Tisch). Es zählen nur Tische, an denen beide Seiten frei sind.</summary>
+        public int Seats => PlayableTables().Count * 2;
+
+        /// <summary>Spieltische, an denen links und rechts Platz ist – nur dort wird gespielt.</summary>
+        static List<GameTable> PlayableTables() => Tables().FindAll(t => t.Seats().Count == 2);
 
         public static List<GameTable> Tables()
         {
@@ -116,7 +111,9 @@ namespace TwoMoons
                               (Game.Skills.Has(Skill.Organizer) ? 2 : 0);
                 var bonus = CardDatabase.Get(BonusCard);
                 if (bonus != null) players += 1 + (int)bonus.Rarity;
-                return Mathf.Clamp(players, 0, Seats);
+                players = Mathf.Clamp(players, 0, Seats);
+                // Immer paarweise, damit jeder Tisch voll ist.
+                return players - players % 2;
             }
         }
 
@@ -314,16 +311,20 @@ namespace TwoMoons
         /// <summary>Ein Spieler hat an der Kasse bezahlt und setzt sich an einen Spieltisch.</summary>
         public void Register(Customer entrant)
         {
+            if (!CanRegister) return;
             var seat = FreeSeat();
-            if (seat == null) return;
             var player = WorldFactory.SpawnTournamentPlayer(entrant.transform.position, entrant.Sprite, PlayerNames[Players.Count % PlayerNames.Length]);
             player.Seat = seat.Value;
             Players.Add(player);
         }
 
+        /// <summary>Anmelden geht nur vor dem Start und solange ein Platz frei ist (danach bliebe ein Tisch halb leer).</summary>
+        public bool CanRegister => Current == State.Registration && FreeSeat() != null;
+
+        /// <summary>Plätze werden Tisch für Tisch vergeben, damit sich immer zwei gegenübersitzen.</summary>
         Vector2Int? FreeSeat()
         {
-            foreach (var table in Tables())
+            foreach (var table in PlayableTables())
                 foreach (var seat in table.Seats())
                     if (!Players.Exists(p => p.Seat == seat)) return seat;
             return null;
@@ -340,10 +341,25 @@ namespace TwoMoons
                 Finish();
                 return;
             }
+            if (Players.Count % 2 == 1) AddStandIn();
             Current = State.Running;
             SoundManager.Play(Sfx.Quest);
             Game.ShowToast($"Das {Kind} beginnt! {Players.Count} Spieler, 3 Runden.", 5f);
             foreach (var player in Players) player.StartPlaying();
+        }
+
+        /// <summary>Bei ungerader Anmeldezahl springt spontan noch jemand ein, damit jeder Tisch voll ist.</summary>
+        void AddStandIn()
+        {
+            var seat = FreeSeat();
+            if (seat == null) return;
+            string name = PlayerNames[Players.Count % PlayerNames.Length];
+            var player = WorldFactory.SpawnTournamentPlayer(ShopGrid.CellToWorld(ShopGrid.SpawnCell),
+                Art.Get($"customer{Random.Range(1, 4)}"), name);
+            player.Seat = seat.Value;
+            Players.Add(player);
+            Game.RegisterEntryFee();
+            Game.ShowToast($"Ungerade Spielerzahl – {name} springt spontan ein, damit jeder einen Gegner hat!", 5f);
         }
 
         void EndTournament()

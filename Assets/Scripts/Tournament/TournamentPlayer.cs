@@ -77,7 +77,7 @@ namespace TwoMoons
                     // Am Platz zum Tisch drehen: die beiden Spieler sitzen sich gegenüber.
                     var table = TournamentManager.Tables().Find(t => System.Array.IndexOf(GameTable.SeatCells(t.Cell), Seat) >= 0);
                     if (table != null) body.flipX = table.Cell.x < Seat.x;
-                    // Wer sich spät angemeldet hat, steigt direkt ins laufende Turnier ein.
+                    // Wer spontan einspringt, kommt erst nach dem Start und spielt direkt mit.
                     state = Game.Tournament.Current == TournamentManager.State.Running ? State.Playing : State.Waiting;
                     break;
 

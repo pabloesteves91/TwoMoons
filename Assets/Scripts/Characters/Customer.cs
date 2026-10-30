@@ -541,6 +541,13 @@ namespace TwoMoons
             }
             if (IsTournamentEntrant)
             {
+                if (!Game.Tournament.CanRegister)
+                {
+                    // Zu spät oder alle Tische voll: kein Startgeld, wieder nach Hause.
+                    Say("Schade, schon voll bzw. angefangen …", 3f);
+                    Leave(true, null, alreadyRewarded: true);
+                    return;
+                }
                 // Startgeld bezahlt: weiter an den Spieltisch.
                 Game.RegisterEntryFee();
                 Game.Register.Remove(this);
