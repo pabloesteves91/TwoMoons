@@ -569,7 +569,9 @@ namespace TwoMoons
             foreach (var saved in data.shelves)
             {
                 var shelf = WorldFactory.SpawnShelf(new Vector2Int(saved.x, saved.y), (ProductCategory)saved.category);
-                if (saved.product >= 0) shelf.SetStock(Catalog.Get((ProductId)saved.product), saved.stock);
+                if (saved.mixed != null && saved.mixed.Count > 0)
+                    foreach (var item in saved.mixed) shelf.AddStock(Catalog.Get((ProductId)item.type), item.count);
+                else if (saved.product >= 0) shelf.SetStock(Catalog.Get((ProductId)saved.product), saved.stock);
             }
             foreach (var box in data.boxes)
                 WorldFactory.SpawnBox(new Vector2Int(box.x, box.y), Catalog.Get((ProductId)box.product), box.amount).IsSingle = box.single;
@@ -659,6 +661,9 @@ namespace TwoMoons
                     category = (int)shelf.Category,
                     product = shelf.Product != null ? (int)shelf.Product.Id : -1,
                 });
+                if (shelf.Mixed)
+                    foreach (var item in shelf.Contents)
+                        data.shelves[data.shelves.Count - 1].mixed.Add(new SavedCount { type = (int)item.Key.Id, count = item.Value });
             }
             foreach (var box in DeliveryBox.Existing)
             {

@@ -258,7 +258,7 @@ namespace TwoMoons
                         BuyFromShowcase();
                         break;
                     }
-                    product = shelf != null && shelf.Stock > 0 ? shelf.Product : null;
+                    product = shelf != null && shelf.Stock > 0 ? shelf.PickProduct() : null;
                     if (product == null && TryOtherShelf()) break;
                     if (product == null)
                     {
@@ -284,7 +284,7 @@ namespace TwoMoons
                     if (hasGamed) wanted = 1;
                     else if (Game.TodayEvent == DayEvent.Collectors) wanted++;
                     if (IsThief) wanted = Random.Range(1, 4);
-                    itemCount = shelf.Take(wanted + (bargain && !IsThief ? 1 : 0));
+                    itemCount = shelf.Take(product, wanted + (bargain && !IsThief ? 1 : 0));
 
                     if (itemCount == 0 && TryOtherShelf()) break;
                     if (itemCount == 0) Leave(false, "Ein Kunde ist gegangen: Das Regal war leer.");

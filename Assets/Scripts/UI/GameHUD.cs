@@ -92,9 +92,13 @@ namespace TwoMoons
             var shelf = Game.Shelves.Find(s => s.Cell == cell);
             if (shelf != null)
             {
-                info = shelf.Stock > 0 && shelf.Product != null
-                    ? $"{shelf.Label}: {shelf.Product.Name}\n{shelf.Stock} / {Shelf.Capacity} Stück"
-                    : $"{shelf.Label}: leer (0 / {Shelf.Capacity})";
+                if (shelf.Stock == 0) info = $"{shelf.Label}: leer (0 / {Shelf.Capacity})";
+                else if (shelf.Mixed)
+                {
+                    info = $"{shelf.Label}: {shelf.Stock} / {Shelf.Capacity} Stück";
+                    foreach (var item in shelf.Contents) info += $"\n{item.Value}× {item.Key.Name}";
+                }
+                else info = $"{shelf.Label}: {shelf.Product.Name}\n{shelf.Stock} / {Shelf.Capacity} Stück";
             }
             var showcase = Game.Showcases.Find(s => s.Cell == cell);
             if (showcase != null)

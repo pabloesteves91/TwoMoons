@@ -13,6 +13,8 @@ namespace TwoMoons
         public int product = -1;
         /// <summary>0 = Regal für Packs, 1 = Zubehör-Ständer.</summary>
         public int category;
+        /// <summary>Gemischtes Druck-Regal: alle Sorten (type = Ware, count = Stück).</summary>
+        public List<SavedCount> mixed = new List<SavedCount>();
     }
 
     [Serializable]
