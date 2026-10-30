@@ -166,7 +166,7 @@ namespace TwoMoons
             UiKit.BeginWindow(area);
             var collection = Game.Collection;
             GUILayout.BeginHorizontal();
-            GUILayout.Label("Sammelbuch", UiKit.Title);
+            GUILayout.Label(collection.CompletedBooks > 0 ? $"Sammelbuch Nr. {collection.CompletedBooks + 1}" : "Sammelbuch", UiKit.Title);
             foreach (var tab in CardDatabase.Games)
             {
                 GUI.color = collectionGame == tab ? Color.white : UiKit.Dimmed;

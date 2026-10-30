@@ -167,6 +167,8 @@ namespace TwoMoons
         public List<Slab> slabs = new List<Slab>();
         /// <summary>Beste Note pro Karte (count = Note), fürs Sammelbuch.</summary>
         public List<SavedCard> bestGrades = new List<SavedCard>();
+        /// <summary>Wie oft das Sammelbuch schon komplett war und verkauft wurde.</summary>
+        public int completedBooks;
         public List<SavedGrader> graders = new List<SavedGrader>();
         public List<int> skills = new List<int>();
         public List<SavedBin> bins = new List<SavedBin>();

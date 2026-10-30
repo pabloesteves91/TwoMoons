@@ -956,7 +956,35 @@ namespace TwoMoons
             PackOpened?.Invoke(OpenedPack.FindAll(c => c.Rarity == Rarity.Ultra).Count);
         }
 
-        public void ClosePack() => OpenedPack = null;
+        public void ClosePack()
+        {
+            OpenedPack = null;
+            CheckBookComplete();
+        }
+
+        /// <summary>
+        /// Alle Karten aller Spiele entdeckt: Die ganze Sammlung im Buch wird zum Marktwert verkauft,
+        /// und das Sammelbuch beginnt von vorne. Vitrinen-Karten und bewertete Karten bleiben.
+        /// </summary>
+        void CheckBookComplete()
+        {
+            if (IsDemo || !Collection.IsComplete) return;
+            int cards = Collection.TotalCount();
+            int value = Collection.TotalValue();
+            int round = Collection.CompletedBooks + 2;
+            Collection.StartOver();
+            MoneyCents += value;
+            Today.Income += value;
+            AddXp(value / 100 + 200);
+            ChangeReputation(30);
+            SoundManager.Play(Sfx.Fanfare);
+            ShowDialog(new[]
+            {
+                $"Das Sammelbuch ist komplett! Alle {CardDatabase.All.Count} Karten aus Monstera, Spellforge und Soul Clash.",
+                $"Ein großer Sammler kauft dir die ganze Sammlung ab: {cards} Karten für {Money.Format(value)} (Marktwert).",
+                $"{PlayerName}: Und jetzt … alles nochmal von vorne! Sammelbuch Nr. {round} – los geht's.",
+            });
+        }
 
         /// <summary>Glückspilz: bekannte Karten werden manchmal gegen noch fehlende derselben Seltenheit getauscht.</summary>
         void SwapInMissingCards(List<CardDef> pack)
@@ -1119,6 +1147,7 @@ namespace TwoMoons
             Today.Expenses += price;
             foreach (var card in cards) Collection.Add(card.Id);
             ShowToast($"{cards.Count} Karten angekauft für {Money.Format(price)}.", 4f);
+            CheckBookComplete();
             SoundManager.Play(Sfx.Order);
             CardsBought?.Invoke();
         }

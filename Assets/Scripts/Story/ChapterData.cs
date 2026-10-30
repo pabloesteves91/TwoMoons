@@ -71,9 +71,9 @@ namespace TwoMoons
         static Quest Showcases(int count) => new Quest { Text = "Vitrinen im Laden", Target = count, Poll = () => Game.Showcases.Count };
         static Quest Decos(int count) => new Quest { Text = "Deko im Laden", Target = count, Poll = () => Game.Decos.Count };
         static Quest Cozy(int value) => new Quest { Text = "Gemütlichkeit erreichen", Target = value, Poll = () => Game.Coziness };
-        static Quest Cards(int count) => new Quest { Text = "Karten im Sammelbuch", Target = count, Poll = () => Game.Collection.DiscoveredCount };
+        static Quest Cards(int count) => new Quest { Text = "Karten im Sammelbuch", Target = count, Poll = () => Game.Collection.EverDiscoveredCount };
         static Quest CardsIn(TcgGame game, int count) =>
-            new Quest { Text = $"{Catalog.GameName(game)}-Karten im Sammelbuch", Target = count, Poll = () => Game.Collection.DiscoveredIn(game) };
+            new Quest { Text = $"{Catalog.GameName(game)}-Karten im Sammelbuch", Target = count, Poll = () => Game.Collection.EverDiscoveredIn(game) };
         static Quest Money(int euros) => new Quest { Text = "Euro auf dem Konto", Target = euros, Poll = () => Game.MoneyCents / 100 };
 
         static Quest Reputation(int stage, string name) =>

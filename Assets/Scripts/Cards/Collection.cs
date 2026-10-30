@@ -19,6 +19,39 @@ namespace TwoMoons
 
         public int DiscoveredCount => discovered.Count;
 
+        /// <summary>Wie oft das ganze Sammelbuch (alle Karten aller Spiele) schon komplett war.</summary>
+        public int CompletedBooks { get; private set; }
+
+        public bool IsComplete => discovered.Count >= CardDatabase.All.Count;
+
+        /// <summary>Für Aufgaben: ein schon einmal komplettes Buch zählt weiter als voll.</summary>
+        public int EverDiscoveredIn(TcgGame game) => CompletedBooks > 0 ? CardDatabase.CardsPerGame : DiscoveredIn(game);
+
+        public int EverDiscoveredCount => CompletedBooks > 0 ? CardDatabase.All.Count : DiscoveredCount;
+
+        /// <summary>Marktwert aller Karten im Buch (jede Karte so oft, wie man sie hat).</summary>
+        public int TotalValue()
+        {
+            int value = 0;
+            foreach (var pair in owned) value += pair.Value * (CardDatabase.Get(pair.Key)?.Value ?? 0);
+            return value;
+        }
+
+        public int TotalCount()
+        {
+            int count = 0;
+            foreach (var pair in owned) count += pair.Value;
+            return count;
+        }
+
+        /// <summary>Alles verkauft: das Buch beginnt von vorne (beste Noten bleiben als Erinnerung).</summary>
+        public void StartOver()
+        {
+            owned.Clear();
+            discovered.Clear();
+            CompletedBooks++;
+        }
+
         public int DiscoveredIn(TcgGame game)
         {
             int count = 0;
@@ -54,6 +87,7 @@ namespace TwoMoons
                 if (!IsDiscovered(card.Id)) continue;
                 data.cards.Add(new SavedCard { card = card.Id, count = Count(card.Id) });
             }
+            data.completedBooks = CompletedBooks;
             data.bestGrades.Clear();
             foreach (var pair in bestGrades) data.bestGrades.Add(new SavedCard { card = pair.Key, count = pair.Value });
         }
@@ -63,6 +97,7 @@ namespace TwoMoons
             owned.Clear();
             discovered.Clear();
             bestGrades.Clear();
+            CompletedBooks = data.completedBooks;
             foreach (var saved in data.cards)
             {
                 discovered.Add(saved.card);

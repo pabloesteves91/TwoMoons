@@ -120,7 +120,8 @@ namespace TwoMoons
             Section("Packs öffnen & Sammelbuch",
                 "Nimm mit [E] einen Booster aus dem Regal und öffne ihn am Pack-Tisch hinter der Theke.",
                 "Jedes Pack hat 10 Karten, die beste zuletzt. Ultra-Seltene glänzen.",
-                "Im Sammelbuch [C] siehst du alle Karten pro Spiel (Monstera, Spellforge, Soul Clash).");
+                "Im Sammelbuch [C] siehst du alle Karten pro Spiel (Monstera, Spellforge, Soul Clash).",
+                "Ist das ganze Buch voll (alle 90 Karten), kauft dir ein Sammler alles zum Marktwert ab – und das Buch beginnt von vorne. Vitrinen- und bewertete Karten bleiben.");
             Section("Vitrine",
                 "Lege Einzelkarten in die Vitrine und stelle den Preis ein. Sammler kaufen daraus.",
                 "Die Premium-Vitrine (Level 6) hat 8 Fächer, dort zahlen Sammler bis zu 10 % mehr.");
