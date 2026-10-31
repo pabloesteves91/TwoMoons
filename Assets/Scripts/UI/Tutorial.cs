@@ -170,6 +170,7 @@ namespace TwoMoons
             float textHeight = UiKit.Text.CalcHeight(content, area.width - 28f);
             area.height = textHeight + 82f;
             if (below) area.y = UiKit.VirtualHeight - area.height - UiKit.Margin;
+            else if (step.Target != null) area = AvoidTarget(area, width, step.Target());
             GUI.Box(area, GUIContent.none, UiKit.Panel);
             GUI.color = UiKit.Gold;
             GUI.Label(new Rect(area.x + 14f, area.y + 8f, area.width - 28f, 22f), $"Tutorial · Schritt {stepIndex + 1}/{steps.Length}", UiKit.Bold);
@@ -187,6 +188,41 @@ namespace TwoMoons
             }
 
             if (step.Target != null && !Game.ComputerOpen) DrawArrow(step.Target());
+        }
+
+        /// <summary>
+        /// Das Fenster darf das Ziel (z. B. den Computer) nicht verdecken: dann weicht es nach unten links,
+        /// in die Mitte links oder nach unten rechts aus.
+        /// </summary>
+        static Rect AvoidTarget(Rect area, float width, Vector3? target)
+        {
+            var point = ToGui(target);
+            if (point == null) return area;
+            float h = area.height;
+            var candidates = new[]
+            {
+                area,
+                new Rect(UiKit.Margin, UiKit.VirtualHeight - h - 60f, area.width, h),
+                new Rect(UiKit.Margin, (UiKit.VirtualHeight - h) / 2f, area.width, h),
+                new Rect(width - area.width - UiKit.Margin, UiKit.VirtualHeight - h - 60f, area.width, h),
+            };
+            foreach (var candidate in candidates)
+            {
+                // Etwas Abstand rund ums Ziel, damit auch der Pfeil darüber frei bleibt.
+                var padded = new Rect(candidate.x - 50f, candidate.y - 50f, candidate.width + 100f, candidate.height + 110f);
+                if (!padded.Contains(point.Value)) return candidate;
+            }
+            return area;
+        }
+
+        /// <summary>Weltposition in Oberflächen-Koordinaten (null, wenn es nichts zu zeigen gibt).</summary>
+        static Vector2? ToGui(Vector3? target)
+        {
+            var camera = Camera.main;
+            if (target == null || camera == null) return null;
+            float scale = Screen.height / UiKit.VirtualHeight;
+            var screen = camera.WorldToScreenPoint(target.Value);
+            return new Vector2(screen.x / scale, (Screen.height - screen.y) / scale);
         }
 
         /// <summary>Hüpfender Pfeil über dem Ziel in der Welt.</summary>
