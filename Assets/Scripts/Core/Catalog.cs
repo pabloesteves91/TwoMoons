@@ -1,0 +1,231 @@
+namespace TwoMoons
+{
+    /// <summary>Die erfundenen Kartenspiele.</summary>
+    public enum TcgGame { Monstera, Spellforge, SoulClash }
+
+    /// <summary>Neue Waren immer hinten anhängen – die Nummern stehen in Spielständen.</summary>
+    public enum ProductId { MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat, TournamentPack, SoulClashPack, Soda, EnergyDrink,
+        Filament, PrintSmall, PrintMedium, PrintLarge, TrashBag, Wrappers, IslandSettlers, DragonKeep, StarTraders }
+
+    /// <summary>Wo eine Ware im Laden steht: Packs ins Regal, Zubehör in den Zubehör-Ständer.</summary>
+    public enum ProductCategory { Pack, Accessory, Promo, Drink, Supply, Print, Trash, BoardGame }
+
+    public enum OrderKind { ProductBox, Furniture }
+
+    public class Product
+    {
+        public ProductId Id;
+        public string Name;
+        public string SpriteKey;
+        public ProductCategory Category;
+        /// <summary>Zu welchem Spiel ein Boosterpack gehört (nur bei Packs).</summary>
+        public TcgGame Game;
+        /// <summary>Einkaufspreis pro Stück beim Großhändler.</summary>
+        public int BuyPrice;
+        /// <summary>Was Kunden für fair halten. Startwert für den Verkaufspreis.</summary>
+        public int MarketValue;
+        /// <summary>Ab diesem Store-Level gibt es die Ware.</summary>
+        public int MinLevel = 1;
+    }
+
+    public class OrderOption
+    {
+        public string Name;
+        public string Description;
+        public int Cost;
+        public OrderKind Kind;
+        public ProductId Product;
+        public int Amount;
+        public Furniture Furniture;
+        /// <summary>Ab diesem Store-Level kann man es kaufen.</summary>
+        public int MinLevel = 1;
+    }
+
+    /// <summary>Alle Waren und Bestellmöglichkeiten.</summary>
+    public static class Catalog
+    {
+        public static readonly Product MonsteraPack = new Product
+        {
+            Id = ProductId.MonsteraPack, Name = "Monstera-Booster", SpriteKey = "packMonstera",
+            Category = ProductCategory.Pack, Game = TcgGame.Monstera, BuyPrice = 300, MarketValue = 400,
+        };
+
+        public static readonly Product SpellforgePack = new Product
+        {
+            Id = ProductId.SpellforgePack, Name = "Spellforge-Booster", SpriteKey = "packSpellforge",
+            Category = ProductCategory.Pack, Game = TcgGame.Spellforge, BuyPrice = 350, MarketValue = 500, MinLevel = 2,
+        };
+
+        public static readonly Product Sleeves = new Product
+        {
+            Id = ProductId.Sleeves, Name = "Kartenhüllen", SpriteKey = "sleeves",
+            Category = ProductCategory.Accessory, BuyPrice = 150, MarketValue = 300, MinLevel = 2,
+        };
+
+        public static readonly Product Binder = new Product
+        {
+            Id = ProductId.Binder, Name = "Sammelordner", SpriteKey = "binder",
+            Category = ProductCategory.Accessory, BuyPrice = 600, MarketValue = 1200, MinLevel = 2,
+        };
+
+        public static readonly Product Playmat = new Product
+        {
+            Id = ProductId.Playmat, Name = "Spielmatte", SpriteKey = "playmat",
+            Category = ProductCategory.Accessory, BuyPrice = 800, MarketValue = 1500, MinLevel = 2,
+        };
+
+        /// <summary>Gratis-Packs vom Hersteller – nur für den Turnier-Prizepool, nicht zum Verkaufen.</summary>
+        public static readonly Product TournamentPack = new Product
+        {
+            Id = ProductId.TournamentPack, Name = "Turnier-Packs", SpriteKey = "packMonstera",
+            Category = ProductCategory.Promo, Game = TcgGame.Monstera, MinLevel = 3,
+        };
+
+        public static readonly Product SoulClashPack = new Product
+        {
+            Id = ProductId.SoulClashPack, Name = "Soul-Clash-Booster", SpriteKey = "packSoulClash",
+            Category = ProductCategory.Pack, Game = TcgGame.SoulClash, BuyPrice = 400, MarketValue = 600, MinLevel = 3,
+        };
+
+        public static readonly Product Soda = new Product
+        {
+            Id = ProductId.Soda, Name = "Limo", SpriteKey = "soda",
+            Category = ProductCategory.Drink, BuyPrice = 80, MarketValue = 200, MinLevel = 3,
+        };
+
+        public static readonly Product EnergyDrink = new Product
+        {
+            Id = ProductId.EnergyDrink, Name = "Energy-Drink", SpriteKey = "energyDrink",
+            Category = ProductCategory.Drink, BuyPrice = 120, MarketValue = 300, MinLevel = 3,
+        };
+
+        /// <summary>Filament-Spulen für den 3D-Drucker (nicht zum Verkaufen).</summary>
+        public static readonly Product Filament = new Product
+        {
+            Id = ProductId.Filament, Name = "Filament", SpriteKey = "filament",
+            Category = ProductCategory.Supply, BuyPrice = 500, MinLevel = 4,
+        };
+
+        public static readonly Product PrintSmall = Print(ProductId.PrintSmall, "Mooskröte-Figur", "printSmall", 800);
+        public static readonly Product PrintMedium = Print(ProductId.PrintMedium, "Flammfalke-Figur", "printMedium", 1800);
+        public static readonly Product PrintLarge = Print(ProductId.PrintLarge, "Zwielichtdrache-Statue", "printLarge", 4500);
+
+        /// <summary>Voller Müllsack aus dem Mülleimer – gehört in den Container draußen.</summary>
+        public static readonly Product TrashBag = new Product
+        {
+            Id = ProductId.TrashBag, Name = "Müllsack", SpriteKey = "trashBag", Category = ProductCategory.Trash, MinLevel = 2,
+        };
+
+        /// <summary>Booster-Folien, die ein Kunde auf dem Tisch liegen gelassen hat – in den Mülleimer damit.</summary>
+        public static readonly Product Wrappers = new Product
+        {
+            Id = ProductId.Wrappers, Name = "Booster-Folien", SpriteKey = "wrappers", Category = ProductCategory.Trash, MinLevel = 2,
+        };
+
+        // Brettspiele (ab Level 2): stehen im normalen Regal, Kunden nehmen eins.
+        public static readonly Product IslandSettlers = BoardGame(ProductId.IslandSettlers, "Inselsiedler", "boardGame1", 2000, 3500);
+        public static readonly Product DragonKeep = BoardGame(ProductId.DragonKeep, "Drachenburg", "boardGame2", 2500, 4200);
+        public static readonly Product StarTraders = BoardGame(ProductId.StarTraders, "Sternenhändler", "boardGame3", 1800, 3000);
+
+        static Product BoardGame(ProductId id, string name, string sprite, int buy, int value) => new Product
+        {
+            Id = id, Name = name, SpriteKey = sprite, Category = ProductCategory.BoardGame, BuyPrice = buy, MarketValue = value, MinLevel = 2,
+        };
+
+        static Product Print(ProductId id, string name, string sprite, int value) => new Product
+        {
+            Id = id, Name = name, SpriteKey = sprite, Category = ProductCategory.Print, MarketValue = value, MinLevel = 4,
+        };
+
+        /// <summary>Alle Waren, in der Reihenfolge von <see cref="ProductId"/>.</summary>
+        public static readonly Product[] Products =
+        {
+            MonsteraPack, SpellforgePack, Sleeves, Binder, Playmat, TournamentPack, SoulClashPack, Soda, EnergyDrink,
+            Filament, PrintSmall, PrintMedium, PrintLarge, TrashBag, Wrappers, IslandSettlers, DragonKeep, StarTraders,
+        };
+
+        /// <summary>Tab „Ware“ am Computer.</summary>
+        public static readonly OrderOption[] Orders =
+        {
+            Box(MonsteraPack, "Monstera-Display", "Karton mit 12 Monstera-Boosterpacks", 12),
+            Box(SpellforgePack, "Spellforge-Display", "Karton mit 12 Spellforge-Boosterpacks", 12),
+            Box(Sleeves, "Kartenhüllen", "Karton mit 10 Packungen Hüllen · für den Zubehör-Ständer", 10),
+            Box(Binder, "Sammelordner", "Karton mit 5 Ordnern · für den Zubehör-Ständer", 5),
+            Box(Playmat, "Spielmatten", "Karton mit 4 Matten · für den Zubehör-Ständer", 4),
+            Box(SoulClashPack, "Soul-Clash-Display", "Karton mit 12 Soul-Clash-Boosterpacks", 12),
+            Box(Soda, "Limo", "Kiste mit 12 Flaschen · für den Kühlschrank", 12),
+            Box(EnergyDrink, "Energy-Drinks", "Kiste mit 12 Dosen · für den Kühlschrank", 12),
+            Box(Filament, "Filament-Spulen", "5 Spulen für den 3D-Drucker · zum Drucker tragen", 5),
+            Box(IslandSettlers, "Inselsiedler (Brettspiel)", "4 Spiele · Siedeln, Handeln, Bauen · ins normale Regal", 4),
+            Box(DragonKeep, "Drachenburg (Brettspiel)", "4 Spiele · Helden erkunden ein Dungeon · ins normale Regal", 4),
+            Box(StarTraders, "Sternenhändler (Brettspiel)", "4 Spiele · Handel im Weltraum · ins normale Regal", 4),
+        };
+
+        /// <summary>Tab „Einrichtung“ am Computer: Möbel und Deko, nach Store-Level freigeschaltet.</summary>
+        public static readonly OrderOption[] Furnishings =
+        {
+            Furnishing(Furniture.Shelf, "Platz für 24 Boosterpacks", 6000, 1),
+            Furnishing(Furniture.Plant, "Gemütlichkeit +2", 1500, 1),
+            Furnishing(Furniture.Poster, "Für die Wand · Gemütlichkeit +1", 1000, 1),
+            Furnishing(Furniture.Showcase, "Für 4 Einzelkarten – Sammler kaufen daraus", 8000, 2),
+            Furnishing(Furniture.AccessoryStand, "Für Hüllen, Ordner und Spielmatten", 5000, 2),
+            Furnishing(Furniture.Rug, "Man kann darüber laufen · Gemütlichkeit +3", 4000, 2),
+            Furnishing(Furniture.WallClock, "Für die Wand · Gemütlichkeit +1", 2000, 2),
+            Furnishing(Furniture.Table, "Kunden setzen sich, öffnen Booster und tauschen Karten · Stühle direkt daneben stellen", 3000, 2),
+            Furnishing(Furniture.Chair, "Sitzplatz – muss direkt neben einem Tisch stehen", 1000, 2),
+            Furnishing(Furniture.TrashBin, "Für den Pack-Müll der Kunden · volle Säcke in den Container vor der Tür", 1500, 2),
+            Furnishing(Furniture.FairyLights, "Für die Wand, funkelt · Gemütlichkeit +3", 2500, 2),
+            Furnishing(Furniture.GameTable, "2 Turnierplätze: links und rechts daneben frei lassen", 12000, 3),
+            Furnishing(Furniture.PrizeCounter, "Prizepool vorbereiten und Preise verteilen", 15000, 3),
+            Furnishing(Furniture.TournamentBoard, "Für die Wand · zeigt das nächste Turnier", 4000, 3),
+            Furnishing(Furniture.Fridge, "Getränkekühlschrank für Limo und Energy-Drinks", 10000, 3),
+            Furnishing(Furniture.Couch, "Couch-Ecke: Couch + TV + Konsole · Gemütlichkeit +3", 12000, 3),
+            Furnishing(Furniture.Tv, "Für die Wand · Couch-Ecke", 12000, 3),
+            Furnishing(Furniture.Console, "Spielkonsole · Couch-Ecke", 10000, 3),
+            Furnishing(Furniture.Printer3D, "Druckt Figuren aus Filament", 30000, 4),
+            Furnishing(Furniture.PrintShelf, "Regal für 3D-Drucke", 7000, 4),
+            Furnishing(Furniture.NeonSign, "Für die Wand, leuchtet · Gemütlichkeit +5", 9000, 4),
+            Furnishing(Furniture.GradingStation, "Karten bewerten und versiegeln (5 € pro Karte)", 40000, 5),
+            Furnishing(Furniture.Lounge, "Gemütlich für die Spielecke · Gemütlichkeit +3", 6000, 5),
+            Furnishing(Furniture.PremiumShowcase, "Beleuchtet, 8 Karten · Sammler zahlen bis +10 %", 25000, 6),
+            Furnishing(Furniture.Arcade, "Kunden zocken für 1 € pro Runde · Gemütlichkeit +6", 40000, 6),
+            Furnishing(Furniture.Turf, "Kunstrasen-Ecke, man kann darüber laufen · Gemütlichkeit +4", 5000, 6),
+            Furnishing(Furniture.TrophyWall, "Für die Wand, zeigt deine Turniere · Gemütlichkeit +8", 30000, 7),
+            Furnishing(Furniture.MoonStatue, "Das Wahrzeichen von TwoMoons · Gemütlichkeit +10", 50000, 7),
+        };
+
+        /// <summary>Ein Karton Ware zum Großhandelspreis.</summary>
+        static OrderOption Box(Product product, string name, string description, int amount) => new OrderOption
+        {
+            Name = name,
+            Description = description,
+            Cost = product.BuyPrice * amount,
+            Kind = OrderKind.ProductBox,
+            Product = product.Id,
+            Amount = amount,
+            MinLevel = product.MinLevel,
+        };
+
+        static OrderOption Furnishing(Furniture furniture, string description, int cost, int minLevel) => new OrderOption
+        {
+            Name = FurnitureCatalog.Get(furniture).Name,
+            Description = description,
+            Cost = cost,
+            Kind = OrderKind.Furniture,
+            Furniture = furniture,
+            MinLevel = minLevel,
+        };
+
+        public static Product Get(ProductId id) => Products[(int)id];
+
+        public static string GameName(TcgGame game)
+        {
+            switch (game)
+            {
+                case TcgGame.Spellforge: return "Spellforge";
+                case TcgGame.SoulClash: return "Soul Clash";
+                default: return "Monstera";
+            }
+        }
+    }
+}

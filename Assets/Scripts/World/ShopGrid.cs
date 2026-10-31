@@ -1,0 +1,153 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace TwoMoons
+{
+    /// <summary>
+    /// Das Raster des Ladens. Ein Feld = 1 Unity-Einheit = 16 Pixel.
+    /// Innenraum: x 1–20, y 2–9 (20×8 Felder, passend zum Breitbild). y = 0 ist die Straße, y = 1 die untere Wand mit der Tür.
+    /// Mit der Ladenerweiterung (Level 5) wird der Laden nach rechts um 10 Spalten breiter (ein großer Raum).
+    /// </summary>
+    public class ShopGrid : MonoBehaviour
+    {
+        public const int BaseWidth = 22;
+        /// <summary>So viele Spalten bringt die Ladenerweiterung.</summary>
+        public const int ExtraWidth = 10;
+        public const int Height = 11;
+
+        /// <summary>Zweiter Raum gebaut? Wird vor dem Aufbau der Welt gesetzt.</summary>
+        public static bool Expanded;
+        public static int Width => Expanded ? BaseWidth + ExtraWidth : BaseWidth;
+
+        public static readonly Vector2Int SpawnCell = new Vector2Int(BaseWidth / 2, 0);
+        public static readonly Vector2Int DoorCell = new Vector2Int(BaseWidth / 2, 1);
+        public static readonly Vector2Int SignCell = new Vector2Int(BaseWidth / 2 - 1, 1);
+        /// <summary>Tür zum Lagerraum in der linken Wand, und das Feld davor (bleibt immer frei).</summary>
+        public static readonly Vector2Int StorageCell = new Vector2Int(0, 5);
+        public static readonly Vector2Int StorageFrontCell = new Vector2Int(1, 5);
+        /// <summary>Müllcontainer draußen auf dem Gehweg, links vom Eingang.</summary>
+        public static readonly Vector2Int ContainerCell = new Vector2Int(BaseWidth / 2 - 1, 0);
+        public static readonly Vector2Int RegisterCell = new Vector2Int(3, 7);
+        public static readonly Vector2Int ComputerCell = new Vector2Int(1, 9);
+        public static readonly Vector2Int PackTableCell = new Vector2Int(4, 9);
+        public static readonly Vector2Int PlayerStartCell = new Vector2Int(BaseWidth / 2, 4);
+
+        public static readonly Vector2Int[] CounterCells =
+            { new Vector2Int(1, 7), new Vector2Int(2, 7), new Vector2Int(3, 7), new Vector2Int(4, 7) };
+
+        /// <summary>Warteschlange vor der Kasse, vorne zuerst.</summary>
+        public static readonly Vector2Int[] QueueCells =
+            { new Vector2Int(3, 6), new Vector2Int(3, 5), new Vector2Int(3, 4), new Vector2Int(3, 3) };
+
+        /// <summary>Hier stellt der Lieferdienst die Kartons ab, rechts neben dem Eingang.</summary>
+        public static readonly Vector2Int[] DeliveryCells =
+        {
+            new Vector2Int(13, 2), new Vector2Int(14, 2), new Vector2Int(15, 2),
+            new Vector2Int(13, 3), new Vector2Int(14, 3), new Vector2Int(15, 3),
+        };
+
+        /// <summary>Felder, die immer erreichbar bleiben müssen (hinter der Kasse, am Computer).</summary>
+        public static readonly Vector2Int[] StaffCells = { new Vector2Int(3, 8), new Vector2Int(2, 9) };
+
+        bool[,] blocked;
+
+        public void Init()
+        {
+            blocked = new bool[Width, Height];
+            for (int x = 0; x < Width; x++)
+            for (int y = 0; y < Height; y++)
+            {
+                bool wall = IsWall(new Vector2Int(x, y));
+                bool street = y == 0;
+                blocked[x, y] = (wall && !street && new Vector2Int(x, y) != DoorCell) || (street && x != SpawnCell.x);
+            }
+        }
+
+        /// <summary>Außenwände. Nach der Erweiterung rückt die rechte Wand einfach nach außen – ein großer Raum.</summary>
+        public static bool IsWall(Vector2Int c)
+        {
+            if (c.y == 0) return false;
+            return c.x == 0 || c.x == Width - 1 || c.y == 1 || c.y == Height - 1;
+        }
+
+        public static bool InBounds(Vector2Int c) => c.x >= 0 && c.x < Width && c.y >= 0 && c.y < Height;
+
+        public static bool IsInterior(Vector2Int c) => c.x >= 1 && c.x <= Width - 2 && c.y >= 2 && c.y <= Height - 2;
+
+        public static Vector3 CellToWorld(Vector2Int c) => new Vector3(c.x + 0.5f, c.y + 0.5f, 0f);
+
+        public static Vector2Int WorldToCell(Vector3 p) => new Vector2Int(Mathf.FloorToInt(p.x), Mathf.FloorToInt(p.y));
+
+        public bool IsWalkable(Vector2Int c) => InBounds(c) && c.x < blocked.GetLength(0) && !blocked[c.x, c.y];
+
+        public void SetBlocked(Vector2Int c, bool value)
+        {
+            if (InBounds(c) && c.x < blocked.GetLength(0)) blocked[c.x, c.y] = value;
+        }
+
+        public static bool IsReserved(Vector2Int c)
+        {
+            if (c == DoorCell + Vector2Int.up) return true;
+            if (c == StorageFrontCell) return true;
+            if (c.x <= 4 && c.y >= 8) return true; // hinter der Theke
+            foreach (var q in QueueCells) if (q == c) return true;
+            foreach (var d in DeliveryCells) if (d == c) return true;
+            return false;
+        }
+
+        static readonly Vector2Int[] Directions = { Vector2Int.up, Vector2Int.right, Vector2Int.down, Vector2Int.left };
+
+        public IEnumerable<Vector2Int> WalkableNeighbours(Vector2Int c)
+        {
+            foreach (var d in Directions)
+            {
+                var n = c + d;
+                if (IsWalkable(n)) yield return n;
+            }
+        }
+
+        /// <summary>Alle Felder, die von <paramref name="start"/> aus zu Fuß erreichbar sind.</summary>
+        public HashSet<Vector2Int> ReachableFrom(Vector2Int start)
+        {
+            var seen = new HashSet<Vector2Int>();
+            if (!IsWalkable(start)) return seen;
+            var open = new Queue<Vector2Int>();
+            open.Enqueue(start);
+            seen.Add(start);
+            while (open.Count > 0)
+            {
+                var c = open.Dequeue();
+                foreach (var n in WalkableNeighbours(c))
+                    if (seen.Add(n)) open.Enqueue(n);
+            }
+            return seen;
+        }
+
+        /// <summary>Kürzester Weg (Breitensuche), ohne das Startfeld. Null, wenn es keinen Weg gibt.</summary>
+        public List<Vector2Int> FindPath(Vector2Int from, Vector2Int to)
+        {
+            if (!IsWalkable(to)) return null;
+            var cameFrom = new Dictionary<Vector2Int, Vector2Int> { [from] = from };
+            var open = new Queue<Vector2Int>();
+            open.Enqueue(from);
+            while (open.Count > 0)
+            {
+                var c = open.Dequeue();
+                if (c == to)
+                {
+                    var path = new List<Vector2Int>();
+                    for (var p = to; p != from; p = cameFrom[p]) path.Add(p);
+                    path.Reverse();
+                    return path;
+                }
+                foreach (var n in WalkableNeighbours(c))
+                {
+                    if (cameFrom.ContainsKey(n)) continue;
+                    cameFrom[n] = c;
+                    open.Enqueue(n);
+                }
+            }
+            return null;
+        }
+    }
+}

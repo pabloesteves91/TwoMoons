@@ -1,0 +1,230 @@
+using UnityEngine;
+
+namespace TwoMoons
+{
+    /// <summary>Erzeugt alle Objekte im Laden aus Code, damit nur die Bilder ausgetauscht werden müssen.</summary>
+    public static class WorldFactory
+    {
+        public const int FloorOrder = -30000;
+        public const int FloorDecalOrder = -29000;
+
+        static GameManager Game => GameManager.Instance;
+
+        /// <summary>Alles im Laden hängt hier drunter, damit die Welt für ein neues Spiel komplett abgebaut werden kann.</summary>
+        public static Transform Root;
+
+        public static SpriteRenderer CreateSprite(string name, string spriteKey, Vector3 position, int order = 0, Transform parent = null)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent != null ? parent : Root, false);
+            go.transform.position = position;
+            var renderer = go.AddComponent<SpriteRenderer>();
+            renderer.sprite = Art.Get(spriteKey);
+            renderer.sortingOrder = order;
+            return renderer;
+        }
+
+        /// <summary>Fester Block (Wand, Theke, Regal), an dem die Figur nicht vorbeikommt.</summary>
+        public static GameObject CreateSolid(string name, string spriteKey, Vector2Int cell, Transform parent)
+        {
+            var renderer = CreateSprite(name, spriteKey, ShopGrid.CellToWorld(cell), 0, parent);
+            renderer.gameObject.AddComponent<BoxCollider2D>().size = Vector2.one;
+            renderer.gameObject.AddComponent<YSort>();
+            Game.Grid.SetBlocked(cell, true);
+            return renderer.gameObject;
+        }
+
+        public static void CreateBlocker(Vector2Int cell, Transform parent)
+        {
+            var go = new GameObject("Blocker");
+            go.transform.SetParent(parent != null ? parent : Root, false);
+            go.transform.position = ShopGrid.CellToWorld(cell);
+            go.AddComponent<BoxCollider2D>().size = Vector2.one;
+        }
+
+        public static PlayerController SpawnPlayer(Vector2Int cell)
+        {
+            var renderer = CreateSprite("Spieler", "player1", ShopGrid.CellToWorld(cell));
+            var go = renderer.gameObject;
+            var body = go.AddComponent<Rigidbody2D>();
+            body.gravityScale = 0f;
+            body.freezeRotation = true;
+            body.interpolation = RigidbodyInterpolation2D.Interpolate;
+            body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
+            go.AddComponent<CircleCollider2D>().radius = 0.35f;
+            go.AddComponent<YSort>();
+            return go.AddComponent<PlayerController>();
+        }
+
+        public static Customer SpawnCustomer()
+        {
+            string key = $"customer{Random.Range(1, 4)}";
+            var renderer = CreateSprite("Kunde", key, ShopGrid.CellToWorld(ShopGrid.SpawnCell));
+            renderer.gameObject.AddComponent<YSort>();
+            return renderer.gameObject.AddComponent<Customer>();
+        }
+
+        public static DeliveryBox SpawnBox(Vector2Int cell, Product product, int amount)
+        {
+            var renderer = CreateSprite("Karton", "box", ShopGrid.CellToWorld(cell));
+            renderer.gameObject.AddComponent<YSort>();
+            var box = renderer.gameObject.AddComponent<DeliveryBox>();
+            box.Product = product;
+            box.Amount = amount;
+            return box;
+        }
+
+        /// <summary>Ein einzelnes Stück Ware (aus dem Regal oder frisch gedruckt), kein Karton.</summary>
+        public static DeliveryBox SpawnSingle(Vector2Int cell, Product product)
+        {
+            var single = SpawnBox(cell, product, 1);
+            single.IsSingle = true;
+            return single;
+        }
+
+        public static DirtSpot SpawnDirt(Vector2Int cell)
+        {
+            var renderer = CreateSprite("Fleck", "dirt", ShopGrid.CellToWorld(cell), FloorDecalOrder);
+            return renderer.gameObject.AddComponent<DirtSpot>();
+        }
+
+        public static void SpawnDirtSomewhere()
+        {
+            for (int attempt = 0; attempt < 20; attempt++)
+            {
+                var cell = new Vector2Int(Random.Range(1, ShopGrid.Width - 1), Random.Range(2, ShopGrid.Height - 1));
+                if (Game.Grid.IsWalkable(cell) && !ShopGrid.IsReserved(cell))
+                {
+                    SpawnDirt(cell);
+                    return;
+                }
+            }
+        }
+
+        public static Shelf SpawnShelf(Vector2Int cell, ProductCategory category = ProductCategory.Pack)
+        {
+            string sprite = category == ProductCategory.Accessory ? "accessoryStand"
+                : category == ProductCategory.Drink ? "fridge"
+                : category == ProductCategory.Print ? "printShelf"
+                : "shelf";
+            var go = CreateSolid(Shelf.LabelFor(category), sprite, cell, null);
+            var icons = new SpriteRenderer[3];
+            for (int i = 0; i < icons.Length; i++)
+            {
+                var position = ShopGrid.CellToWorld(cell) + new Vector3(-0.25f + i * 0.25f, -0.15f + (i % 2) * 0.3f, 0f);
+                icons[i] = CreateSprite("Pack", "packMonstera", position, 1 + i, go.transform);
+                icons[i].transform.localScale = Vector3.one * 0.45f;
+            }
+            go.GetComponent<YSort>().Collect();
+
+            var shelf = go.AddComponent<Shelf>();
+            shelf.Init(cell, icons, category);
+            Game.Shelves.Add(shelf);
+            return shelf;
+        }
+
+        /// <summary>Lagerraum-Tür in der linken Wand (über das Wandstück gezeichnet).</summary>
+        public static StorageDoor SpawnStorageDoor()
+        {
+            var renderer = CreateSprite("Lagerraum", "storageDoor", ShopGrid.CellToWorld(ShopGrid.StorageCell), -(ShopGrid.StorageCell.y * 100) + 5);
+            return renderer.gameObject.AddComponent<StorageDoor>();
+        }
+
+        public static Showcase SpawnShowcase(Vector2Int cell, bool premium = false)
+        {
+            var go = CreateSolid(premium ? "Premium-Vitrine" : "Vitrine", premium ? "premiumShowcase" : "showcase", cell, null);
+            var icons = new SpriteRenderer[premium ? Showcase.PremiumSlots : Showcase.NormalSlots];
+            int columns = premium ? 4 : 2;
+            float step = premium ? 0.22f : 0.44f;
+            for (int i = 0; i < icons.Length; i++)
+            {
+                var offset = new Vector3(-step * (columns - 1) / 2f + (i % columns) * step, 0.18f - (i / columns) * 0.38f, 0f);
+                icons[i] = CreateSprite("Karte", "cardIcon", ShopGrid.CellToWorld(cell) + offset, 1 + i, go.transform);
+                icons[i].transform.localScale = Vector3.one * (premium ? 0.3f : 0.4f);
+            }
+            go.GetComponent<YSort>().Collect();
+
+            var showcase = go.AddComponent<Showcase>();
+            showcase.Init(cell, icons, premium);
+            Game.Showcases.Add(showcase);
+            return showcase;
+        }
+
+        public static DecoItem SpawnDeco(Furniture type, Vector2Int cell)
+        {
+            var def = FurnitureCatalog.Get(type);
+            GameObject go;
+            switch (def.Placement)
+            {
+                case Placement.Floor:
+                    go = CreateSolid(def.Name, def.SpriteKey, cell, null);
+                    break;
+                case Placement.Wall:
+                    // Vor der Wand, aber hinter allem, was im Raum steht.
+                    go = CreateSprite(def.Name, def.SpriteKey, ShopGrid.CellToWorld(cell), -(cell.y * 100) - 40).gameObject;
+                    break;
+                default:
+                    go = CreateSprite(def.Name, def.SpriteKey, ShopGrid.CellToWorld(cell), FloorDecalOrder - 1).gameObject;
+                    break;
+            }
+            var deco = go.AddComponent<DecoItem>();
+            deco.Init(type, cell);
+            if (type == Furniture.GameTable) go.AddComponent<GameTable>().Init(cell);
+            if (type == Furniture.PrizeCounter) go.AddComponent<PrizeCounter>().Init(cell);
+            if (type == Furniture.Printer3D) go.AddComponent<Printer3D>().Init(cell);
+            if (type == Furniture.GradingStation) go.AddComponent<GradingStation>().Init(cell);
+            if (type == Furniture.TrashBin) go.AddComponent<TrashBin>().Init(cell);
+            if (type == Furniture.Table) go.AddComponent<TableTrash>().Init();
+            Game.Decos.Add(deco);
+            return deco;
+        }
+
+        public static TournamentPlayer SpawnTournamentPlayer(Vector3 position, Sprite sprite, string name)
+        {
+            var renderer = CreateSprite("Turnierspieler", "customer1", position);
+            renderer.sprite = sprite;
+            renderer.gameObject.AddComponent<YSort>();
+            var player = renderer.gameObject.AddComponent<TournamentPlayer>();
+            player.Name = name;
+            return player;
+        }
+
+        public static Employee SpawnEmployee(Vector2Int cell, Employee.Role role)
+        {
+            var renderer = CreateSprite("Mitarbeiter", "employee", ShopGrid.CellToWorld(cell));
+            renderer.gameObject.AddComponent<YSort>();
+            var employee = renderer.gameObject.AddComponent<Employee>();
+            employee.Job = role;
+            return employee;
+        }
+
+        public static FurniturePackage SpawnPackage(Vector2Int cell)
+        {
+            var renderer = CreateSprite("Möbel-Paket", "package", ShopGrid.CellToWorld(cell));
+            renderer.gameObject.AddComponent<YSort>();
+            return renderer.gameObject.AddComponent<FurniturePackage>();
+        }
+
+        public static bool HasBoxAt(Vector2Int cell)
+        {
+            foreach (var box in DeliveryBox.Existing)
+                if (box.enabled && ShopGrid.WorldToCell(box.transform.position) == cell) return true;
+            var package = Game.Package;
+            return package != null && ShopGrid.WorldToCell(package.transform.position) == cell;
+        }
+
+        /// <summary>Freier Abstellplatz für eine Lieferung, notfalls irgendwo im Laden.</summary>
+        public static Vector2Int FreeDeliveryCell()
+        {
+            foreach (var cell in ShopGrid.DeliveryCells)
+                if (!HasBoxAt(cell)) return cell;
+            for (int y = 2; y < ShopGrid.Height - 1; y++)
+            for (int x = ShopGrid.Width - 2; x >= 1; x--)
+            {
+                var cell = new Vector2Int(x, y);
+                if (Game.Grid.IsWalkable(cell) && !ShopGrid.IsReserved(cell) && !HasBoxAt(cell)) return cell;
+            }
+            return ShopGrid.DeliveryCells[0];
+        }
+    }
+}

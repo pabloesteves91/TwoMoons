@@ -1,0 +1,76 @@
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace TwoMoons
+{
+    /// <summary>Kasse mit Warteschlange. Der Spieler kassiert jeden Kunden selbst mit [E].</summary>
+    public class CashRegister : Interactable
+    {
+        /// <summary>Im Hauptmenü kassiert der Laden von selbst.</summary>
+        const float DemoServeSeconds = 1.5f;
+        /// <summary>Papa kassiert in Kapitel 6 einen Tag lang mit – gemütlich.</summary>
+        const float PapaServeSeconds = 3f;
+
+        readonly List<Customer> queue = new List<Customer>();
+        float demoTimer;
+
+        void Update()
+        {
+            var front = Front;
+            var game = GameManager.Instance;
+            bool demo = game.Phase == GamePhase.MainMenu;
+            if ((!demo && !game.PapaHelping) || front == null || front.IsSeller)
+            {
+                demoTimer = demo ? DemoServeSeconds : PapaServeSeconds;
+                return;
+            }
+            demoTimer -= Time.deltaTime;
+            if (demoTimer <= 0f) front.Pay();
+        }
+
+        Customer Front => queue.Count > 0 && queue[0].IsWaitingAtRegister ? queue[0] : null;
+
+        /// <summary>Wartet vorne ein Kunde, der kassiert werden kann?</summary>
+        public bool CanServe => Front != null && !Front.IsSeller;
+
+        /// <summary>Vorne wartet jemand, der Karten verkaufen will (für den Mitarbeiter).</summary>
+        public Customer FrontSeller => Front != null && Front.IsSeller ? Front : null;
+
+        public void ServeFront()
+        {
+            var front = Front;
+            if (front != null) front.Pay();
+        }
+
+        public bool TryJoin(Customer customer)
+        {
+            if (queue.Count >= ShopGrid.QueueCells.Length) return false;
+            queue.Add(customer);
+            customer.SetQueueIndex(queue.Count - 1);
+            return true;
+        }
+
+        public void Remove(Customer customer)
+        {
+            int index = queue.IndexOf(customer);
+            if (index < 0) return;
+            queue.RemoveAt(index);
+            for (int i = index; i < queue.Count; i++) queue[i].SetQueueIndex(i);
+        }
+
+        public override string GetPrompt(PlayerController player)
+        {
+            var front = Front;
+            if (front != null && front.IsSeller) return "Ankauf: Angebot ansehen";
+            return front != null ? $"Abkassieren ({Money.Format(front.Total)})" : "Kasse – kein Kunde wartet";
+        }
+
+        public override bool CanInteract(PlayerController player) => Front != null;
+
+        public override void Interact(PlayerController player)
+        {
+            var front = Front;
+            if (front != null) front.Pay();
+        }
+    }
+}
