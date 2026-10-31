@@ -71,7 +71,7 @@ namespace TwoMoons
                 "[W] [A] [S] [D] oder Pfeiltasten – laufen",
                 "[E] – benutzen: putzen, Karton aufheben/einräumen, kassieren, Computer, Vitrine, Pack-Tisch …",
                 "[Q] – Getragenes abstellen (Karton oder einzelnes Stück)",
-                "[B] – Bau-Modus: Möbel aufstellen (Linksklick), nochmal [B] wechselt das Möbelstück. Morgens: Möbel anklicken zum Verschieben",
+                "[B] – Bau-Modus: Möbel aufstellen (Linksklick), nochmal [B] wechselt das Möbelstück. Morgens: Möbel anklicken zum Verschieben, Maus drauf + [V] verkauft es für 80 % vom Kaufpreis (Inhalt kommt zurück)",
                 "Rechtsklick – im Bau-Modus abbrechen",
                 "[C] – Sammelbuch",
                 "[Tab] – Aufgabenliste auf- und zuklappen",

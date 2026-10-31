@@ -29,6 +29,7 @@ namespace TwoMoons
         static Furniture movingType;
 
         public static bool IsMoving => moving != null;
+        public static Furniture MovingType => movingType;
         /// <summary>Bau-Modus ohne neue Möbel: nur verschieben.</summary>
         public static bool MoveOnly => GameManager.Instance.TotalToPlace == 0;
         public static bool CanMoveNow => GameManager.Instance.Phase == GamePhase.Preparation;
@@ -92,6 +93,14 @@ namespace TwoMoons
 
             Vector3 world = mainCamera.ScreenToWorldPoint(GameInput.MousePosition);
             var cell = ShopGrid.WorldToCell(world);
+
+            // [V]: das Möbelstück in der Hand oder unter der Maus verkaufen.
+            if (GameInput.SellPressed)
+            {
+                var target = moving != null ? moving : PlacedAt(game, cell);
+                if (target != null) TrySell(target);
+                return;
+            }
 
             if (moving != null)
             {
@@ -241,6 +250,58 @@ namespace TwoMoons
         }
 
         static void CancelMove() => Drop(movingFrom);
+
+        // ---------- Verkaufen ----------
+
+        /// <summary>Anteil vom Kaufpreis, den man beim Verkauf zurückbekommt.</summary>
+        public const float SellFactor = 0.8f;
+
+        public static int SellPrice(Furniture furniture)
+        {
+            foreach (var option in Catalog.Furnishings)
+                if (option.Furniture == furniture) return Mathf.RoundToInt(option.Cost * SellFactor);
+            return 0;
+        }
+
+        /// <summary>Verkauft ein aufgestelltes Möbelstück für 80 % des Kaufpreises. Inhalt kommt zurück.</summary>
+        void TrySell(GameObject go)
+        {
+            var game = GameManager.Instance;
+            string refusal = null;
+            if (!CanMoveNow) refusal = "Möbel verkaufen geht nur morgens, bevor der Laden öffnet.";
+            else if ((go.GetComponent<GameTable>() != null || go.GetComponent<PrizeCounter>() != null) && game.Tournament.Busy)
+                refusal = "Während eines Turniers bleiben Spieltisch und Counter stehen.";
+            else if (go.GetComponent<Printer3D>()?.Printing != null) refusal = "Der 3D-Drucker druckt noch – erst den Druck abholen.";
+            else if (go.GetComponent<GradingStation>()?.Busy ?? false) refusal = "In der Grading-Station liegt noch eine Karte.";
+            else if (go.GetComponent<DecoItem>()?.InUse ?? false) refusal = "Da sitzt gerade jemand.";
+            if (refusal != null)
+            {
+                game.ShowToast(refusal);
+                SoundManager.Play(Sfx.Error);
+                return;
+            }
+
+            var type = moving == go ? movingType : TypeOf(go);
+            var cell = moving == go ? movingFrom : ShopGrid.WorldToCell(go.transform.position);
+
+            // Inhalt geht nicht verloren: Ware als Kartons an den Eingang, Karten zurück ins Sammelbuch bzw. zu den Slabs.
+            var shelf = go.GetComponent<Shelf>();
+            if (shelf != null)
+                foreach (var pair in new List<KeyValuePair<Product, int>>(shelf.Contents))
+                    if (pair.Value > 0) WorldFactory.SpawnBox(WorldFactory.FreeDeliveryCell(), pair.Key, pair.Value);
+            var showcase = go.GetComponent<Showcase>();
+            if (showcase != null)
+                for (int slot = 0; slot < showcase.SlotCount; slot++) showcase.ReturnToOwner(slot);
+
+            if (moving == go) moving = null;
+            else
+            {
+                SetListed(game, go, false);
+                if (FurnitureCatalog.Get(type).Placement == Placement.Floor) game.Grid.SetBlocked(cell, false);
+            }
+            Destroy(go);
+            game.SellFurniture(FurnitureCatalog.Get(type).Name, SellPrice(type));
+        }
 
         static void Drop(Vector2Int cell)
         {

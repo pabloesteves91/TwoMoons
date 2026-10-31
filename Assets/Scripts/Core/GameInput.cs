@@ -41,6 +41,9 @@ namespace TwoMoons
             (Keyboard.current?.bKey.wasPressedThisFrame ?? false) ||
             (Gamepad.current?.buttonNorth.wasPressedThisFrame ?? false);
 
+        /// <summary>[V]: im Bau-Modus ein Möbelstück verkaufen.</summary>
+        public static bool SellPressed => Keyboard.current?.vKey.wasPressedThisFrame ?? false;
+
         public static bool CancelPressed =>
             (Keyboard.current?.escapeKey.wasPressedThisFrame ?? false) ||
             (Gamepad.current?.buttonEast.wasPressedThisFrame ?? false);

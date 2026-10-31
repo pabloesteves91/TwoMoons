@@ -1239,6 +1239,15 @@ namespace TwoMoons
         }
 
         /// <summary>Startgeld eines Turnierspielers an der Kasse.</summary>
+        /// <summary>Ein Möbelstück wurde im Bau-Modus verkauft.</summary>
+        public void SellFurniture(string name, int cents)
+        {
+            MoneyCents += cents;
+            Today.Income += cents;
+            ShowToast($"{name} verkauft: +{Money.Format(cents)}", 3f);
+            SoundManager.Play(Sfx.Register);
+        }
+
         public void RegisterEntryFee()
         {
             MoneyCents += TournamentManager.EntryFee;

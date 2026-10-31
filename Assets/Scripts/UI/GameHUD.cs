@@ -502,11 +502,11 @@ namespace TwoMoons
 
             if (Game.BuildMode && BuildController.IsMoving)
             {
-                line = "Verschieben: Linksklick = Hier hinstellen   Rechtsklick = Zurück an den alten Platz";
+                line = $"Verschieben: Linksklick = Hier hinstellen   [V] = Verkaufen ({Money.Format(BuildController.SellPrice(BuildController.MovingType))})   Rechtsklick = Zurück";
             }
             else if (Game.BuildMode && BuildController.MoveOnly)
             {
-                line = "Bau-Modus: Möbelstück anklicken, um es zu verschieben   Rechtsklick / [B] = Fertig";
+                line = "Bau-Modus: Möbel anklicken = Verschieben   Maus drauf + [V] = Verkaufen (80 %)   Rechtsklick / [B] = Fertig";
             }
             else if (Game.BuildMode)
             {
