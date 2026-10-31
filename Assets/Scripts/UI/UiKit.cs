@@ -182,6 +182,10 @@ namespace TwoMoons
 
             overlay = Solid(Color.white);
 
+            // Eigene Schrift mit allen Zeichen (€, –, „“, …): die eingebaute hat sie im Web-Build nicht.
+            var font = Resources.Load<Font>("Fonts/LiberationSans-Regular");
+            if (font != null) GUI.skin.font = font;
+
             Panel = new GUIStyle(GUI.skin.box)
             {
                 fontSize = 14,
