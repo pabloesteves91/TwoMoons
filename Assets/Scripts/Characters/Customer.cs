@@ -63,7 +63,7 @@ namespace TwoMoons
         SpriteRenderer spriteRenderer;
         SpriteRenderer moodIcon;
 
-        public int Total => card != null ? unitPrice : itemCount * unitPrice;
+        public int Total => card != null ? unitPrice : Game.Promotions.PaidCount(product, itemCount) * unitPrice;
 
         /// <summary>Was der Kunde gerade sagt (Sprechblase über dem Kopf), null = nichts.</summary>
         public string Speech => Time.time < speechUntil ? speech : null;
@@ -268,7 +268,7 @@ namespace TwoMoons
                     }
 
                     // Preis mit dem Marktwert vergleichen.
-                    unitPrice = Game.GetPrice(product);
+                    unitPrice = Game.GetSalePrice(product);
                     float ratio = unitPrice / (float)product.MarketValue;
                     if (!IsThief && Random.value < Mathf.Clamp01((ratio - 1f) / PainRange))
                     {
@@ -283,6 +283,14 @@ namespace TwoMoons
                     // Nach dem Zocken: nur ein Getränk.
                     if (hasGamed) wanted = 1;
                     else if (Game.TodayEvent == DayEvent.Collectors) wanted++;
+                    // „3 für 2“ bei Boostern: viele nehmen gleich drei.
+                    if (product.Category == ProductCategory.Pack && Game.Promotions.BundleDeal && Random.value < 0.6f)
+                    {
+                        wanted = Mathf.Max(wanted, 3);
+                        Say("3 für 2? Da greif ich zu!", 2.5f);
+                    }
+                    else if (bargain && Game.Promotions.Discount(product.Category) > 0 && Random.value < 0.3f)
+                        Say("Oh, heute Rabatt!", 2.5f);
                     if (IsThief) wanted = Random.Range(1, 4);
                     itemCount = shelf.Take(product, wanted + (bargain && !IsThief ? 1 : 0));
 

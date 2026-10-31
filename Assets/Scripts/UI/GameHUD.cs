@@ -763,8 +763,66 @@ namespace TwoMoons
             }
         }
 
+        static string CategoryName(ProductCategory category)
+        {
+            switch (category)
+            {
+                case ProductCategory.Pack: return "Booster";
+                case ProductCategory.Accessory: return "Zubehör";
+                case ProductCategory.Drink: return "Getränke";
+                case ProductCategory.Print: return "3D-Drucke";
+                case ProductCategory.BoardGame: return "Brettspiele";
+                default: return category.ToString();
+            }
+        }
+
+        /// <summary>Tagesaktionen oben im Preise-Tab: nur morgens vor Ladenöffnung änderbar.</summary>
+        void DrawPromotions()
+        {
+            var promos = Game.Promotions;
+            bool editable = Game.Phase == GamePhase.Preparation;
+            GUILayout.Label("Aktionen heute", bold);
+            GUILayout.Label(editable
+                ? "Gelten nur für heute. Rabatt macht Kunden zufriedener und sie kaufen mehr – aber du verdienst weniger pro Stück."
+                : "Aktionen kann man nur morgens vor Ladenöffnung ändern.", hint);
+            GUI.enabled = editable;
+
+            foreach (var category in Promotions.Categories)
+            {
+                if (!System.Array.Exists(Catalog.Products, p => p.Category == category && p.MinLevel <= Game.StoreLevel)) continue;
+                GUILayout.BeginHorizontal();
+                GUILayout.Label($"Rabatt {CategoryName(category)}", text, GUILayout.Width(150f));
+                int current = promos.Discount(category);
+                foreach (int step in Promotions.DiscountSteps)
+                {
+                    GUI.color = current == step ? Color.white : UiKit.Dimmed;
+                    if (Button(step == 0 ? "Kein" : $"−{step} %", GUILayout.Height(26f))) promos.SetDiscount(category, step);
+                }
+                GUI.color = Color.white;
+                GUILayout.EndHorizontal();
+            }
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label($"Flyer verteilen ({Money.Format(Promotions.FlyerCost)}): heute mehr Kunden", text);
+            GUI.color = promos.Flyer ? Color.white : UiKit.Dimmed;
+            if (Button(promos.Flyer ? "Bestellt" : "Bestellen", GUILayout.Width(110f), GUILayout.Height(26f))) Game.ToggleFlyer();
+            GUI.color = Color.white;
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("„3 für 2“ auf Booster: jeder dritte gratis", text);
+            GUI.color = promos.BundleDeal ? Color.white : UiKit.Dimmed;
+            if (Button(promos.BundleDeal ? "An" : "Aus", GUILayout.Width(110f), GUILayout.Height(26f))) promos.BundleDeal = !promos.BundleDeal;
+            GUI.color = Color.white;
+            GUILayout.EndHorizontal();
+
+            GUI.enabled = true;
+            GUILayout.Space(12f);
+        }
+
         void DrawPriceList()
         {
+            DrawPromotions();
             GUILayout.Label("Teurer als der Marktwert schreckt Kunden ab, günstiger bringt mehr Verkäufe und Ruf.", hint);
             GUILayout.Space(4f);
             foreach (var product in Catalog.Products)
@@ -791,7 +849,16 @@ namespace TwoMoons
 
                 GUI.color = profit > 0 ? UiKit.Good : UiKit.Bad;
                 string unit = product.Category == ProductCategory.Pack ? "Pack" : "Stück";
-                GUILayout.Label($"Gewinn pro {unit}: {Money.Format(profit)}   ·   {PriceVerdict(price, product.MarketValue)}", text);
+                int discount = Game.Promotions.Discount(product.Category);
+                if (discount > 0)
+                {
+                    int sale = Game.GetSalePrice(product);
+                    profit = sale - product.BuyPrice;
+                    GUI.color = profit > 0 ? UiKit.Good : UiKit.Bad;
+                    GUILayout.Label($"Heute −{discount} %: {Money.Format(sale)} · Gewinn pro {unit}: {Money.Format(profit)}   ·   {PriceVerdict(sale, product.MarketValue)}", text);
+                }
+                else
+                    GUILayout.Label($"Gewinn pro {unit}: {Money.Format(profit)}   ·   {PriceVerdict(price, product.MarketValue)}", text);
                 GUI.color = Color.white;
                 GUILayout.Space(10f);
             }

@@ -99,7 +99,8 @@ namespace TwoMoons
                 "Sammlertag – Kunden kaufen ein Pack mehr, mehr Sammler an der Vitrine.");
             Section("Preise",
                 "Bis zum Marktwert kaufen alle. Darüber geht ein Teil der Kunden: +30 % etwa jeder Zweite, ab +60 % keiner.",
-                "Unter 85 % ist es ein Schnäppchen: der Kunde nimmt ein Pack mehr und der Ruf steigt schneller.");
+                "Unter 85 % ist es ein Schnäppchen: der Kunde nimmt ein Pack mehr und der Ruf steigt schneller.",
+                "Aktionen (Computer → Preise, nur morgens): Rabatt pro Warengruppe, Flyer für mehr Kunden, „3 für 2“ auf Booster. Gelten einen Tag.");
             Section("Ruf & Gemütlichkeit",
                 "Zufriedene Kunden bringen Ruf. Mit besserem Ruf kommen mehr Kunden und sie warten länger.",
                 "Deko macht den Laden gemütlich: Kunden sind geduldiger und abends gibt es etwas Ruf dazu.");

@@ -145,6 +145,10 @@ namespace TwoMoons
         public float dayTime;
         public int dayEvent;
         public int influencerMinute = -1;
+        /// <summary>Tagesaktionen: Rabatt pro Warengruppe (card = Kategorie, count = Prozent), Flyer, „3 für 2“.</summary>
+        public List<SavedCard> promoDiscounts = new List<SavedCard>();
+        public bool promoFlyer;
+        public bool promoBundle;
         public DayStats today;
         public int chapter = 1;
         public int[] questProgress;

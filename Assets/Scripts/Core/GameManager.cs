@@ -69,6 +69,7 @@ namespace TwoMoons
         public FurniturePackage Package;
         public readonly Collection Collection = new Collection();
         public readonly Skills Skills = new Skills();
+        public readonly Promotions Promotions = new Promotions();
         public int SkillPoints => Skills.FreePoints(StoreLevel);
 
         public bool LearnSkill(Skill skill)
@@ -270,9 +271,11 @@ namespace TwoMoons
         {
             get
             {
-                if (TodayEvent == DayEvent.Rain) return 1.4f;
+                // Flyer: den ganzen Tag ein Drittel mehr Kunden.
+                float flyer = Promotions.Flyer ? 0.75f : 1f;
+                if (TodayEvent == DayEvent.Rain) return 1.4f * flyer;
                 if (TodayEvent == DayEvent.Rush && ClockMinutes >= 13 * 60 && ClockMinutes < 15 * 60) return 0.4f;
-                return 1f;
+                return flyer;
             }
         }
 
@@ -564,6 +567,7 @@ namespace TwoMoons
             }
             Collection.LoadFrom(data);
             Skills.LoadFrom(data);
+            Promotions.Load(data);
 
             foreach (var price in data.prices) prices[(ProductId)price.product] = price.cents;
             foreach (var saved in data.shelves)
@@ -674,6 +678,7 @@ namespace TwoMoons
             }
             Collection.SaveTo(data);
             Skills.SaveTo(data);
+            Promotions.Save(data);
             data.seenStories.AddRange(seenStories);
             data.tournament = Tournament.Save();
             foreach (var deco in Decos)
@@ -865,6 +870,32 @@ namespace TwoMoons
         public static int MaxPriceFor(Product product) => Mathf.Max(100, Mathf.RoundToInt(product.MarketValue * 2.5f / 10f) * 10);
 
         /// <summary>Verkaufspreis pro Stück. Ohne eigene Einstellung gilt der Marktwert.</summary>
+        /// <summary>Flyer bestellen (kostet sofort) oder vor Ladenöffnung wieder abbestellen (Geld zurück).</summary>
+        public void ToggleFlyer()
+        {
+            if (Phase != GamePhase.Preparation) return;
+            if (Promotions.Flyer)
+            {
+                Promotions.SetFlyer(false);
+                MoneyCents += Promotions.FlyerCost;
+                Today.Expenses -= Promotions.FlyerCost;
+                return;
+            }
+            if (MoneyCents < Promotions.FlyerCost)
+            {
+                ShowToast("Nicht genug Geld für die Flyer.");
+                SoundManager.Play(Sfx.Error);
+                return;
+            }
+            MoneyCents -= Promotions.FlyerCost;
+            Today.Expenses += Promotions.FlyerCost;
+            Promotions.SetFlyer(true);
+            SoundManager.Play(Sfx.Order);
+        }
+
+        /// <summary>Was Kunden heute am Regal zahlen: dein Preis minus Tagesrabatt.</summary>
+        public int GetSalePrice(Product product) => Promotions.PriceAfterDiscount(product, GetPrice(product));
+
         public int GetPrice(Product product) =>
             prices.TryGetValue(product.Id, out int cents) ? cents : product.MarketValue;
 
@@ -1099,6 +1130,7 @@ namespace TwoMoons
                 ShowToast($"Dein gemütlicher Laden spricht sich herum: Ruf +{cozyBonus}");
             }
 
+            Promotions.Clear();
             TodayEvent = DailyEvents.Roll();
             InfluencerMinute = TodayEvent == DayEvent.Influencer ? UnityEngine.Random.Range(10 * 60, 16 * 60) : -1;
             if (TodayEvent != DayEvent.None)
