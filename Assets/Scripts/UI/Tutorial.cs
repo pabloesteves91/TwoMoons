@@ -162,15 +162,14 @@ namespace TwoMoons
             if (Game.DialogLines != null || Game.PauseOpen || Game.LevelUpShown > 0 || Game.Phase == GamePhase.Summary) return;
 
             var step = steps[stepIndex];
-            // Normal links unter der Kopfzeile; ist ein großes Fenster offen, als breiter Balken unten,
-            // damit es das Fenster nicht verdeckt.
+            // Wenn möglich unten links; ist ein großes Fenster offen, als breiter Balken unten links darunter.
             bool below = GameHUD.BigWindowOpen;
-            var area = below ? new Rect((width - 580f) / 2f, 0f, 580f, 0f) : new Rect(UiKit.Margin, 104f, 320f, 0f);
+            var area = new Rect(UiKit.Margin, 0f, below ? 580f : 320f, 0f);
             var content = new GUIContent(step.Text);
             float textHeight = UiKit.Text.CalcHeight(content, area.width - 28f);
             area.height = textHeight + 82f;
             if (below) area.y = UiKit.VirtualHeight - area.height - UiKit.Margin;
-            else if (step.Target != null) area = AvoidTarget(area, width, step.Target());
+            else area = Place(area, width, step.Target?.Invoke());
             GUI.Box(area, GUIContent.none, UiKit.Panel);
             GUI.color = UiKit.Gold;
             GUI.Label(new Rect(area.x + 14f, area.y + 8f, area.width - 28f, 22f), $"Tutorial · Schritt {stepIndex + 1}/{steps.Length}", UiKit.Bold);
@@ -191,28 +190,31 @@ namespace TwoMoons
         }
 
         /// <summary>
-        /// Das Fenster darf das Ziel (z. B. den Computer) nicht verdecken: dann weicht es nach unten links,
-        /// in die Mitte links oder nach unten rechts aus.
+        /// Unten links, wenn möglich. Verdeckt es dort das Ziel (z. B. die Kasse), weicht es nach
+        /// oben links, unten rechts oder in die Mitte links aus.
         /// </summary>
-        static Rect AvoidTarget(Rect area, float width, Vector3? target)
+        static Rect Place(Rect area, float width, Vector3? target)
         {
-            var point = ToGui(target);
-            if (point == null) return area;
-            float h = area.height;
+            float w = area.width, h = area.height;
+            // Über der Hinweiszeile unten in der Mitte bleiben, außer daneben ist genug Platz.
+            float promptLeft = (width - 640f) / 2f;
+            float bottom = UiKit.VirtualHeight - h - (promptLeft >= w + 2f * UiKit.Margin ? UiKit.Margin : 60f);
             var candidates = new[]
             {
-                area,
-                new Rect(UiKit.Margin, UiKit.VirtualHeight - h - 60f, area.width, h),
-                new Rect(UiKit.Margin, (UiKit.VirtualHeight - h) / 2f, area.width, h),
-                new Rect(width - area.width - UiKit.Margin, UiKit.VirtualHeight - h - 60f, area.width, h),
+                new Rect(UiKit.Margin, bottom, w, h),
+                new Rect(UiKit.Margin, 104f, w, h),
+                new Rect(width - w - UiKit.Margin, bottom, w, h),
+                new Rect(UiKit.Margin, (UiKit.VirtualHeight - h) / 2f, w, h),
             };
+            var point = ToGui(target);
+            if (point == null) return candidates[0];
             foreach (var candidate in candidates)
             {
                 // Etwas Abstand rund ums Ziel, damit auch der Pfeil darüber frei bleibt.
                 var padded = new Rect(candidate.x - 50f, candidate.y - 50f, candidate.width + 100f, candidate.height + 110f);
                 if (!padded.Contains(point.Value)) return candidate;
             }
-            return area;
+            return candidates[0];
         }
 
         /// <summary>Weltposition in Oberflächen-Koordinaten (null, wenn es nichts zu zeigen gibt).</summary>
