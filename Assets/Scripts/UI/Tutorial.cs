@@ -162,10 +162,14 @@ namespace TwoMoons
             if (Game.DialogLines != null || Game.PauseOpen || Game.LevelUpShown > 0 || Game.Phase == GamePhase.Summary) return;
 
             var step = steps[stepIndex];
-            var area = new Rect(UiKit.Margin, 104f, 320f, 0f);
+            // Normal links unter der Kopfzeile; ist ein großes Fenster offen, als breiter Balken unten,
+            // damit es das Fenster nicht verdeckt.
+            bool below = GameHUD.BigWindowOpen;
+            var area = below ? new Rect((width - 580f) / 2f, 0f, 580f, 0f) : new Rect(UiKit.Margin, 104f, 320f, 0f);
             var content = new GUIContent(step.Text);
             float textHeight = UiKit.Text.CalcHeight(content, area.width - 28f);
             area.height = textHeight + 82f;
+            if (below) area.y = UiKit.VirtualHeight - area.height - UiKit.Margin;
             GUI.Box(area, GUIContent.none, UiKit.Panel);
             GUI.color = UiKit.Gold;
             GUI.Label(new Rect(area.x + 14f, area.y + 8f, area.width - 28f, 22f), $"Tutorial · Schritt {stepIndex + 1}/{steps.Length}", UiKit.Bold);

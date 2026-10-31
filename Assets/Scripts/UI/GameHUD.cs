@@ -55,6 +55,7 @@ namespace TwoMoons
                               Game.PrizeCounterOpen || Game.OpenPrinter != null || Game.OpenGrading != null ||
                               Game.GradeReveal != null || Game.SellerOffer != null || Game.ComputerOpen || Game.PauseOpen ||
                               Game.StorageOpen;
+            BigWindowOpen = windowOpen;
             if (!windowOpen)
             {
                 DrawSpeechBubbles();
@@ -537,6 +538,9 @@ namespace TwoMoons
             if (line == null) return;
             GUI.Box(new Rect((width - 640f) / 2f, VirtualHeight - 44f - Margin, 640f, 40f), line, prompt);
         }
+
+        /// <summary>Ein großes Fenster (Computer, Sammelbuch …) ist offen – das Tutorial weicht dann nach unten aus.</summary>
+        public static bool BigWindowOpen { get; private set; }
 
         void DrawComputer(float width)
         {

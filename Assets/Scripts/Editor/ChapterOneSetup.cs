@@ -170,7 +170,8 @@ namespace TwoMoons.EditorTools
                 field.SetValue(library, AssetDatabase.LoadAssetAtPath<Sprite>($"{SpriteFolder}/{key}.png"));
             }
 
-            if (library.logo == null)
+            // Ein hochkantiges Bild im Logo-Feld ist keins (z. B. versehentlich eine Karte) – dann logo.png eintragen.
+            if (library.logo == null || !UiKit.IsLogoShaped(library.logo.rect.width, library.logo.rect.height))
                 library.logo = AssetDatabase.LoadAssetAtPath<Sprite>(PixelArtImporter.UiFolder + "Resources/logo.png");
 
             EditorUtility.SetDirty(library);

@@ -111,13 +111,19 @@ namespace TwoMoons
         /// </summary>
         public static Texture2D LoadLogoTexture()
         {
+            var exact = Resources.Load<Texture2D>("logo");
+            if (exact != null) return exact;
             foreach (var texture in Resources.LoadAll<Texture2D>(""))
             {
+                // Kartenbilder (z. B. eine Two-Moons-Karte) sind hochkant – das Logo ist immer breiter als hoch.
+                if (!IsLogoShaped(texture.width, texture.height)) continue;
                 string name = texture.name.ToLowerInvariant();
                 if (name.Contains("logo") || name.Contains("twomoons")) return texture;
             }
             return null;
         }
+
+        public static bool IsLogoShaped(float width, float height) => width > height * 1.2f;
 
         static Rect Fit(Rect box, float width, float height)
         {
