@@ -341,11 +341,13 @@ namespace TwoMoons
                 Finish();
                 return;
             }
-            if (Players.Count % 2 == 1) AddStandIn();
             Current = State.Running;
             SoundManager.Play(Sfx.Quest);
-            Game.ShowToast($"Das {Kind} beginnt! {Players.Count} Spieler, 3 Runden.", 5f);
             foreach (var player in Players) player.StartPlaying();
+            // Erst danach: der Einspringer muss noch vom Eingang zu seinem Platz laufen
+            // (StartPlaying vor dem Losgehen würde ihn draußen stehen lassen).
+            if (Players.Count % 2 == 1) AddStandIn();
+            Game.ShowToast($"Das {Kind} beginnt! {Players.Count} Spieler, 3 Runden.", 5f);
         }
 
         /// <summary>Bei ungerader Anmeldezahl springt spontan noch jemand ein, damit jeder Tisch voll ist.</summary>
