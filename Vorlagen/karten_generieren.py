@@ -92,27 +92,26 @@ BANDS = {"monstera": (60, 160, 80), "spellforge": (110, 70, 190), "soulclash": (
 
 
 def compose(art, rarity, game="monstera"):
-    """Baut die Karte wie im Spiel auf: 24×32 Raster, hier 20-fach (480×640)."""
+    """Baut die Karte im Aufbau deiner eigenen Karten (monstera_01–03) zusammen, 768×1024."""
     from PIL import Image, ImageDraw
 
-    s = 20
-    w, h = 24 * s, 32 * s
+    w, h = 768, 1024
     card = Image.new("RGBA", (w, h))
     d = ImageDraw.Draw(card)
 
-    def zone(x, y, zw, zh, color):  # y von unten gezählt wie im Spiel
-        d.rectangle([x * s, (32 - y - zh) * s, (x + zw) * s - 1, (32 - y) * s - 1], fill=color)
+    def box(x0, y0, x1, y1, color):  # Anteile von Breite/Höhe, von oben gemessen
+        d.rectangle([round(x0 * w), round(y0 * h), round(x1 * w) - 1, round(y1 * h) - 1], fill=color)
 
     frame = FRAMES.get(rarity, FRAMES["Gewöhnlich"])
     band = BANDS.get(game, BANDS["monstera"])
-    zone(0, 0, 24, 32, (30, 22, 18))
-    zone(1, 1, 22, 30, frame)
-    zone(3, 3, 18, 7, (245, 235, 210))        # Textfeld: bleibt leer, das Spiel schreibt hinein
-    zone(3, 9, 18, 1, band)                   # Farbstreifen pro Spiel wie im Spiel
+    box(0, 0, 1, 1, (30, 22, 18))                     # dunkler Außenrand
+    box(0.021, 0.016, 0.979, 0.984, frame)            # Rahmen in Seltenheitsfarbe
+    box(0.10, 0.690, 0.90, 0.696, band)               # dünner Farbstreifen pro Spiel
+    box(0.10, 0.712, 0.90, 0.930, (242, 232, 208))    # Textfeld: bleibt leer, das Spiel schreibt hinein
 
-    # Bildfenster: x 3–21, y 12–29 (18×17 Pixel)
-    box = (3 * s, 3 * s, 21 * s, 20 * s)
-    bw, bh = box[2] - box[0], box[3] - box[1]
+    # Bildfenster: 10–90 % der Breite, 8,1–66,4 % der Höhe
+    x0, y0, x1, y1 = round(0.10 * w), round(0.081 * h), round(0.90 * w), round(0.664 * h)
+    bw, bh = x1 - x0, y1 - y0
     art = art.convert("RGBA")
     # mittig auf das Seitenverhältnis des Fensters zuschneiden
     aw, ah = art.size
@@ -123,8 +122,7 @@ def compose(art, rarity, game="monstera"):
     else:
         nh = int(aw / target)
         art = art.crop((0, (ah - nh) // 2, aw, (ah - nh) // 2 + nh))
-    art = art.resize((bw, bh), Image.LANCZOS)
-    card.paste(art, box[:2])
+    card.paste(art.resize((bw, bh), Image.LANCZOS), (x0, y0))
     return card
 
 
@@ -193,10 +191,29 @@ def main():
     parser.add_argument("--neu", nargs="+", metavar="KARTE", help="vorhandene Bilder neu erstellen")
     parser.add_argument("--qualitaet", default="medium", choices=["low", "medium", "high"])
     parser.add_argument("--test", action="store_true", help="nichts erstellen, nur anzeigen")
+    parser.add_argument("--rahmen", action="store_true",
+                        help="keine neuen Bilder: schon erstellte Motive (Vorlagen/Motive) nur neu einrahmen – kostet nichts")
     parser.add_argument("--modell", help="Bildmodell erzwingen, z. B. gpt-image-1 oder dall-e-3 (sonst automatisch)")
     args = parser.parse_args()
 
     cards = read_cards()
+    if args.rahmen:
+        from PIL import Image
+        raw_dir = os.path.join(ROOT, "Vorlagen", "Motive")
+        done = 0
+        for c in cards:
+            if (args.nur or args.neu) and c["key"] not in set(args.nur or []) | set(args.neu or []):
+                continue
+            if args.spiel and not c["key"].startswith(args.spiel):
+                continue
+            raw = os.path.join(raw_dir, c["file"])
+            if not os.path.exists(raw):
+                continue
+            compose(Image.open(raw), c["rarity"], c["key"].split("_")[0]).save(os.path.join(OUT, c["file"]))
+            print(f"neu eingerahmt: {c['file']}")
+            done += 1
+        print(f"{done} Karte(n) neu eingerahmt." if done else "Keine Motive in Vorlagen/Motive gefunden.")
+        return
     wanted = set(args.nur or []) | set(args.neu or [])
     if wanted:
         cards = [c for c in cards if c["key"] in wanted]
