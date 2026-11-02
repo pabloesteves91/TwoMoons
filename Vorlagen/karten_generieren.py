@@ -118,15 +118,32 @@ def compose(art, rarity):
     return card
 
 
-def generate(client, card, quality):
-    result = client.images.generate(
-        model="gpt-image-1",
-        prompt=prompt_for(card),
-        size="1024x1024",
-        quality=quality,
-        n=1,
-    )
+def pick_model(client, wanted):
+    """Nimmt das gewünschte Bildmodell, sonst das neueste, das dein Konto anbietet."""
+    if wanted:
+        return wanted
+    try:
+        ids = sorted((m.id for m in client.models.list()), reverse=True)
+    except Exception as e:
+        print(f"Modellliste nicht abrufbar ({e}), versuche gpt-image-1.")
+        return "gpt-image-1"
+    images = [i for i in ids if i.startswith("gpt-image") and "mini" not in i]
+    images += [i for i in ids if i.startswith("gpt-image") and "mini" in i]
+    images += [i for i in ids if i.startswith("dall-e-3")]
+    if not images:
+        sys.exit("Dein OpenAI-Konto bietet kein Bildmodell an. Verfügbar: " + ", ".join(ids[:30]))
+    return images[0]
+
+
+def generate(client, card, quality, model):
     from PIL import Image
+    if model.startswith("dall-e"):
+        result = client.images.generate(
+            model=model, prompt=prompt_for(card), size="1024x1024",
+            quality="hd" if quality == "high" else "standard", response_format="b64_json", n=1,
+        )
+    else:
+        result = client.images.generate(model=model, prompt=prompt_for(card), size="1024x1024", quality=quality, n=1)
     data = base64.b64decode(result.data[0].b64_json)
     return Image.open(io.BytesIO(data))
 
@@ -138,6 +155,7 @@ def main():
     parser.add_argument("--neu", nargs="+", metavar="KARTE", help="vorhandene Bilder neu erstellen")
     parser.add_argument("--qualitaet", default="medium", choices=["low", "medium", "high"])
     parser.add_argument("--test", action="store_true", help="nichts erstellen, nur anzeigen")
+    parser.add_argument("--modell", help="Bildmodell erzwingen, z. B. gpt-image-1 oder dall-e-3 (sonst automatisch)")
     args = parser.parse_args()
 
     cards = read_cards()
@@ -162,12 +180,14 @@ def main():
         sys.exit("Kein OPENAI_API_KEY gesetzt. Erst:  export OPENAI_API_KEY=\"sk-...\"")
     from openai import OpenAI
     client = OpenAI()
+    model = pick_model(client, args.modell)
+    print(f"Bildmodell: {model}")
     os.makedirs(OUT, exist_ok=True)
 
     for i, c in enumerate(todo, 1):
         print(f"[{i}/{len(todo)}] {c['name']} …", end=" ", flush=True)
         try:
-            art = generate(client, c, args.qualitaet)
+            art = generate(client, c, args.qualitaet, model)
             # Rohbild zum Nachbessern aufheben (liegt außerhalb von Resources, kommt nicht ins Spiel)
             raw_dir = os.path.join(ROOT, "Vorlagen", "Motive")
             os.makedirs(raw_dir, exist_ok=True)
