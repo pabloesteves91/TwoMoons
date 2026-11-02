@@ -148,9 +148,17 @@ def model_missing(error):
 
 
 def style_image(card):
-    """Stil-Vorbild: Vorlagen/stil_<spiel>.png (z. B. stil_monstera.png), falls vorhanden."""
-    path = os.path.join(ROOT, "Vorlagen", f"stil_{card['key'].split('_')[0]}.png")
-    return path if os.path.exists(path) else None
+    """Stil-Vorbild: Vorlagen/stil_<spiel>.png, sonst die erste fertige Karte des Spiels."""
+    game = card['key'].split('_')[0]
+    path = os.path.join(ROOT, "Vorlagen", f"stil_{game}.png")
+    if os.path.exists(path):
+        return path
+    # Sonst die erste schon fertige Karte dieses Spiels (z. B. deine eigene monstera_01.png).
+    for number in range(1, 31):
+        existing = os.path.join(OUT, f"{game}_{number:02d}.png")
+        if os.path.exists(existing):
+            return existing
+    return None
 
 
 def generate(client, card, quality, model):
