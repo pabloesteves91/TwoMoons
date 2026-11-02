@@ -356,7 +356,7 @@ namespace TwoMoons
             var seat = FreeSeat();
             if (seat == null) return;
             string name = PlayerNames[Players.Count % PlayerNames.Length];
-            var player = WorldFactory.SpawnTournamentPlayer(ShopGrid.CellToWorld(ShopGrid.SpawnCell),
+            var player = WorldFactory.SpawnTournamentPlayer(ShopGrid.CellToWorld(ShopGrid.DoorCell),
                 Art.Get($"customer{Random.Range(1, 4)}"), name);
             player.Seat = seat.Value;
             Players.Add(player);

@@ -32,7 +32,7 @@ namespace TwoMoons
             icon.enabled = false;
             GetComponent<YSort>().Collect();
             // Nach dem Laden kann ein Spieler schon bei der Siegerehrung sein – dann nicht erst zum Platz.
-            if (state == State.ToSeat) WalkTo(Seat);
+            if (state == State.ToSeat) GoToSeat();
         }
 
         void WalkTo(Vector2Int cell)
@@ -41,7 +41,21 @@ namespace TwoMoons
             pathIndex = 0;
         }
 
-        public void StartPlaying() => state = State.Playing;
+        /// <summary>Zum Platz laufen; findet sich kein Weg, direkt hinsetzen statt draußen stehen zu bleiben.</summary>
+        void GoToSeat()
+        {
+            WalkTo(Seat);
+            if (path == null) transform.position = ShopGrid.CellToWorld(Seat);
+        }
+
+        bool AtSeat => ShopGrid.WorldToCell(transform.position) == Seat;
+
+        /// <summary>Spielt ab jetzt mit – wer noch unterwegs ist, setzt sich erst hin.</summary>
+        public void StartPlaying()
+        {
+            if (state == State.ToSeat && !AtSeat) return;
+            state = State.Playing;
+        }
 
         public void GoCheer(Vector2Int spot)
         {
@@ -82,6 +96,13 @@ namespace TwoMoons
                     break;
 
                 case State.Playing:
+                    // Nicht am Platz (z. B. Weg war versperrt)? Erst hinsetzen.
+                    if (!AtSeat)
+                    {
+                        state = State.ToSeat;
+                        GoToSeat();
+                        break;
+                    }
                     // Karten ausspielen, ab und zu ein Jubel oder Ärger
                     iconTimer -= Time.deltaTime;
                     if (iconTimer > 0f) break;
