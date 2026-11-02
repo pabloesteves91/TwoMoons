@@ -15,16 +15,63 @@ namespace TwoMoons
             if (card.Rarity == Rarity.Ultra) DrawShine(rect);
             if (small) return;
 
-            // Name und Nummer im hellen Textfeld unten auf der Karte (unten 10 von 32 Pixeln).
-            float pixel = rect.height / CardArt.Height;
-            var textArea = new Rect(rect.x + 3f * pixel, rect.yMax - 10f * pixel, rect.width - 6f * pixel, 7f * pixel);
-            var nameStyle = new GUIStyle(UiKit.Bold) { alignment = TextAnchor.UpperCenter, fontSize = Mathf.RoundToInt(pixel * 2.4f), wordWrap = false };
-            nameStyle.normal.textColor = new Color(0.18f, 0.1f, 0.06f);
-            GUI.Label(new Rect(textArea.x, textArea.y + pixel * 2.4f, textArea.width, textArea.height), card.Name, nameStyle);
+            DrawTextField(rect, card);
+        }
 
-            var numberStyle = new GUIStyle(nameStyle) { alignment = TextAnchor.UpperRight, fontSize = Mathf.RoundToInt(pixel * 1.6f), fontStyle = FontStyle.Normal };
-            string number = card == CardDatabase.TwoMoons ? "1/1" : $"#{card.Number:00}/{CardDatabase.CardsPerGame}";
-            GUI.Label(new Rect(textArea.x, textArea.y + pixel * 0.3f, textArea.width - pixel, textArea.height), number, numberStyle);
+        static GUIStyle nameStyle, numberStyle;
+        static readonly GUIContent content = new GUIContent();
+
+        /// <summary>
+        /// Helles Textfeld unten auf der Karte (Pixelzeilen 3–10 von 32): oben links die Seltenheits-Steine,
+        /// oben rechts die Nummer, darunter mittig der Name – zu lange Namen werden kleiner statt abgeschnitten.
+        /// </summary>
+        static void DrawTextField(Rect rect, CardDef card)
+        {
+            EnsureTextures();
+            float pixel = rect.height / CardArt.Height;
+            var field = new Rect(rect.x + 3f * pixel, rect.yMax - 10f * pixel, rect.width - 6f * pixel, 7f * pixel);
+            var ink = new Color(0.22f, 0.13f, 0.08f);
+            if (nameStyle == null)
+            {
+                nameStyle = new GUIStyle(UiKit.Bold) { alignment = TextAnchor.MiddleCenter, wordWrap = false, clipping = TextClipping.Overflow };
+                numberStyle = new GUIStyle(UiKit.Text) { alignment = TextAnchor.MiddleRight, wordWrap = false, clipping = TextClipping.Overflow };
+            }
+            nameStyle.normal.textColor = ink;
+            numberStyle.normal.textColor = new Color(ink.r, ink.g, ink.b, 0.75f);
+
+            // Obere Zeile: Steine links, Nummer rechts
+            var top = new Rect(field.x + pixel * 0.8f, field.y + pixel * 0.5f, field.width - pixel * 1.6f, pixel * 2f);
+            int gems = card == CardDatabase.TwoMoons ? 5 : (int)card.Rarity + 1;
+            float gem = Mathf.Max(2f, pixel * 1.1f);
+            for (int i = 0; i < gems; i++)
+            {
+                var g = new Rect(top.x + i * gem * 1.6f, top.center.y - gem / 2f, gem, gem);
+                GUI.color = new Color(0.22f, 0.13f, 0.08f, 0.6f);
+                GUI.DrawTexture(new Rect(g.x - 1f, g.y - 1f, g.width + 2f, g.height + 2f), white);
+                GUI.color = card == CardDatabase.TwoMoons ? UiKit.Gold : CardDatabase.RarityColor(card.Rarity);
+                GUI.DrawTexture(g, white);
+            }
+            GUI.color = Color.white;
+            numberStyle.fontSize = Mathf.Max(7, Mathf.RoundToInt(pixel * 1.5f));
+            string number = card == CardDatabase.TwoMoons ? "1/1" : $"{card.Number:00}/{CardDatabase.CardsPerGame}";
+            GUI.Label(top, number, numberStyle);
+
+            // Trennlinie
+            GUI.color = new Color(ink.r, ink.g, ink.b, 0.2f);
+            GUI.DrawTexture(new Rect(field.x + pixel, top.yMax + pixel * 0.3f, field.width - pixel * 2f, Mathf.Max(1f, pixel * 0.15f)), white);
+            GUI.color = Color.white;
+
+            // Name: so groß wie möglich, aber immer ganz lesbar
+            var nameRect = new Rect(field.x + pixel * 0.5f, top.yMax + pixel * 0.5f, field.width - pixel, field.yMax - top.yMax - pixel * 0.7f);
+            content.text = card.Name;
+            int size = Mathf.Max(7, Mathf.RoundToInt(pixel * 2.4f));
+            nameStyle.fontSize = size;
+            while (size > 7 && nameStyle.CalcSize(content).x > nameRect.width)
+            {
+                size--;
+                nameStyle.fontSize = size;
+            }
+            GUI.Label(nameRect, content, nameStyle);
         }
 
         /// <summary>Versiegelte Karte in der Schutzhülle („Slab“) mit Notenschild oben.</summary>

@@ -83,9 +83,7 @@ namespace TwoMoons
                 : new Color32(60, 160, 80, 255);
             Fill(px, 3, 9, Width - 6, 1, band);
 
-            // Seltenheits-Steine im Textfeld
-            int gems = (int)card.Rarity + 1;
-            for (int i = 0; i < gems; i++) Fill(px, 5 + i * 3, 5, 2, 2, frame);
+            // Seltenheits-Steine, Name und Nummer zeichnet CardUI ins Textfeld.
 
             texture.SetPixels32(px);
             texture.Apply();
@@ -106,7 +104,6 @@ namespace TwoMoons
             Circle(px, 9, 22, 4, new Color32(225, 85, 40, 255));
             Circle(px, 15, 18, 4, gold);
             Fill(px, 3, 3, Width - 6, 7, new Color32(245, 235, 210, 255));
-            for (int i = 0; i < 5; i++) Fill(px, 5 + i * 3, 5, 2, 2, gold);
             texture.SetPixels32(px);
             texture.Apply();
             return texture;
