@@ -88,7 +88,7 @@ def prompt_for(card):
 
 
 # Farbstreifen über dem Textfeld (wie CardArt im Spiel): grün Monstera, lila Spellforge, rot Soul Clash.
-BANDS = {"monstera": (60, 160, 80), "spellforge": (110, 70, 190), "soulclash": (200, 50, 40), "two": (245, 200, 80)}
+BANDS = {"monstera": (60, 160, 80), "spellforge": (110, 70, 190), "soulclash": (200, 50, 40), "two": (150, 90, 20)}
 
 
 def compose(art, rarity, game="monstera"):
