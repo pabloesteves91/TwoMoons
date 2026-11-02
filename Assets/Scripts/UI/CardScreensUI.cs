@@ -251,6 +251,17 @@ namespace TwoMoons
                 if (best > 0) GUILayout.Label($"Beste Note: {best} ({Grading.Describe(best)})", UiKit.Text);
                 int slabs = Game.Slabs.FindAll(slab => slab.card == selected.Id).Count;
                 if (slabs > 0) GUILayout.Label($"Bewertet im Lager: {slabs}", UiKit.Text);
+                int inShowcase = 0;
+                foreach (var showcase in Game.Showcases)
+                    foreach (int id in showcase.Cards) if (id == selected.Id) inShowcase++;
+                inShowcase += Game.StaffCards.FindAll(id => id == selected.Id).Count;
+                if (inShowcase > 0) GUILayout.Label($"In der Vitrine: {inShowcase}", UiKit.Text);
+                if (collection.Count(selected.Id) == 0 && inShowcase == 0 && slabs == 0)
+                {
+                    GUI.color = UiKit.Dimmed;
+                    GUILayout.Label("Schon gezogen, aber nicht mehr da – verkauft oder getauscht. Bleibt trotzdem im Sammelbuch eingetragen.", UiKit.Text);
+                    GUI.color = Color.white;
+                }
             }
             else
             {
