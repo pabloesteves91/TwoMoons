@@ -118,21 +118,28 @@ def compose(art, rarity):
     return card
 
 
-def pick_model(client, wanted):
-    """Nimmt das gewünschte Bildmodell, sonst das neueste, das dein Konto anbietet."""
+# Falls die Modellliste nichts Brauchbares liefert, werden diese der Reihe nach probiert.
+FALLBACK_MODELS = ["gpt-image-2", "gpt-image-1.5", "chatgpt-image-latest", "gpt-image-1", "gpt-image-1-mini", "dall-e-3"]
+
+
+def candidate_models(client, wanted):
+    """Bildmodelle zum Ausprobieren: gewünschtes, sonst die vom Konto angebotenen, dann bekannte Namen."""
     if wanted:
-        return wanted
+        return [wanted]
+    listed = []
     try:
         ids = sorted((m.id for m in client.models.list()), reverse=True)
+        listed = [i for i in ids if ("image" in i or i.startswith("dall-e")) and "mini" not in i]
+        listed += [i for i in ids if ("image" in i or i.startswith("dall-e")) and "mini" in i]
+        print("Bildmodelle deines Kontos: " + (", ".join(listed) if listed else "keine gefunden"))
     except Exception as e:
-        print(f"Modellliste nicht abrufbar ({e}), versuche gpt-image-1.")
-        return "gpt-image-1"
-    images = [i for i in ids if i.startswith("gpt-image") and "mini" not in i]
-    images += [i for i in ids if i.startswith("gpt-image") and "mini" in i]
-    images += [i for i in ids if i.startswith("dall-e-3")]
-    if not images:
-        sys.exit("Dein OpenAI-Konto bietet kein Bildmodell an. Verfügbar: " + ", ".join(ids[:30]))
-    return images[0]
+        print(f"Modellliste nicht abrufbar ({e}).")
+    return list(dict.fromkeys(listed + FALLBACK_MODELS))
+
+
+def model_missing(error):
+    text = str(error).lower()
+    return "does not exist" in text or "model_not_found" in text or "invalid model" in text or "unknown model" in text
 
 
 def generate(client, card, quality, model):
@@ -180,20 +187,30 @@ def main():
         sys.exit("Kein OPENAI_API_KEY gesetzt. Erst:  export OPENAI_API_KEY=\"sk-...\"")
     from openai import OpenAI
     client = OpenAI()
-    model = pick_model(client, args.modell)
-    print(f"Bildmodell: {model}")
+    models = candidate_models(client, args.modell)
     os.makedirs(OUT, exist_ok=True)
 
     for i, c in enumerate(todo, 1):
         print(f"[{i}/{len(todo)}] {c['name']} …", end=" ", flush=True)
         try:
-            art = generate(client, c, args.qualitaet, model)
+            art = None
+            while art is None:
+                if not models:
+                    sys.exit("\nKein Bildmodell funktioniert. Auf platform.openai.com unter Settings → Organization "
+                             "→ Verification die Organisation verifizieren, dann nochmal versuchen.")
+                try:
+                    art = generate(client, c, args.qualitaet, models[0])
+                except Exception as e:
+                    if not model_missing(e):
+                        raise
+                    print(f"({models[0]} gibt es nicht, nächstes …)", end=" ", flush=True)
+                    models.pop(0)
             # Rohbild zum Nachbessern aufheben (liegt außerhalb von Resources, kommt nicht ins Spiel)
             raw_dir = os.path.join(ROOT, "Vorlagen", "Motive")
             os.makedirs(raw_dir, exist_ok=True)
             art.save(os.path.join(raw_dir, c["file"]))
             compose(art, c["rarity"]).save(os.path.join(OUT, c["file"]))
-            print("fertig")
+            print(f"fertig ({models[0]})")
         except Exception as e:  # weiter mit der nächsten Karte
             print(f"Fehler: {e}")
 
