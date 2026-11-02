@@ -17,6 +17,9 @@ Benutzen (im Ordner TwoMoons):
     python3 Vorlagen/karten_generieren.py --neu monstera_17   # vorhandenes Bild ersetzen
     python3 Vorlagen/karten_generieren.py --test            # zeigt nur, was erstellt würde
 
+Stil-Vorbild: Eine Karte, deren Stil dir gefällt, als Vorlagen/stil_monstera.png (bzw. stil_spellforge.png …)
+speichern – dann malt GPT alle Karten dieses Spiels im gleichen Stil (nur mit gpt-image-Modellen).
+
 Vorhandene Bilder werden nie überschrieben (außer mit --neu). Kosten: ca. 4–17 US-Cent pro Bild,
 je nach --qualitaet (low / medium / high).
 """
@@ -32,7 +35,9 @@ LIST = os.path.join(ROOT, "Vorlagen", "Kartenliste_fuer_GPT.md")
 OUT = os.path.join(ROOT, "Assets", "Art", "Cards", "Resources", "Cards")
 
 STYLES = {
-    "monstera": "cute, colorful, friendly monster trading card art for all ages, big expressive eyes",
+    "monstera": "cute chibi monster trading card art for all ages: a round, friendly creature with big shiny eyes "
+                "and a happy smile, thick dark pixel outlines, bright saturated colors, simple cel shading, "
+                "lush detailed background scene (forest, flowers, sky with small clouds) that fills the whole image",
     "spellforge": "fantasy spell card art, medieval and magical, warm colors with glowing magic effects",
     "soulclash": "anime battle card art, dynamic and cool, strong colors, action pose with energy and motion effects",
     "two": "legendary one-of-a-kind trading card art, magical and festive, deep blue night sky, golden accents",
@@ -142,9 +147,22 @@ def model_missing(error):
     return "does not exist" in text or "model_not_found" in text or "invalid model" in text or "unknown model" in text
 
 
+def style_image(card):
+    """Stil-Vorbild: Vorlagen/stil_<spiel>.png (z. B. stil_monstera.png), falls vorhanden."""
+    path = os.path.join(ROOT, "Vorlagen", f"stil_{card['key'].split('_')[0]}.png")
+    return path if os.path.exists(path) else None
+
+
 def generate(client, card, quality, model):
     from PIL import Image
-    if model.startswith("dall-e"):
+    reference = style_image(card)
+    if reference and model.startswith("gpt-image"):
+        # Mit Vorbild: gleicher Zeichenstil, aber neues Motiv.
+        prompt = ("Use the attached image ONLY as a style reference (pixel size, outlines, colors, shading, "
+                  "type of background). Do not copy its creature, card frame or layout. " + prompt_for(card))
+        with open(reference, "rb") as f:
+            result = client.images.edit(model=model, image=[f], prompt=prompt, size="1024x1024", quality=quality, n=1)
+    elif model.startswith("dall-e"):
         result = client.images.generate(
             model=model, prompt=prompt_for(card), size="1024x1024",
             quality="hd" if quality == "high" else "standard", response_format="b64_json", n=1,
@@ -188,6 +206,9 @@ def main():
     from openai import OpenAI
     client = OpenAI()
     models = candidate_models(client, args.modell)
+    for game in sorted({c["key"].split("_")[0] for c in todo}):
+        ref = style_image({"key": game})
+        print(f"Stil-Vorbild {game}: {os.path.basename(ref) if ref else 'keins (Vorlagen/stil_' + game + '.png anlegen)'}")
     os.makedirs(OUT, exist_ok=True)
 
     for i, c in enumerate(todo, 1):
