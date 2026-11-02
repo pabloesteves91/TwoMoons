@@ -18,6 +18,7 @@ namespace TwoMoons.EditorTools
         const string AudioFolder = PixelArtImporter.ArtFolder + "Audio";
         const string AudioLibraryPath = PixelArtImporter.ArtFolder + "AudioLibrary.asset";
         const string ScenePath = "Assets/Scenes/Kapitel1.unity";
+        const string CardArtFolder = PixelArtImporter.ArtFolder + "Cards/Resources/Cards";
 
         [MenuItem("TwoMoons/Aktualisieren", priority = 0)]
         public static void UpdateMenu() => PrepareProject(true);
@@ -27,6 +28,8 @@ namespace TwoMoons.EditorTools
         {
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return false;
 
+            // Ordner für eigene Kartenbilder (monstera_01.png …) bereitstellen.
+            Directory.CreateDirectory(CardArtFolder);
             AssetDatabase.Refresh();
             // Ersetzte Bilder sicher neu einlesen (Größe/Pixel pro Einheit passen sich an).
             if (AssetDatabase.IsValidFolder(SpriteFolder))
@@ -48,7 +51,8 @@ namespace TwoMoons.EditorTools
                     "Alles aktuell!" + (newScene ? " Die Szene Kapitel1 wurde neu angelegt." : "") + "\n\n" +
                     $"{createdSprites} neue Platzhalter-Bilder, {createdSounds} neue Sounds.\n\n" +
                     $"Eigene Bilder: PNG mit genau demselben Namen in {SpriteFolder} ersetzen (z. B. shelf.png), " +
-                    "dann nochmal „TwoMoons → Aktualisieren“ und Play.",
+                    "dann nochmal „TwoMoons → Aktualisieren“ und Play.\n\n" +
+                    $"Eigene Kartenbilder: {CardArtFolder}/monstera_01.png usw. (Vorlagen im Ordner „Vorlagen“).",
                     "OK");
             return true;
         }
