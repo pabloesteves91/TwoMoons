@@ -87,7 +87,11 @@ def prompt_for(card):
     )
 
 
-def compose(art, rarity):
+# Farbstreifen über dem Textfeld (wie CardArt im Spiel): grün Monstera, lila Spellforge, rot Soul Clash.
+BANDS = {"monstera": (60, 160, 80), "spellforge": (110, 70, 190), "soulclash": (200, 50, 40), "two": (245, 200, 80)}
+
+
+def compose(art, rarity, game="monstera"):
     """Baut die Karte wie im Spiel auf: 24×32 Raster, hier 20-fach (480×640)."""
     from PIL import Image, ImageDraw
 
@@ -100,10 +104,11 @@ def compose(art, rarity):
         d.rectangle([x * s, (32 - y - zh) * s, (x + zw) * s - 1, (32 - y) * s - 1], fill=color)
 
     frame = FRAMES.get(rarity, FRAMES["Gewöhnlich"])
+    band = BANDS.get(game, BANDS["monstera"])
     zone(0, 0, 24, 32, (30, 22, 18))
     zone(1, 1, 22, 30, frame)
     zone(3, 3, 18, 7, (245, 235, 210))        # Textfeld: bleibt leer, das Spiel schreibt hinein
-    zone(3, 9, 18, 1, tuple(int(c * 0.75) for c in frame))
+    zone(3, 9, 18, 1, band)                   # Farbstreifen pro Spiel wie im Spiel
 
     # Bildfenster: x 3–21, y 12–29 (18×17 Pixel)
     box = (3 * s, 3 * s, 21 * s, 20 * s)
@@ -238,7 +243,7 @@ def main():
             raw_dir = os.path.join(ROOT, "Vorlagen", "Motive")
             os.makedirs(raw_dir, exist_ok=True)
             art.save(os.path.join(raw_dir, c["file"]))
-            compose(art, c["rarity"]).save(os.path.join(OUT, c["file"]))
+            compose(art, c["rarity"], c["key"].split("_")[0]).save(os.path.join(OUT, c["file"]))
             print(f"fertig ({models[0]})")
         except Exception as e:  # weiter mit der nächsten Karte
             print(f"Fehler: {e}")
