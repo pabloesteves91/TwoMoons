@@ -1,0 +1,184 @@
+#!/usr/bin/env python3
+"""
+Erstellt die Kartenbilder für TwoMoons automatisch mit der OpenAI-Bild-API.
+
+GPT malt nur das Motiv (quadratisch). Rahmen in Seltenheitsfarbe, Bildfenster und das leere
+Textfeld setzt dieses Skript selbst zusammen – so sehen alle Karten einheitlich aus und passen
+genau zum Spiel (Name, Nummer und Holo zeichnet das Spiel darüber).
+
+Einrichten (einmal):
+    pip3 install openai pillow
+    export OPENAI_API_KEY="sk-..."        # eigener API-Schlüssel von platform.openai.com
+
+Benutzen (im Ordner TwoMoons):
+    python3 Vorlagen/karten_generieren.py                  # alle fehlenden Karten
+    python3 Vorlagen/karten_generieren.py --spiel monstera # nur ein Spiel
+    python3 Vorlagen/karten_generieren.py --nur monstera_03 monstera_04
+    python3 Vorlagen/karten_generieren.py --neu monstera_17   # vorhandenes Bild ersetzen
+    python3 Vorlagen/karten_generieren.py --test            # zeigt nur, was erstellt würde
+
+Vorhandene Bilder werden nie überschrieben (außer mit --neu). Kosten: ca. 4–17 US-Cent pro Bild,
+je nach --qualitaet (low / medium / high).
+"""
+import argparse
+import base64
+import io
+import os
+import re
+import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+LIST = os.path.join(ROOT, "Vorlagen", "Kartenliste_fuer_GPT.md")
+OUT = os.path.join(ROOT, "Assets", "Art", "Cards", "Resources", "Cards")
+
+STYLES = {
+    "monstera": "cute, colorful, friendly monster trading card art for all ages, big expressive eyes",
+    "spellforge": "fantasy spell card art, medieval and magical, warm colors with glowing magic effects",
+    "soulclash": "anime battle card art, dynamic and cool, strong colors, action pose with energy and motion effects",
+    "two": "legendary one-of-a-kind trading card art, magical and festive, deep blue night sky, golden accents",
+}
+
+# Seltenheitsfarben wie im Spiel (CardDatabase.RarityColor)
+FRAMES = {
+    "Gewöhnlich": (217, 217, 217),
+    "Selten": (89, 166, 255),
+    "Ultra-Selten": (255, 204, 64),
+    "Legende": (245, 200, 80),
+}
+
+
+def read_cards():
+    """Liest die Tabellen aus Kartenliste_fuer_GPT.md."""
+    cards = []
+    with open(LIST, encoding="utf-8") as f:
+        for line in f:
+            cells = [c.strip() for c in line.strip().strip("|").split("|")]
+            if not cells or not cells[0].endswith(".png"):
+                continue
+            if len(cells) == 4:
+                file, name, rarity, desc = cells
+            elif len(cells) == 3:  # Legende: Datei | Name | Beschreibung
+                file, name, desc = cells
+                rarity = "Legende"
+            else:
+                continue
+            cards.append({"file": file, "key": file[:-4], "name": name, "rarity": rarity, "desc": desc})
+    return cards
+
+
+def prompt_for(card):
+    style = STYLES[card["key"].split("_")[0]]
+    extra = ""
+    if card["rarity"] in ("Ultra-Selten", "Legende"):
+        extra = " Epic and majestic, dramatic lighting, glowing aura."
+    elif card["rarity"] == "Selten":
+        extra = " Slightly more impressive than a common card, some glow."
+    return (
+        f"Pixel art illustration (16-bit style, crisp clean pixels, no blur, no anti-aliasing), square image. "
+        f"{style}.{extra} "
+        f"Subject: {card['name']} – {card['desc']}. "
+        f"The subject is centered and fully visible with a simple fitting background scene filling the whole image. "
+        f"No card frame, no border, no text, no letters, no numbers, no logo, no watermark."
+    )
+
+
+def compose(art, rarity):
+    """Baut die Karte wie im Spiel auf: 24×32 Raster, hier 20-fach (480×640)."""
+    from PIL import Image, ImageDraw
+
+    s = 20
+    w, h = 24 * s, 32 * s
+    card = Image.new("RGBA", (w, h))
+    d = ImageDraw.Draw(card)
+
+    def zone(x, y, zw, zh, color):  # y von unten gezählt wie im Spiel
+        d.rectangle([x * s, (32 - y - zh) * s, (x + zw) * s - 1, (32 - y) * s - 1], fill=color)
+
+    frame = FRAMES.get(rarity, FRAMES["Gewöhnlich"])
+    zone(0, 0, 24, 32, (30, 22, 18))
+    zone(1, 1, 22, 30, frame)
+    zone(3, 3, 18, 7, (245, 235, 210))        # Textfeld: bleibt leer, das Spiel schreibt hinein
+    zone(3, 9, 18, 1, tuple(int(c * 0.75) for c in frame))
+
+    # Bildfenster: x 3–21, y 12–29 (18×17 Pixel)
+    box = (3 * s, 3 * s, 21 * s, 20 * s)
+    bw, bh = box[2] - box[0], box[3] - box[1]
+    art = art.convert("RGBA")
+    # mittig auf das Seitenverhältnis des Fensters zuschneiden
+    aw, ah = art.size
+    target = bw / bh
+    if aw / ah > target:
+        nw = int(ah * target)
+        art = art.crop(((aw - nw) // 2, 0, (aw - nw) // 2 + nw, ah))
+    else:
+        nh = int(aw / target)
+        art = art.crop((0, (ah - nh) // 2, aw, (ah - nh) // 2 + nh))
+    art = art.resize((bw, bh), Image.LANCZOS)
+    card.paste(art, box[:2])
+    return card
+
+
+def generate(client, card, quality):
+    result = client.images.generate(
+        model="gpt-image-1",
+        prompt=prompt_for(card),
+        size="1024x1024",
+        quality=quality,
+        n=1,
+    )
+    from PIL import Image
+    data = base64.b64decode(result.data[0].b64_json)
+    return Image.open(io.BytesIO(data))
+
+
+def main():
+    parser = argparse.ArgumentParser(description="TwoMoons-Kartenbilder mit GPT erstellen")
+    parser.add_argument("--spiel", choices=["monstera", "spellforge", "soulclash", "two"])
+    parser.add_argument("--nur", nargs="+", metavar="KARTE", help="z. B. monstera_03 monstera_04")
+    parser.add_argument("--neu", nargs="+", metavar="KARTE", help="vorhandene Bilder neu erstellen")
+    parser.add_argument("--qualitaet", default="medium", choices=["low", "medium", "high"])
+    parser.add_argument("--test", action="store_true", help="nichts erstellen, nur anzeigen")
+    args = parser.parse_args()
+
+    cards = read_cards()
+    wanted = set(args.nur or []) | set(args.neu or [])
+    if wanted:
+        cards = [c for c in cards if c["key"] in wanted]
+    if args.spiel:
+        cards = [c for c in cards if c["key"].startswith(args.spiel)]
+    redo = set(args.neu or [])
+    todo = [c for c in cards if c["key"] in redo or not os.path.exists(os.path.join(OUT, c["file"]))]
+
+    if not todo:
+        print("Nichts zu tun – alle gewählten Karten haben schon ein Bild.")
+        return
+    print(f"{len(todo)} Karte(n) werden erstellt:")
+    for c in todo:
+        print(f"  {c['file']:<24} {c['name']} ({c['rarity']})")
+    if args.test:
+        return
+
+    if not os.environ.get("OPENAI_API_KEY"):
+        sys.exit("Kein OPENAI_API_KEY gesetzt. Erst:  export OPENAI_API_KEY=\"sk-...\"")
+    from openai import OpenAI
+    client = OpenAI()
+    os.makedirs(OUT, exist_ok=True)
+
+    for i, c in enumerate(todo, 1):
+        print(f"[{i}/{len(todo)}] {c['name']} …", end=" ", flush=True)
+        try:
+            art = generate(client, c, args.qualitaet)
+            # Rohbild zum Nachbessern aufheben (liegt außerhalb von Resources, kommt nicht ins Spiel)
+            raw_dir = os.path.join(ROOT, "Vorlagen", "Motive")
+            os.makedirs(raw_dir, exist_ok=True)
+            art.save(os.path.join(raw_dir, c["file"]))
+            compose(art, c["rarity"]).save(os.path.join(OUT, c["file"]))
+            print("fertig")
+        except Exception as e:  # weiter mit der nächsten Karte
+            print(f"Fehler: {e}")
+
+    print("\nJetzt in Unity: TwoMoons → Aktualisieren, dann Play.")
+
+
+if __name__ == "__main__":
+    main()
