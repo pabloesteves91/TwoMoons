@@ -18,11 +18,11 @@ namespace TwoMoons
             DrawTextField(rect, card);
         }
 
-        static GUIStyle nameStyle, numberStyle;
+        static GUIStyle nameStyle, numberStyle, rarityStyle;
         static readonly GUIContent content = new GUIContent();
 
         /// <summary>
-        /// Helles Textfeld unten auf der Karte (Pixelzeilen 3–10 von 32): oben links die Seltenheits-Steine,
+        /// Helles Textfeld unten auf der Karte (Pixelzeilen 3–10 von 32): oben links die Seltenheit,
         /// oben rechts die Nummer, darunter mittig der Name – zu lange Namen werden kleiner statt abgeschnitten.
         /// </summary>
         static void DrawTextField(Rect rect, CardDef card)
@@ -39,20 +39,16 @@ namespace TwoMoons
             nameStyle.normal.textColor = ink;
             numberStyle.normal.textColor = new Color(ink.r, ink.g, ink.b, 0.75f);
 
-            // Obere Zeile: Steine links, Nummer rechts
+            // Obere Zeile: Seltenheit links, Nummer rechts
             var top = new Rect(field.x + pixel * 0.8f, field.y + pixel * 0.5f, field.width - pixel * 1.6f, pixel * 2f);
-            int gems = card == CardDatabase.TwoMoons ? 5 : (int)card.Rarity + 1;
-            float gem = Mathf.Max(2f, pixel * 1.1f);
-            for (int i = 0; i < gems; i++)
-            {
-                var g = new Rect(top.x + i * gem * 1.6f, top.center.y - gem / 2f, gem, gem);
-                GUI.color = new Color(0.22f, 0.13f, 0.08f, 0.6f);
-                GUI.DrawTexture(new Rect(g.x - 1f, g.y - 1f, g.width + 2f, g.height + 2f), white);
-                GUI.color = card == CardDatabase.TwoMoons ? UiKit.Gold : CardDatabase.RarityColor(card.Rarity);
-                GUI.DrawTexture(g, white);
-            }
-            GUI.color = Color.white;
+            // Seltenheit als kleines Wort, in dunkler Seltenheitsfarbe
             numberStyle.fontSize = Mathf.Max(7, Mathf.RoundToInt(pixel * 1.5f));
+            rarityStyle ??= new GUIStyle(numberStyle) { alignment = TextAnchor.MiddleLeft, fontStyle = FontStyle.Bold };
+            rarityStyle.fontSize = numberStyle.fontSize;
+            rarityStyle.normal.textColor = card == CardDatabase.TwoMoons || card.Rarity == Rarity.Ultra ? new Color(0.7f, 0.45f, 0.05f)
+                : card.Rarity == Rarity.Rare ? new Color(0.15f, 0.38f, 0.75f)
+                : new Color(ink.r, ink.g, ink.b, 0.6f);
+            GUI.Label(top, card == CardDatabase.TwoMoons ? "Legende" : CardDatabase.RarityName(card.Rarity), rarityStyle);
             string number = card == CardDatabase.TwoMoons ? "1/1" : $"{card.Number:00}/{CardDatabase.CardsPerGame}";
             GUI.Label(top, number, numberStyle);
 
