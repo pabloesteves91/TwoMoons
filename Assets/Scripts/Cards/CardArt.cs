@@ -15,6 +15,17 @@ namespace TwoMoons
         static readonly Dictionary<int, Texture2D> cache = new Dictionary<int, Texture2D>();
         static Texture2D back;
 
+        /// <summary>
+        /// Bei jedem Play neu laden: ohne Domain-Reload blieben sonst die alten Platzhalter im Speicher
+        /// und neu hinzugefügte Kartenbilder würden erst nach einem Unity-Neustart sichtbar.
+        /// </summary>
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetCache()
+        {
+            cache.Clear();
+            back = null;
+        }
+
         public static Texture2D Get(CardDef card)
         {
             if (cache.TryGetValue(card.Id, out var texture) && texture != null) return texture;
