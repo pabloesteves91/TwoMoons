@@ -375,7 +375,8 @@ namespace TwoMoons
                     timer -= Time.deltaTime;
                     if (Couch != null && Couch.Type == Furniture.Chair) TableTalk();
                     else moodIcon.enabled = Mathf.Repeat(timer, 3f) < 1.5f;
-                    if (timer > 0f) break;
+                    // Um 18 Uhr wird ausgeschaltet: dann ist Schluss mit Zocken.
+                    if (timer > 0f && Game.Phase == GamePhase.Open) break;
                     FinishGaming();
                     break;
 
@@ -595,8 +596,10 @@ namespace TwoMoons
             card = null;
 
             // Pack-Käufer setzen sich gern an einen Tisch, sonst ab und zu Couch oder Arcade-Automat.
-            var couch = !hasGamed && boughtPacks && Random.value < TableChance ? FreeChair() : null;
-            if (couch == null) couch = !hasGamed && Random.value < CouchChance ? FreeGamingSpot() : null;
+            // Nach Ladenschluss setzt sich keiner mehr hin – Konsole und Automat sind aus.
+            bool open = Game.Phase == GamePhase.Open;
+            var couch = open && !hasGamed && boughtPacks && Random.value < TableChance ? FreeChair() : null;
+            if (couch == null) couch = open && !hasGamed && Random.value < CouchChance ? FreeGamingSpot() : null;
             if (couch != null)
             {
                 Game.Register.Remove(this);

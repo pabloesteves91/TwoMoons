@@ -34,9 +34,24 @@ namespace TwoMoons
         /// <summary>Spielt gerade jemand an diesem Automaten bzw. sitzt auf dieser Couch?</summary>
         public bool InUse => Customer.Active.Exists(c => c.Couch == this);
 
+        /// <summary>Fernseher, Konsole und Automat laufen nur, solange der Laden geöffnet ist.</summary>
+        static bool PoweredOn => GameManager.Instance.Phase == GamePhase.Open || GameManager.Instance.Phase == GamePhase.MainMenu;
+
+        static readonly Color Off = new Color(0.45f, 0.45f, 0.5f, 1f);
+
         void Update()
         {
             // Die Lichterkette funkelt sanft, der Fernseher flackert, wenn jemand zockt.
+            if ((Type == Furniture.Tv || Type == Furniture.Console || Type == Furniture.Arcade) && !PoweredOn)
+            {
+                spriteRenderer.color = Off;
+                return;
+            }
+            if (Type == Furniture.Console)
+            {
+                spriteRenderer.color = Color.white;
+                return;
+            }
             if (Type == Furniture.FairyLights)
             {
                 float glow = 0.75f + 0.25f * Mathf.Sin(Time.time * 3f + Cell.x);
