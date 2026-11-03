@@ -131,7 +131,7 @@ namespace TwoMoons
                 "Steht dein Mitarbeiter an der Kasse, kauft er selbst an: erst −15 % versuchen, sonst zum verlangten Preis – und legt die Karten in freie Vitrinen-Fächer. Ist keins frei, legt er sie nach und nach nach, sobald eine Karte verkauft wurde.");
             Section("Grading (ab Level 5)",
                 "An der Grading-Station eine Karte bewerten lassen (5 €, 1 Spielstunde).",
-                "Note 10 ×5, 9 ×3, 8 ×2, 7 ×1,5 Wert. Bewertete Karten mögen Sammler besonders.");
+                "BSA 10 ×5, 9 ×3, 8 ×2, 7 ×1,5 Wert. Ganz selten: BSA 10 Black Label (schwarze Hülle) ×15! Bewertete Karten mögen Sammler besonders.");
         }
 
         static void Extras()

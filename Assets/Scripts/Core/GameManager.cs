@@ -910,7 +910,7 @@ namespace TwoMoons
             Today.Income += cents;
             Today.CardsSold++;
             Today.CustomersServed++;
-            ShowToast($"{card.Name}{(grade > 0 ? $" (Note {grade})" : "")} verkauft: +{Money.Format(cents)}", 3f);
+            ShowToast($"{card.Name}{(grade > 0 ? $" ({Grading.Label(grade)})" : "")} verkauft: +{Money.Format(cents)}", 3f);
             SoundManager.Play(Sfx.Register);
             AddXp(cents / 100);
             CardSold?.Invoke(grade);

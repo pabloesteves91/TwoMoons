@@ -241,7 +241,7 @@ namespace TwoMoons
                 GUILayout.Label($"Marktwert: {Money.Format(selected.Value)}", UiKit.Text);
                 GUILayout.Label($"Im Besitz: {collection.Count(selected.Id)}", UiKit.Text);
                 int best = collection.BestGrade(selected.Id);
-                if (best > 0) GUILayout.Label($"Beste Note: {best} ({Grading.Describe(best)})", UiKit.Text);
+                if (best > 0) GUILayout.Label($"Beste Note: {Grading.Label(best)} ({Grading.Describe(best)})", UiKit.Text);
                 int slabs = Game.Slabs.FindAll(slab => slab.card == selected.Id).Count;
                 if (slabs > 0) GUILayout.Label($"Bewertet im Lager: {slabs}", UiKit.Text);
                 int inShowcase = 0;
@@ -317,7 +317,7 @@ namespace TwoMoons
                 else CardUI.Draw(cardRect, card, true);
                 GUILayout.Label(card.Name, UiKit.Bold);
                 int value = showcase.ValueAt(slot);
-                GUILayout.Label(grade > 0 ? $"Note {grade} · Wert {Money.Format(value)}" : $"Wert {Money.Format(value)}", UiKit.Text);
+                GUILayout.Label(grade > 0 ? $"{Grading.Label(grade)} · Wert {Money.Format(value)}" : $"Wert {Money.Format(value)}", UiKit.Text);
 
                 // Preis per Schieberegler: 10 % bis 300 % vom Wert, in 10-Cent-Schritten.
                 int price = showcase.Prices[slot];

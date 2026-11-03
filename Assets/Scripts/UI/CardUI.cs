@@ -74,16 +74,33 @@ namespace TwoMoons
         public static void DrawSlab(Rect rect, CardDef card, int grade)
         {
             EnsureTextures();
-            GUI.color = new Color(0.78f, 0.86f, 0.95f, 0.95f);
-            GUI.DrawTexture(rect, white);
+            bool blackLabel = grade >= Grading.BlackLabel;
+            // Black Label: schwarze Hülle mit goldenem Rand statt der hellen.
+            if (blackLabel)
+            {
+                GUI.color = UiKit.Gold;
+                GUI.DrawTexture(rect, white);
+                GUI.color = new Color(0.07f, 0.07f, 0.08f, 1f);
+                GUI.DrawTexture(new Rect(rect.x + 2f, rect.y + 2f, rect.width - 4f, rect.height - 4f), white);
+            }
+            else
+            {
+                GUI.color = new Color(0.78f, 0.86f, 0.95f, 0.95f);
+                GUI.DrawTexture(rect, white);
+            }
             float label = rect.height * 0.18f;
-            GUI.color = grade >= 10 ? UiKit.Gold : grade >= 8 ? new Color(0.85f, 0.2f, 0.2f) : new Color(0.35f, 0.4f, 0.5f);
+            GUI.color = blackLabel ? new Color(0.14f, 0.14f, 0.15f) : grade >= 10 ? UiKit.Gold : grade >= 8 ? new Color(0.85f, 0.2f, 0.2f) : new Color(0.35f, 0.4f, 0.5f);
             var labelRect = new Rect(rect.x + rect.width * 0.06f, rect.y + rect.height * 0.03f, rect.width * 0.88f, label);
             GUI.DrawTexture(labelRect, white);
             GUI.color = Color.white;
-            var style = new GUIStyle(UiKit.Bold) { alignment = TextAnchor.MiddleCenter, fontSize = Mathf.Max(8, Mathf.RoundToInt(label * 0.7f)) };
-            style.normal.textColor = Color.white;
-            GUI.Label(labelRect, $"BSA {grade}", style);
+            var style = new GUIStyle(UiKit.Bold) { alignment = TextAnchor.MiddleCenter, wordWrap = false, clipping = TextClipping.Overflow };
+            style.normal.textColor = blackLabel ? UiKit.Gold : Color.white;
+            // So groß wie möglich, aber immer ganz im Schild.
+            var text = new GUIContent(Grading.Label(grade).ToUpperInvariant());
+            int size = Mathf.Max(8, Mathf.RoundToInt(label * 0.7f));
+            style.fontSize = size;
+            while (size > 6 && style.CalcSize(text).x > labelRect.width - 4f) style.fontSize = --size;
+            GUI.Label(labelRect, text, style);
 
             float inset = rect.width * 0.1f;
             var cardRect = new Rect(rect.x + inset, labelRect.yMax + rect.height * 0.03f, rect.width - 2f * inset, rect.yMax - labelRect.yMax - rect.height * 0.06f);

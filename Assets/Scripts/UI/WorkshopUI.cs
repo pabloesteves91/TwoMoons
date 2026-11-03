@@ -63,7 +63,7 @@ namespace TwoMoons
                         // Kurz und in Gold, damit es auch bei einer 10 in eine Zeile passt.
                         bestStyle ??= new GUIStyle(UiKit.Hint) { fontSize = 11, fontStyle = FontStyle.Bold, wordWrap = false, clipping = TextClipping.Overflow };
                         bestStyle.normal.textColor = UiKit.Gold;
-                        GUI.Label(new Rect(rect.x - 10f, rect.yMax + 15f, rect.width + 20f, 16f), $"Beste: BSA {best}", bestStyle);
+                        GUI.Label(new Rect(rect.x - 10f, rect.yMax + 15f, rect.width + 20f, 16f), best >= Grading.BlackLabel ? "Beste: Black Label" : $"Beste: {Grading.Label(best)}", bestStyle);
                     }
                     GUI.enabled = Game.MoneyCents >= Grading.Cost;
                     if (GUI.Button(rect, GUIContent.none, GUIStyle.none))
@@ -90,7 +90,7 @@ namespace TwoMoons
             var area = GUILayoutUtility.GetRect(380f, 260f);
             CardUI.DrawSlab(new Rect(area.center.x - 90f, area.y, 180f, 250f), card, slab.grade);
             GUI.color = slab.grade >= 10 ? UiKit.Gold : slab.grade >= 8 ? UiKit.Good : Color.white;
-            GUILayout.Label($"Note {slab.grade} – {Grading.Describe(slab.grade)}!", UiKit.Title.WithFontSize(22).WithAlignment(TextAnchor.MiddleCenter));
+            GUILayout.Label($"{Grading.Label(slab.grade)} – {Grading.Describe(slab.grade)}!", UiKit.Title.WithFontSize(22).WithAlignment(TextAnchor.MiddleCenter));
             GUI.color = Color.white;
             GUILayout.Label($"{card.Name} ist jetzt {Money.Format(slab.Value)} wert (×{Grading.Multiplier(slab.grade):0.#}). " +
                             "Leg sie in eine Vitrine – Sammler lieben bewertete Karten.", UiKit.Text.WithAlignment(TextAnchor.MiddleCenter));
