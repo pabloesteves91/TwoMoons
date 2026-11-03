@@ -3,7 +3,7 @@ namespace TwoMoons
     /// <summary>Neue Einträge immer hinten anhängen – die Nummern stehen in Spielständen.</summary>
     public enum Furniture { Shelf, Showcase, Plant, Poster, Rug, WallClock, FairyLights, AccessoryStand, GameTable, PrizeCounter, TournamentBoard,
         Fridge, Couch, Tv, Console, Printer3D, PrintShelf, NeonSign, GradingStation, Lounge,
-        PremiumShowcase, Arcade, Turf, TrophyWall, MoonStatue, Table, Chair, TrashBin }
+        PremiumShowcase, Arcade, Turf, TrophyWall, MoonStatue, Table, Chair, TrashBin, Alarm }
 
     /// <summary>Wo ein Möbelstück hinkommt.</summary>
     public enum Placement
@@ -58,6 +58,7 @@ namespace TwoMoons
             new FurnitureDef { Id = Furniture.Table, Name = "Tisch", SpriteKey = "table", Placement = Placement.Floor, Cozy = 1 },
             new FurnitureDef { Id = Furniture.Chair, Name = "Stuhl", SpriteKey = "chair", Placement = Placement.Floor },
             new FurnitureDef { Id = Furniture.TrashBin, Name = "Mülleimer", SpriteKey = "trashBin", Placement = Placement.Floor },
+            new FurnitureDef { Id = Furniture.Alarm, Name = "Alarmanlage", SpriteKey = "alarm", Placement = Placement.Wall },
         };
 
         public static FurnitureDef Get(Furniture id) => All[(int)id];

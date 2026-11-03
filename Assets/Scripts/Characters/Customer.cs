@@ -11,7 +11,7 @@ namespace TwoMoons
     {
         public static readonly List<Customer> Active = new List<Customer>();
 
-        enum State { ToShelf, Browsing, ToQueue, Queued, Leaving, ToCouch, Gaming, Sneaking, ToBin }
+        enum State { ToShelf, Browsing, ToQueue, Queued, Leaving, ToCouch, Gaming, Sneaking, ToBin, ToRob, Robbing }
 
         const float Speed = 2.2f;
         const float BrowseSeconds = 2f;
@@ -86,6 +86,8 @@ namespace TwoMoons
 
         /// <summary>Ladendieb: steckt Packs ein und schleicht zum Ausgang. Mit [E] erwischen!</summary>
         public bool IsThief;
+        /// <summary>Gauner beim Überfall: läuft zur Kasse und stellt Forderungen.</summary>
+        public bool IsRobber;
         public bool IsSneaking => state == State.Sneaking;
         /// <summary>Influencerin (Tagesereignis): gut bedient gibt es viel Ruf, sonst Ärger.</summary>
         public bool IsInfluencer;
@@ -129,6 +131,16 @@ namespace TwoMoons
             {
                 spriteRenderer.color = new Color(1f, 0.75f, 0.95f);
                 Say("Hey Leute, ich bin heute bei TwoMoons!", 4f);
+            }
+
+            if (IsRobber)
+            {
+                // Dunkel gekleidet, mit Sturmhaube – direkt zur Kasse, an der Schlange vorbei.
+                spriteRenderer.color = new Color(0.32f, 0.3f, 0.36f);
+                Say("Keiner bewegt sich!", 3f);
+                state = State.ToRob;
+                if (!WalkTo(ShopGrid.QueueCells[0])) Game.StartRobbery(this);
+                return;
             }
 
             if (IsTournamentEntrant)
@@ -330,6 +342,16 @@ namespace TwoMoons
 
                 case State.Leaving:
                     if (Arrived) Destroy(gameObject);
+                    break;
+
+                case State.ToRob:
+                    if (!Arrived) break;
+                    state = State.Robbing;
+                    Say("Kasse auf! Und keine Tricks!", 3f);
+                    Game.StartRobbery(this);
+                    break;
+
+                case State.Robbing:
                     break;
 
                 case State.ToCouch:
@@ -594,6 +616,21 @@ namespace TwoMoons
                 return;
             }
             Leave(true, null);
+        }
+
+        /// <summary>Beim Überfall erschrocken: schnell raus, ohne Rufverlust.</summary>
+        public void Flee()
+        {
+            if (state == State.Leaving || IsRobber) return;
+            Say("Hilfe!", 2f);
+            Leave(true, null, alreadyRewarded: true);
+        }
+
+        /// <summary>Der Gauner haut ab.</summary>
+        public void RunAway()
+        {
+            state = State.Queued; // damit Leave() nicht übersprungen wird
+            Leave(true, null, alreadyRewarded: true);
         }
 
         void Leave(bool happy, string reason, bool alreadyRewarded = false)

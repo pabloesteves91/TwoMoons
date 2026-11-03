@@ -15,14 +15,16 @@ namespace TwoMoons
         void OnGUI()
         {
             if (Game.Phase == GamePhase.MainMenu) return;
-            if (Game.OpenPrinter == null && Game.SellerOffer == null && Game.OpenGrading == null && Game.GradeReveal == null)
+            if (Game.OpenPrinter == null && Game.SellerOffer == null && Game.OpenGrading == null && Game.GradeReveal == null &&
+                Game.CurrentRobbery == null)
             {
                 counterMessage = null;
                 return;
             }
             float width = UiKit.Begin();
             UiKit.DarkenScreen(width, 0.5f);
-            if (Game.SellerOffer != null) DrawOffer(width);
+            if (Game.CurrentRobbery != null) DrawRobbery(width);
+            else if (Game.SellerOffer != null) DrawOffer(width);
             else if (Game.GradeReveal != null) DrawGradeReveal(width);
             else if (Game.OpenGrading != null) DrawGrading(width);
             else DrawPrinter(width);
@@ -162,6 +164,36 @@ namespace TwoMoons
                 counterMessage = seller.TryCounterOffer() ? "Der Kunde ist einverstanden!" : "Der Kunde bleibt bei seinem Preis.";
             GUI.enabled = true;
             if (UiKit.Button("Ablehnen", GUILayout.Height(36f))) Close(seller, false);
+            GUILayout.EndHorizontal();
+            UiKit.EndWindow();
+        }
+
+        void DrawRobbery(float width)
+        {
+            var robbery = Game.CurrentRobbery;
+            UiKit.BeginWindow(UiKit.Centered(width, 500f, 330f));
+            GUI.color = UiKit.Bad;
+            GUILayout.Label("Überfall!", UiKit.Title);
+            GUI.color = Color.white;
+            GUILayout.Label("Ein Gauner mit Sturmhaube steht vor der Kasse. Die Kunden ducken sich.", UiKit.Text);
+            GUILayout.Space(6f);
+            GUILayout.Label(robbery.WantsGoods
+                ? $"„Her mit der Ware! {robbery.Demand} – sofort!“"
+                : $"„Kasse auf! {robbery.Demand}, dann bin ich weg!“", UiKit.Bold);
+            if (robbery.Message != null) GUILayout.Label(robbery.Message, UiKit.Text);
+            GUILayout.Space(4f);
+            GUILayout.Label(Robbery.HasAlarm
+                ? "Deine Alarmanlage hat einen Knopf unter der Theke …"
+                : "Tipp: Mit einer Alarmanlage (Computer → Einrichtung) könntest du Alarm auslösen.", UiKit.Hint);
+
+            GUILayout.FlexibleSpace();
+            GUILayout.BeginHorizontal();
+            if (UiKit.Button(robbery.WantsGoods ? "Ware geben" : "Geld geben", GUILayout.Height(36f))) robbery.GiveIn();
+            GUI.enabled = !robbery.Negotiated;
+            if (UiKit.Button("Verhandeln", GUILayout.Height(36f))) robbery.Negotiate();
+            GUI.enabled = Robbery.HasAlarm;
+            if (UiKit.Button("Alarmknopf", GUILayout.Height(36f))) robbery.PressAlarm();
+            GUI.enabled = true;
             GUILayout.EndHorizontal();
             UiKit.EndWindow();
         }

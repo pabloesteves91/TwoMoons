@@ -171,6 +171,13 @@ namespace TwoMoons
         public Printer3D OpenPrinter;
         /// <summary>Ankauf-Angebot eines Verkäufers an der Kasse.</summary>
         public Customer SellerOffer;
+        /// <summary>Laufender Überfall (Verhandlungsfenster offen), sonst null.</summary>
+        public Robbery CurrentRobbery;
+        /// <summary>Uhrzeit des heutigen Überfalls (-1 = keiner).</summary>
+        public int RobberyMinute { get; private set; } = -1;
+        int lastRobberyDay = -100;
+        /// <summary>Was die Polizei am nächsten Morgen zurückbringt.</summary>
+        int refundCents, refundProduct = -1, refundCount;
         /// <summary>Kartenwahl an der Grading-Station.</summary>
         public GradingStation OpenGrading;
         /// <summary>Frisch bewertete Karte, deren Note gerade gezeigt wird.</summary>
@@ -224,13 +231,14 @@ namespace TwoMoons
             Phase == GamePhase.MainMenu || Phase == GamePhase.CharacterSelect || Phase == GamePhase.Intro || Phase == GamePhase.Summary ||
             DialogLines != null || ComputerOpen || PauseOpen || BuildMode ||
             CollectionOpen || OpenShowcase != null || OpenedPack != null || LevelUpShown > 0 || CutscenePlaying || PrizeCounterOpen ||
-            OpenPrinter != null || SellerOffer != null || OpenGrading != null || GradeReveal != null || TutorialAsking || StorageOpen;
+            OpenPrinter != null || SellerOffer != null || OpenGrading != null || GradeReveal != null || TutorialAsking || StorageOpen ||
+            CurrentRobbery != null;
 
         /// <summary>Menüs, die das Spiel anhalten.</summary>
         bool Paused =>
             DialogLines != null || ComputerOpen || PauseOpen || CollectionOpen || OpenShowcase != null || OpenedPack != null ||
             LevelUpShown > 0 || CutscenePlaying || PrizeCounterOpen || OpenPrinter != null || SellerOffer != null ||
-            OpenGrading != null || GradeReveal != null || TutorialAsking || StorageOpen;
+            OpenGrading != null || GradeReveal != null || TutorialAsking || StorageOpen || CurrentRobbery != null;
 
         public int ToPlace(Furniture furniture) => toPlace.TryGetValue(furniture, out int count) ? count : 0;
 
@@ -637,6 +645,11 @@ namespace TwoMoons
             DayTime = Mathf.Clamp(data.dayTime, 0f, DayLengthSeconds);
             TodayEvent = (DayEvent)data.dayEvent;
             InfluencerMinute = data.influencerMinute;
+            RobberyMinute = data.robberyMinute;
+            lastRobberyDay = data.lastRobberyDay;
+            refundCents = data.robberyRefundCents;
+            refundProduct = data.robberyRefundProduct;
+            refundCount = data.robberyRefundCount;
             if (data.today != null) Today = data.today;
             ShowToast($"Willkommen zurück, {PlayerName}! Tag {Day}, {ClockText}.");
         }
@@ -656,6 +669,11 @@ namespace TwoMoons
                 dayTime = DayTime,
                 dayEvent = (int)TodayEvent,
                 influencerMinute = InfluencerMinute,
+                robberyMinute = RobberyMinute,
+                lastRobberyDay = lastRobberyDay,
+                robberyRefundCents = refundCents,
+                robberyRefundProduct = refundProduct,
+                robberyRefundCount = refundCount,
                 today = Today,
                 chapter = ChapterProgress.Chapter,
                 questProgress = ChapterProgress.SaveProgress(),
@@ -1149,9 +1167,74 @@ namespace TwoMoons
             for (int i = 0; i < dirt; i++) WorldFactory.SpawnDirtSomewhere();
 
             Tournament.OnNewDay();
+            ReturnStolenGoods();
+            RobberyMinute = Robbery.RollForToday(lastRobberyDay);
 
             // Automatisch speichern, jeden Morgen nach dem Schlafen.
             SaveGame();
+        }
+
+        // ---------- Überfall ----------
+
+        public void RobberArrived() => RobberyMinute = -1;
+
+        /// <summary>Nur zum Testen: Überfall gleich jetzt (der Gauner kommt beim nächsten Kunden-Takt).</summary>
+        public void TestRobbery() => RobberyMinute = ClockMinutes;
+
+        /// <summary>Der Gauner steht vor der Kasse: Verhandlungsfenster, Kunden erschrecken.</summary>
+        public void StartRobbery(Customer robber)
+        {
+            if (CurrentRobbery != null) return;
+            CurrentRobbery = Robbery.Create(robber);
+            SoundManager.Play(Sfx.Error);
+            foreach (var customer in new List<Customer>(Customer.Active))
+                if (customer != robber && UnityEngine.Random.value < 0.4f) customer.Flee();
+        }
+
+        public void LoseMoney(int cents)
+        {
+            MoneyCents -= cents;
+            Today.Expenses += cents;
+        }
+
+        /// <summary>Überfall vorbei: Gauner haut ab, vielleicht bringt die Polizei morgen die Hälfte zurück.</summary>
+        public void EndRobbery(Robbery robbery, int cents, int count, bool refund)
+        {
+            CurrentRobbery = null;
+            lastRobberyDay = Day;
+            robbery.Robber.RunAway();
+            if (cents > 0 || count > 0)
+            {
+                ShowToast(cents > 0 ? $"Der Gauner ist mit {Money.Format(cents)} abgehauen." : $"Der Gauner ist mit {count}× {robbery.Product.Name} abgehauen.", 5f);
+                if (refund)
+                {
+                    refundCents = cents / 2;
+                    refundProduct = count > 0 ? (int)robbery.Product.Id : -1;
+                    refundCount = count / 2;
+                }
+            }
+            SaveGame();
+        }
+
+        void ReturnStolenGoods()
+        {
+            if (refundCents <= 0 && refundCount <= 0) return;
+            string what;
+            if (refundCents > 0)
+            {
+                MoneyCents += refundCents;
+                what = Money.Format(refundCents);
+            }
+            else
+            {
+                var product = Catalog.Get((ProductId)refundProduct);
+                WorldFactory.SpawnBox(WorldFactory.FreeDeliveryCell(), product, refundCount);
+                what = $"{refundCount}× {product.Name} (Karton am Eingang)";
+            }
+            ShowDialog(new[] { "Die Polizei war da!", $"Sie haben den Gauner von gestern erwischt und bringen dir einen Teil zurück: {what}." });
+            refundCents = 0;
+            refundProduct = -1;
+            refundCount = 0;
         }
 
         public void NotifyDirtCleaned() => DirtCleaned?.Invoke();

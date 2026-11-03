@@ -149,6 +149,12 @@ namespace TwoMoons
         public List<SavedCard> promoDiscounts = new List<SavedCard>();
         public bool promoFlyer;
         public bool promoBundle;
+        /// <summary>Überfall: geplante Uhrzeit heute, letzter Überfall-Tag, Rückgabe der Polizei am nächsten Morgen.</summary>
+        public int robberyMinute = -1;
+        public int lastRobberyDay = -100;
+        public int robberyRefundCents;
+        public int robberyRefundProduct = -1;
+        public int robberyRefundCount;
         public DayStats today;
         public int chapter = 1;
         public int[] questProgress;

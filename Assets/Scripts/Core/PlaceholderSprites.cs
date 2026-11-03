@@ -220,6 +220,12 @@ namespace TwoMoons
                     Rect(8, 9, 1, 3, new Color32(30, 22, 18, 255));
                     Rect(8, 9, 2, 1, new Color32(30, 22, 18, 255));
                     break;
+                case "alarm": // weißer Kasten mit rotem Knopf und Blinklicht
+                    Rect(4, 4, 8, 9, new Color32(60, 60, 70, 255));
+                    Rect(5, 5, 6, 7, new Color32(230, 230, 235, 255));
+                    Rect(6, 6, 4, 3, new Color32(220, 40, 40, 255));
+                    Rect(7, 12, 2, 2, new Color32(255, 80, 60, 255));
+                    break;
                 case "fairyLights":
                     for (int x = 0; x < 16; x++) Rect(x, 11 - (x % 4 == 1 || x % 4 == 2 ? 1 : 0), 1, 1, new Color32(60, 60, 50, 255));
                     Rect(1, 9, 2, 2, new Color32(255, 220, 90, 255));

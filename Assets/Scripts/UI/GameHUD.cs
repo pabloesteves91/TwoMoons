@@ -54,7 +54,7 @@ namespace TwoMoons
             bool windowOpen = Game.CollectionOpen || Game.OpenShowcase != null || Game.OpenedPack != null ||
                               Game.PrizeCounterOpen || Game.OpenPrinter != null || Game.OpenGrading != null ||
                               Game.GradeReveal != null || Game.SellerOffer != null || Game.ComputerOpen || Game.PauseOpen ||
-                              Game.StorageOpen;
+                              Game.StorageOpen || Game.CurrentRobbery != null;
             BigWindowOpen = windowOpen;
             if (!windowOpen)
             {
@@ -186,7 +186,7 @@ namespace TwoMoons
             switch (pauseScreen)
             {
                 case PauseScreen.Main:
-                    UiKit.BeginWindow(UiKit.Centered(width, 320f, ShowTestTools ? 480f : 390f));
+                    UiKit.BeginWindow(UiKit.Centered(width, 320f, ShowTestTools ? 520f : 390f));
                     GUILayout.Label("Pause", title);
                     GUILayout.Space(6f);
                     if (UiKit.BigButtonLayout("Weiter [Esc]")) Game.PauseOpen = false;
@@ -201,6 +201,13 @@ namespace TwoMoons
                         GUI.enabled = Game.StoreLevel < StoreLevels.Max;
                         if (Button($"TEST: Level {Mathf.Min(Game.StoreLevel + 1, StoreLevels.Max)} freischalten", GUILayout.Height(30f)))
                             pauseScreen = PauseScreen.TestUnlock;
+                        // Überfall sofort auslösen (nur während der Laden offen ist).
+                        GUI.enabled = Game.Phase == GamePhase.Open && Game.CurrentRobbery == null;
+                        if (Button("TEST: Überfall jetzt", GUILayout.Height(30f)))
+                        {
+                            Game.PauseOpen = false;
+                            Game.TestRobbery();
+                        }
                         GUI.enabled = true;
                     }
                     UiKit.EndWindow();

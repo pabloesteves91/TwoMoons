@@ -174,6 +174,7 @@ namespace TwoMoons
             Furnishing(Furniture.Table, "Kunden setzen sich, öffnen Booster und tauschen Karten · Stühle direkt daneben stellen", 3000, 2),
             Furnishing(Furniture.Chair, "Sitzplatz – muss direkt neben einem Tisch stehen", 1000, 2),
             Furnishing(Furniture.TrashBin, "Für den Pack-Müll der Kunden · volle Säcke in den Container vor der Tür", 1500, 2),
+            Furnishing(Furniture.Alarm, "Für die Wand · Alarmknopf bei Überfällen, schreckt Gauner ab", 15000, 3),
             Furnishing(Furniture.FairyLights, "Für die Wand, funkelt · Gemütlichkeit +3", 2500, 2),
             Furnishing(Furniture.GameTable, "2 Turnierplätze: links und rechts daneben frei lassen", 12000, 3),
             Furnishing(Furniture.PrizeCounter, "Prizepool vorbereiten und Preise verteilen", 15000, 3),

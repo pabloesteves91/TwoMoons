@@ -90,7 +90,8 @@ namespace TwoMoons
                 "Das Gesicht über dem Kopf zeigt die Laune: froh → neutral → verärgert. Danach gehen sie (Ruf −1).",
                 "Ist ein Regal leer, schauen sie im nächsten. Ist alles leer, gehen sie.",
                 "Manchmal kleckert ein Kunde – Flecken mit [E] wegwischen, sonst werden alle ungeduldiger.",
-                "Ladendiebe: Wer „*pfeif*“ macht und ohne zu zahlen zur Tür schleicht, hat etwas eingesteckt. Hinlaufen und [E] drücken!");
+                "Ladendiebe: Wer „*pfeif*“ macht und ohne zu zahlen zur Tür schleicht, hat etwas eingesteckt. Hinlaufen und [E] drücken!",
+                "Überfall (ab Level 3, sehr selten): Der Gauner will Geld oder Ware. Nachgeben, einmal verhandeln oder – mit Alarmanlage – den Alarmknopf drücken. Manchmal bringt die Polizei am nächsten Morgen einen Teil zurück.");
             Section("Tagesereignisse (ab Tag 2)",
                 "Regentag – weniger Kunden, aber geduldiger.",
                 "Schulschluss-Ansturm – 13 bis 15 Uhr kommen viel mehr Kunden.",

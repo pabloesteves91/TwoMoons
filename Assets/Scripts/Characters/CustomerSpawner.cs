@@ -21,6 +21,13 @@ namespace TwoMoons
 
             bool open = game.Phase == GamePhase.Open;
             bool influencer = open && game.InfluencerMinute >= 0 && game.ClockMinutes >= game.InfluencerMinute;
+            // Sehr selten: ein Überfall (Uhrzeit wird morgens ausgewürfelt).
+            if (open && game.RobberyMinute >= 0 && game.ClockMinutes >= game.RobberyMinute && game.CurrentRobbery == null)
+            {
+                game.RobberArrived();
+                WorldFactory.SpawnCustomer().IsRobber = true;
+                SoundManager.Play(Sfx.Doorbell);
+            }
             // Beim Ansturm passen mehr Kunden gleichzeitig in den Laden.
             int maxCustomers = open && game.SpawnIntervalFactor < 1f ? MaxCustomers + 3 : MaxCustomers;
             if (Customer.Active.Count < maxCustomers || influencer)
