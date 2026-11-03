@@ -91,6 +91,15 @@ namespace TwoMoons
         public override void Interact(PlayerController player)
         {
             var game = GameManager.Instance;
+            if (Done && CardId == CardDatabase.TwoMoons.Id)
+            {
+                // Die Legende ist natürlich perfekt.
+                CardId = -1;
+                Progress = 0f;
+                Refresh();
+                game.RevealTwoMoonsGrade();
+                return;
+            }
             if (Done)
             {
                 var slab = new Slab { card = CardId, grade = Grading.Roll() };

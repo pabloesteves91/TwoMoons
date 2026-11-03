@@ -231,11 +231,16 @@ namespace TwoMoons
             if (selected == CardDatabase.TwoMoons && Game.HasTwoMoons)
             {
                 var big = GUILayoutUtility.GetRect(180f, 240f, GUILayout.Width(180f), GUILayout.Height(240f));
-                CardUI.Draw(big, selected);
+                if (Game.TwoMoonsGraded) CardUI.DrawSlab(big, selected, Grading.BlackLabel);
+                else CardUI.Draw(big, selected);
                 GUI.color = UiKit.Gold;
                 GUILayout.Label("Two Moons – die Legende", UiKit.Bold);
                 GUI.color = Color.white;
-                GUILayout.Label("Es gibt sie nur ein einziges Mal. Sie gehört dem besten Laden der Stadt – und ist unverkäuflich.", UiKit.Text);
+                if (Game.TwoMoonsGraded)
+                    GUILayout.Label($"{Grading.Label(Grading.BlackLabel)} · Wert {Money.Format(Grading.Value(selected, Grading.BlackLabel))} – unverkäuflich.", UiKit.Text);
+                GUILayout.Label(Game.TwoMoonsGraded
+                    ? "Es gibt sie nur ein einziges Mal. Sie gehört dem besten Laden der Stadt."
+                    : "Es gibt sie nur ein einziges Mal. Sie gehört dem besten Laden der Stadt – und ist unverkäuflich. Einmal bewerten lassen geht an der Grading-Station.", UiKit.Text);
             }
             else if (selected != null && collection.IsDiscovered(selected.Id))
             {

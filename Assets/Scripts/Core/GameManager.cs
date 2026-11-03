@@ -368,6 +368,24 @@ namespace TwoMoons
         /// <summary>Die legendäre Karte gehört dir (nach dem Finale).</summary>
         public bool HasTwoMoons => seenStories.Contains(TwoMoonsStory);
 
+        const string TwoMoonsGradedStory = "twoMoonsBlackLabel";
+
+        /// <summary>Die Two-Moons-Karte wurde (einmalig) bewertet – immer BSA 10 Black Label.</summary>
+        public bool TwoMoonsGraded => seenStories.Contains(TwoMoonsGradedStory);
+
+        /// <summary>Two Moons aus der Grading-Station abholen: Black Label, unverkäuflich, bleibt im Sammelbuch.</summary>
+        public void RevealTwoMoonsGrade()
+        {
+            seenStories.Add(TwoMoonsGradedStory);
+            var slab = new Slab { card = CardDatabase.TwoMoons.Id, grade = Grading.BlackLabel };
+            GradeReveal = slab;
+            SoundManager.Play(Sfx.Fanfare);
+            SoundManager.Play(Sfx.ShinyCard);
+            ChangeReputation(20);
+            Graded?.Invoke(slab.grade);
+            SaveGame();
+        }
+
         /// <summary>Nach dem Finale: die Two-Moons-Karte ins Sammelbuch, dann geht das Spiel frei weiter.</summary>
         void FinishStory()
         {

@@ -39,6 +39,21 @@ namespace TwoMoons
                             "Note 10 ×5, 9 ×3, 8 ×2, 7 ×1,5", UiKit.Hint);
             GUILayout.Space(6f);
 
+            // Die Legende darf genau einmal bewertet werden.
+            if (Game.HasTwoMoons && !Game.TwoMoonsGraded)
+            {
+                GUI.color = UiKit.Gold;
+                GUI.enabled = Game.MoneyCents >= Grading.Cost;
+                if (UiKit.Button("Two Moons bewerten lassen (einmalig)", GUILayout.Height(32f)))
+                {
+                    station.StartGrading(CardDatabase.TwoMoons);
+                    Game.OpenGrading = null;
+                }
+                GUI.enabled = true;
+                GUI.color = Color.white;
+                GUILayout.Space(6f);
+            }
+
             var owned = new System.Collections.Generic.List<CardDef>();
             foreach (var card in CardDatabase.All)
                 if (Game.Collection.Count(card.Id) > 0) owned.Add(card);
@@ -98,8 +113,10 @@ namespace TwoMoons
             GUI.color = slab.grade >= 10 ? UiKit.Gold : slab.grade >= 8 ? UiKit.Good : Color.white;
             GUILayout.Label($"{Grading.Label(slab.grade)} – {Grading.Describe(slab.grade)}!", UiKit.Title.WithFontSize(22).WithAlignment(TextAnchor.MiddleCenter));
             GUI.color = Color.white;
-            GUILayout.Label($"{card.Name} ist jetzt {Money.Format(slab.Value)} wert (×{Grading.Multiplier(slab.grade):0.#}). " +
-                            "Leg sie in eine Vitrine – Sammler lieben bewertete Karten.", UiKit.Text.WithAlignment(TextAnchor.MiddleCenter));
+            GUILayout.Label(card == CardDatabase.TwoMoons
+                ? $"Die Legende ist jetzt {Money.Format(slab.Value)} wert – aber unverkäuflich. Sie bleibt im Sammelbuch."
+                : $"{card.Name} ist jetzt {Money.Format(slab.Value)} wert (×{Grading.Multiplier(slab.grade):0.#}). " +
+                  "Leg sie in eine Vitrine – Sammler lieben bewertete Karten.", UiKit.Text.WithAlignment(TextAnchor.MiddleCenter));
             GUILayout.FlexibleSpace();
             if (UiKit.Button("Super! [Esc]", GUILayout.Height(34f))) Game.GradeReveal = null;
             UiKit.EndWindow();

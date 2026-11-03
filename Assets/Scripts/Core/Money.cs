@@ -7,7 +7,9 @@ namespace TwoMoons
         {
             string sign = cents < 0 ? "-" : "";
             int abs = System.Math.Abs(cents);
-            return $"{sign}{abs / 100},{abs % 100:00} €";
+            // Tausender mit Punkt, z. B. 150.000,00 €
+            string euros = (abs / 100).ToString("#,0", System.Globalization.CultureInfo.InvariantCulture).Replace(',', '.');
+            return $"{sign}{euros},{abs % 100:00} €";
         }
     }
 }
