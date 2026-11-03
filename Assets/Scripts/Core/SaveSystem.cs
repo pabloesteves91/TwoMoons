@@ -33,6 +33,12 @@ namespace TwoMoons
     }
 
     [Serializable]
+    public class SavedMess
+    {
+        public int x, y, kind;
+    }
+
+    [Serializable]
     public class SavedCard
     {
         public int card;
@@ -158,6 +164,8 @@ namespace TwoMoons
         public bool policeOnSite;
         public bool robberyCleanupTomorrow;
         public bool robberyCleanupPending;
+        /// <summary>Liegengebliebene Überfall-Spuren (x, y = Feld, kind = RobberyMess.Kind).</summary>
+        public List<SavedMess> robberyMess = new List<SavedMess>();
         public DayStats today;
         public int chapter = 1;
         public int[] questProgress;

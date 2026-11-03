@@ -88,6 +88,32 @@ namespace TwoMoons
             return renderer.gameObject.AddComponent<DirtSpot>();
         }
 
+        public static RobberyMess SpawnRobberyMess(RobberyMess.Kind kind, Vector2Int cell)
+        {
+            var renderer = CreateSprite("Überfall-Spuren", RobberyMess.SpriteFor(kind), ShopGrid.CellToWorld(cell),
+                kind == RobberyMess.Kind.Tape ? 0 : FloorDecalOrder + 1);
+            if (kind == RobberyMess.Kind.Tape) renderer.gameObject.AddComponent<YSort>();
+            var mess = renderer.gameObject.AddComponent<RobberyMess>();
+            mess.Type = kind;
+            mess.Cell = cell;
+            return mess;
+        }
+
+        /// <summary>Ein freies Bodenfeld im Laden (für Flecken und Überfall-Spuren).</summary>
+        public static Vector2Int? FreeFloorCell()
+        {
+            for (int attempt = 0; attempt < 30; attempt++)
+            {
+                var cell = new Vector2Int(Random.Range(1, ShopGrid.Width - 1), Random.Range(2, ShopGrid.Height - 1));
+                if (!Game.Grid.IsWalkable(cell) || ShopGrid.IsReserved(cell)) continue;
+                // Nicht auf etwas, das schon dort liegt.
+                if (RobberyMess.Existing.Exists(m => m.Cell == cell)) continue;
+                if (DirtSpot.Existing.Exists(d => ShopGrid.WorldToCell(d.transform.position) == cell)) continue;
+                return cell;
+            }
+            return null;
+        }
+
         public static void SpawnDirtSomewhere()
         {
             for (int attempt = 0; attempt < 20; attempt++)

@@ -181,7 +181,7 @@ namespace TwoMoons
         /// <summary>Morgen nach dem Überfall: erst aufräumen, dann öffnen.</summary>
         bool cleanupTomorrow;
         public bool RobberyCleanupPending { get; private set; }
-        public int CleanupLeft => RobberyCleanupPending ? DirtSpot.Existing.Count : 0;
+        public int CleanupLeft => RobberyCleanupPending ? DirtSpot.Existing.Count + RobberyMess.Existing.Count : 0;
         /// <summary>Was die Polizei am nächsten Morgen zurückbringt.</summary>
         int refundCents, refundProduct = -1, refundCount;
         /// <summary>Kartenwahl an der Grading-Station.</summary>
@@ -605,6 +605,8 @@ namespace TwoMoons
             foreach (var box in data.boxes)
                 WorldFactory.SpawnBox(new Vector2Int(box.x, box.y), Catalog.Get((ProductId)box.product), box.amount).IsSingle = box.single;
             foreach (var cell in data.dirt) WorldFactory.SpawnDirt(new Vector2Int(cell.x, cell.y));
+            if (data.robberyMess != null)
+                foreach (var mess in data.robberyMess) WorldFactory.SpawnRobberyMess((RobberyMess.Kind)mess.kind, new Vector2Int(mess.x, mess.y));
             foreach (var saved in data.showcases)
             {
                 var showcase = WorldFactory.SpawnShowcase(new Vector2Int(saved.x, saved.y), saved.premium);
@@ -779,6 +781,8 @@ namespace TwoMoons
                 var cell = ShopGrid.WorldToCell(dirt.transform.position);
                 data.dirt.Add(new SavedCell { x = cell.x, y = cell.y });
             }
+            foreach (var mess in RobberyMess.Existing)
+                data.robberyMess.Add(new SavedMess { x = mess.Cell.x, y = mess.Cell.y, kind = (int)mess.Type });
             return data;
         }
 
@@ -850,7 +854,7 @@ namespace TwoMoons
             if (Phase != GamePhase.Preparation) return;
             if (CleanupLeft > 0)
             {
-                ShowToast($"Erst aufräumen: Noch {CleanupLeft} Flecken vom Überfall.");
+                ShowToast($"Erst aufräumen: Noch {CleanupLeft} Sachen vom Überfall.");
                 SoundManager.Play(Sfx.Error);
                 return;
             }
@@ -1198,8 +1202,12 @@ namespace TwoMoons
                 // Die Spurensicherung hat Chaos hinterlassen: erst aufräumen, dann öffnen.
                 cleanupTomorrow = false;
                 RobberyCleanupPending = true;
-                for (int i = 0; i < 5; i++) WorldFactory.SpawnDirtSomewhere();
-                ShowToast("Nach dem Überfall ist es unordentlich: Putz alle Flecken weg, dann kannst du öffnen.", 7f);
+                SpawnRobberyMess();
+                ShowDialog(new[]
+                {
+                    "Die Spurensicherung ist weg – und hat ein ziemliches Chaos hinterlassen.",
+                    "Absperrband abnehmen, Beweis-Markierungen einsammeln, Durcheinander aufräumen und die Flecken wegputzen. Erst dann kannst du öffnen.",
+                });
             }
             RobberyMinute = Robbery.RollForToday(lastRobberyDay);
 
@@ -1252,6 +1260,29 @@ namespace TwoMoons
                 }
             }
             SaveGame();
+        }
+
+        /// <summary>Das Chaos nach dem Überfall: Absperrband an der Kasse, Markierungen, Durcheinander und viele Flecken.</summary>
+        static void SpawnRobberyMess()
+        {
+            var queue = ShopGrid.QueueCells;
+            int tapeRow = queue[queue.Length - 1].y - 1;
+            for (int x = 1; x <= queue[0].x + 2; x++)
+            {
+                var cell = new Vector2Int(x, tapeRow);
+                if (GameManager.Instance.Grid.IsWalkable(cell)) WorldFactory.SpawnRobberyMess(RobberyMess.Kind.Tape, cell);
+            }
+            for (int i = 0; i < 4; i++)
+            {
+                var cell = WorldFactory.FreeFloorCell();
+                if (cell != null) WorldFactory.SpawnRobberyMess(RobberyMess.Kind.Marker, cell.Value);
+            }
+            for (int i = 0; i < 5; i++)
+            {
+                var cell = WorldFactory.FreeFloorCell();
+                if (cell != null) WorldFactory.SpawnRobberyMess(RobberyMess.Kind.Clutter, cell.Value);
+            }
+            for (int i = 0; i < 8; i++) WorldFactory.SpawnDirtSomewhere();
         }
 
         void ReturnStolenGoods()
