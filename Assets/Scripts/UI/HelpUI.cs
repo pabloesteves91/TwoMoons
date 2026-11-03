@@ -110,7 +110,7 @@ namespace TwoMoons
         static void Computer() =>
             Section("Der Computer (oben links, [E])",
                 "Ware – Kartons mit Boostern, Brettspielen (ab Level 2, ins normale Regal), Zubehör, Getränken, Filament. Sofort am Eingang geliefert.",
-                "Einrichtung – Möbel und Deko. Alles kommt in einem Paket am Eingang: mit [E] auspacken, dann aufstellen. Ab Level 5 auch die Ladenerweiterung.",
+                "Einrichtung – Möbel und Deko. Alles kommt in einem Paket am Eingang: mit [E] auspacken, dann aufstellen. Ab Level 5 auch die Ladenerweiterung, ab Level 4 teure Laden-Upgrades (Kartenterminal, Kamera, größere Regale, Klimaanlage, Schaufenster).",
                 "Preise – Verkaufspreis jeder Ware einstellen.",
                 "Lagerraum (Einrichtung, 60 €) – Tür in der linken Wand. Kartons ohne Platz mit [E] hineinstellen, mit leeren Händen [E] zum Herausnehmen. Der Mitarbeiter holt dort auch Nachschub. Maus über die Tür zeigt den Bestand.",
                 "Team – ab Level 3 einen Mitarbeiter einstellen (Kasse oder Regale), Lohn wird abends abgezogen.",
@@ -132,6 +132,7 @@ namespace TwoMoons
                 "Steht dein Mitarbeiter an der Kasse, kauft er selbst an: erst −15 % versuchen, sonst zum verlangten Preis – und legt die Karten in freie Vitrinen-Fächer. Ist keins frei, legt er sie nach und nach nach, sobald eine Karte verkauft wurde.");
             Section("Grading (ab Level 5)",
                 "An der Grading-Station eine Karte bewerten lassen (5 €, 1 Spielstunde).",
+                "Sammler-Auktion (ab Level 5, jeden 7. Tag): Computer → Ware. Mitbieten, bis die anderen aussteigen – mal Schnäppchen, mal zu teuer.",
                 "BSA 10 ×5, 9 ×3, 8 ×2, 7 ×1,5 Wert. Ganz selten: BSA 10 Black Label (schwarze Hülle) ×15! Bewertete Karten mögen Sammler besonders.");
         }
 

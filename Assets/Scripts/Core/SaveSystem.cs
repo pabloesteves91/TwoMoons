@@ -164,6 +164,8 @@ namespace TwoMoons
         public bool policeOnSite;
         public bool robberyCleanupTomorrow;
         public bool robberyCleanupPending;
+        public List<int> upgrades = new List<int>();
+        public List<AuctionLot> auctionLots = new List<AuctionLot>();
         /// <summary>Liegengebliebene Überfall-Spuren (x, y = Feld, kind = RobberyMess.Kind).</summary>
         public List<SavedMess> robberyMess = new List<SavedMess>();
         public DayStats today;

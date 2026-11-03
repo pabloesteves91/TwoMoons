@@ -186,7 +186,7 @@ namespace TwoMoons
             switch (pauseScreen)
             {
                 case PauseScreen.Main:
-                    UiKit.BeginWindow(UiKit.Centered(width, 320f, ShowTestTools ? 560f : 390f));
+                    UiKit.BeginWindow(UiKit.Centered(width, 320f, ShowTestTools ? 600f : 390f));
                     GUILayout.Label("Pause", title);
                     GUILayout.Space(6f);
                     if (UiKit.BigButtonLayout("Weiter [Esc]")) Game.PauseOpen = false;
@@ -213,6 +213,12 @@ namespace TwoMoons
                         {
                             Game.PauseOpen = false;
                             Game.TestBlackLabel();
+                        }
+                        if (Button("TEST: Auktion heute", GUILayout.Height(30f)))
+                        {
+                            Game.PauseOpen = false;
+                            Game.AuctionLots = Auction.CreateLots();
+                            Game.ShowToast("Test: Sammler-Auktion am Computer → Ware.", 4f);
                         }
                     }
                     UiKit.EndWindow();
@@ -597,10 +603,12 @@ namespace TwoMoons
             GUILayout.Label(options == Catalog.Orders
                 ? "Lieferung: sofort an den Eingang"
                 : "Lieferung sofort · mit [B] aufstellen · Deko macht den Laden gemütlicher", hint);
+            if (options == Catalog.Orders) DrawAuction();
             if (options == Catalog.Furnishings)
             {
                 DrawStorageOffer();
                 DrawExtension();
+                DrawUpgrades();
             }
             foreach (var option in options)
             {
@@ -677,6 +685,81 @@ namespace TwoMoons
             }
             GUILayout.EndHorizontal();
             GUILayout.Space(8f);
+        }
+
+        /// <summary>Teure, dauerhafte Laden-Upgrades.</summary>
+        void DrawUpgrades()
+        {
+            GUILayout.Label("Laden-Upgrades", bold);
+            foreach (var upgrade in Upgrades.All)
+            {
+                bool owned = Game.Upgrades.Has(upgrade.Id);
+                bool locked = upgrade.MinLevel > Game.StoreLevel;
+                GUILayout.BeginHorizontal();
+                GUI.color = locked ? UiKit.Dimmed : Color.white;
+                GUILayout.BeginVertical();
+                GUILayout.Label($"{upgrade.Name} – {Money.Format(upgrade.Cost)}", bold);
+                GUILayout.Label(upgrade.Description, text);
+                GUILayout.EndVertical();
+                GUI.color = Color.white;
+                GUILayout.FlexibleSpace();
+                if (owned) GUILayout.Label("eingebaut", hint, GUILayout.Width(90f), GUILayout.Height(36f));
+                else if (locked) GUILayout.Label($"ab Level {upgrade.MinLevel}", hint, GUILayout.Width(90f), GUILayout.Height(36f));
+                else
+                {
+                    GUI.enabled = Game.MoneyCents >= upgrade.Cost;
+                    if (Button("Kaufen", GUILayout.Width(90f), GUILayout.Height(36f))) Game.BuyUpgrade(upgrade);
+                    GUI.enabled = true;
+                }
+                GUILayout.EndHorizontal();
+            }
+            GUILayout.Space(8f);
+        }
+
+        string auctionMessage;
+
+        /// <summary>Sammler-Auktion (jeden 7. Tag ab Level 5) oben im Ware-Tab.</summary>
+        void DrawAuction()
+        {
+            if (Game.StoreLevel < Auction.MinLevel) return;
+            if (Game.AuctionLots.Count == 0)
+            {
+                GUILayout.Label($"Sammler-Auktion: nächste an Tag {Auction.NextAuctionDay(Game.Day)}", hint);
+                GUILayout.Space(6f);
+                return;
+            }
+            GUI.color = UiKit.Gold;
+            GUILayout.Label("Sammler-Auktion – heute!", bold);
+            GUI.color = Color.white;
+            GUILayout.Label("Biete mit – die anderen Sammler steigen irgendwann aus. Wer zuletzt bietet, gewinnt.", hint);
+            foreach (var lot in Game.AuctionLots)
+            {
+                var card = lot.Card;
+                if (card == null) continue;
+                GUILayout.BeginHorizontal();
+                var cardRect = GUILayoutUtility.GetRect(42f, 56f, GUILayout.Width(42f), GUILayout.Height(56f));
+                if (lot.grade > 0) CardUI.DrawSlab(cardRect, card, lot.grade);
+                else CardUI.Draw(cardRect, card, true);
+                GUILayout.BeginVertical();
+                string grade = lot.grade > 0 ? Grading.Label(lot.grade) : "unbewertet";
+                GUILayout.Label($"{card.Name} · {grade} · Wert {Money.Format(lot.Value)}", bold);
+                string status = lot.state == 1 ? $"Gewonnen für {Money.Format(lot.price)}!"
+                    : lot.state == 2 ? $"An einen anderen Sammler verkauft ({Money.Format(lot.price)})"
+                    : $"Höchstgebot: {Money.Format(lot.price)} (anderer Sammler) · dein nächstes Gebot: {Money.Format(lot.price + lot.Step)}";
+                GUILayout.Label(status, text);
+                GUILayout.EndVertical();
+                GUILayout.FlexibleSpace();
+                if (lot.state == 0)
+                {
+                    GUI.enabled = Game.MoneyCents >= lot.price + lot.Step;
+                    if (Button("Bieten", GUILayout.Width(80f), GUILayout.Height(30f))) auctionMessage = Auction.Bid(lot);
+                    GUI.enabled = true;
+                    if (Button("Aussteigen", GUILayout.Width(90f), GUILayout.Height(30f))) Auction.Pass(lot);
+                }
+                GUILayout.EndHorizontal();
+            }
+            if (auctionMessage != null) GUILayout.Label(auctionMessage, bold);
+            GUILayout.Space(10f);
         }
 
         void DrawTeam()

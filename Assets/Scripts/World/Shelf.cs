@@ -5,7 +5,9 @@ namespace TwoMoons
 {
     public class Shelf : Interactable
     {
-        public const int Capacity = 24;
+        /// <summary>24 Stück, mit dem Upgrade „Größere Regale“ 32.</summary>
+        public static int Capacity =>
+            GameManager.Instance != null && GameManager.Instance.Upgrades.Has(Upgrade.BigShelves) ? 32 : 24;
 
         public Vector2Int Cell { get; private set; }
         /// <summary>Nach dem Verschieben im Bau-Modus.</summary>

@@ -14,7 +14,8 @@ namespace TwoMoons
         public const int DailyWage = 3000;
         public const string Name = "Kai";
         const float Speed = 2.4f;
-        const float ServeSeconds = 2.5f;
+        /// <summary>Mit Kartenterminal kassiert er doppelt so schnell.</summary>
+        static float ServeSeconds => Game.Upgrades.Has(Upgrade.CardReader) ? 1.25f : 2.5f;
 
         public Role Job;
 

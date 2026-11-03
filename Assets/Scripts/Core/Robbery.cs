@@ -32,7 +32,7 @@ namespace TwoMoons
         {
             if (Game.StoreLevel < 3 || Game.Day - lastRobberyDay < MinDaysBetween) return -1;
             if (Game.Tournament.IsTournamentDay || (Game.Guide != null && Game.Guide.Active)) return -1;
-            float chance = Chance * (HasAlarm ? 0.5f : 1f);
+            float chance = Chance * (HasAlarm ? 0.5f : 1f) * (Game.Upgrades.Has(Upgrade.Camera) ? 0.5f : 1f);
             return Random.value < chance ? Random.Range(11 * 60, 16 * 60) : -1;
         }
 

@@ -41,7 +41,7 @@ namespace TwoMoons
                 // Ab Level 4 will ab und zu jemand Karten verkaufen.
                 else if (open && game.StoreLevel >= 4 && Random.value < 0.12f) customer.IsSeller = true;
                 // Ab Tag 2 versucht ab und zu jemand, Packs mitgehen zu lassen.
-                else if (open && game.Day >= 2 && !(game.Guide != null && game.Guide.Active) && Random.value < ThiefChance) customer.IsThief = true;
+                else if (open && game.Day >= 2 && !(game.Guide != null && game.Guide.Active) && Random.value < ThiefChance * (game.Upgrades.Has(Upgrade.Camera) ? 0.5f : 1f)) customer.IsThief = true;
                 if (game.Phase != GamePhase.MainMenu) SoundManager.Play(Sfx.Doorbell);
             }
             float reputationFactor = Mathf.Lerp(1f, 0.5f, game.ReputationStage / 4f);

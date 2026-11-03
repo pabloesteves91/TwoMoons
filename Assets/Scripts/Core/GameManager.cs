@@ -70,6 +70,9 @@ namespace TwoMoons
         public readonly Collection Collection = new Collection();
         public readonly Skills Skills = new Skills();
         public readonly Promotions Promotions = new Promotions();
+        public readonly Upgrades Upgrades = new Upgrades();
+        /// <summary>Lose der heutigen Sammler-Auktion (leer, wenn heute keine ist).</summary>
+        public List<AuctionLot> AuctionLots = new List<AuctionLot>();
         public int SkillPoints => Skills.FreePoints(StoreLevel);
 
         public bool LearnSkill(Skill skill)
@@ -267,6 +270,7 @@ namespace TwoMoons
             {
                 int cozy = 0;
                 foreach (var deco in Decos) cozy += FurnitureCatalog.Get(deco.Type).Cozy;
+                if (Upgrades.Has(Upgrade.AirCon)) cozy += 5;
                 return Mathf.Max(0, cozy - DirtSpot.Existing.Count);
             }
         }
@@ -278,7 +282,8 @@ namespace TwoMoons
         public float CustomerPatience =>
             (15f + 5f * ReputationStage) * Mathf.Max(0.5f, 1f - 0.08f * DirtSpot.Existing.Count) *
             (1f + Mathf.Min(0.3f, Coziness * 0.02f)) * (Skills.Has(Skill.Charmer) ? 1.2f : 1f) *
-            (TodayEvent == DayEvent.Rain ? 1.3f : 1f);
+            (TodayEvent == DayEvent.Rain ? 1.3f : 1f) *
+            (Upgrades.Has(Upgrade.CardReader) ? 1.15f : 1f) * (Upgrades.Has(Upgrade.AirCon) ? 1.25f : 1f);
 
         /// <summary>Wie oft heute Kunden kommen (kleiner = öfter).</summary>
         public float SpawnIntervalFactor
@@ -286,7 +291,7 @@ namespace TwoMoons
             get
             {
                 // Flyer: den ganzen Tag ein Drittel mehr Kunden. Nach einem Überfall trauen sich nur noch wenige herein.
-                float flyer = Promotions.Flyer ? 0.75f : 1f;
+                float flyer = (Promotions.Flyer ? 0.75f : 1f) * (Upgrades.Has(Upgrade.ShopWindow) ? 0.83f : 1f);
                 float police = policeOnSite ? 4f : 1f;
                 if (TodayEvent == DayEvent.Rain) return 1.4f * flyer * police;
                 if (TodayEvent == DayEvent.Rush && ClockMinutes >= 13 * 60 && ClockMinutes < 15 * 60) return 0.4f * police;
@@ -610,6 +615,8 @@ namespace TwoMoons
             }
             Collection.LoadFrom(data);
             Skills.LoadFrom(data);
+            Upgrades.Load(data);
+            AuctionLots = data.auctionLots ?? new List<AuctionLot>();
             Promotions.Load(data);
 
             foreach (var price in data.prices) prices[(ProductId)price.product] = price.cents;
@@ -740,6 +747,8 @@ namespace TwoMoons
             }
             Collection.SaveTo(data);
             Skills.SaveTo(data);
+            Upgrades.Save(data);
+            data.auctionLots = AuctionLots;
             Promotions.Save(data);
             data.seenStories.AddRange(seenStories);
             data.tournament = Tournament.Save();
@@ -1214,6 +1223,9 @@ namespace TwoMoons
 
             Tournament.OnNewDay();
             ReturnStolenGoods();
+            AuctionLots = Auction.IsAuctionDay(Day) ? Auction.CreateLots() : new List<AuctionLot>();
+            if (AuctionLots.Count > 0)
+                ShowToast("Heute ist Sammler-Auktion! Computer → Ware: seltene, bewertete Karten ersteigern.", 7f);
             if (cleanupTomorrow)
             {
                 // Die Spurensicherung hat Chaos hinterlassen: erst aufräumen, dann öffnen.
@@ -1235,6 +1247,15 @@ namespace TwoMoons
         // ---------- Überfall ----------
 
         public void RobberArrived() => RobberyMinute = -1;
+
+        public void BuyUpgrade(UpgradeDef upgrade)
+        {
+            if (Upgrades.Has(upgrade.Id) || upgrade.MinLevel > StoreLevel || !Spend(upgrade.Cost)) return;
+            Upgrades.Add(upgrade.Id);
+            SoundManager.Play(Sfx.Build);
+            ShowToast($"{upgrade.Name} eingebaut!", 4f);
+            SaveGame();
+        }
 
         /// <summary>Nur zum Testen: eine zufällige Karte als frische Black-Label-Bewertung (mit Enthüllung).</summary>
         public void TestBlackLabel()
