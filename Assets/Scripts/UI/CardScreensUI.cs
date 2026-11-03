@@ -165,12 +165,18 @@ namespace TwoMoons
             var area = UiKit.Centered(width, 760f, 480f);
             UiKit.BeginWindow(area);
             var collection = Game.Collection;
+            // Erste Zeile: Titel und Fortschritt, zweite Zeile: die Tabs – so passt alles, auch mit dem Two-Moons-Tab.
             GUILayout.BeginHorizontal();
             GUILayout.Label(collection.CompletedBooks > 0 ? $"Sammelbuch Nr. {collection.CompletedBooks + 1}" : "Sammelbuch", UiKit.Title);
+            GUILayout.FlexibleSpace();
+            GUILayout.Label($"{collection.DiscoveredIn(collectionGame)}/{CardDatabase.CardsPerGame} entdeckt", UiKit.Bold);
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
             foreach (var tab in CardDatabase.Games)
             {
                 GUI.color = collectionGame == tab ? Color.white : UiKit.Dimmed;
-                if (UiKit.Button(Catalog.GameName(tab), GUILayout.Width(110f), GUILayout.Height(28f)))
+                if (UiKit.Button(Catalog.GameName(tab), GUILayout.Width(120f), GUILayout.Height(28f)))
                 {
                     collectionGame = tab;
                     selectedCard = -1;
@@ -180,12 +186,12 @@ namespace TwoMoons
             if (Game.HasTwoMoons)
             {
                 GUI.color = UiKit.Gold;
-                if (UiKit.Button("Two Moons", GUILayout.Width(110f), GUILayout.Height(28f))) selectedCard = CardDatabase.TwoMoons.Id;
+                if (UiKit.Button("Two Moons", GUILayout.Width(120f), GUILayout.Height(28f))) selectedCard = CardDatabase.TwoMoons.Id;
                 GUI.color = Color.white;
             }
             GUILayout.FlexibleSpace();
-            GUILayout.Label($"{collection.DiscoveredIn(collectionGame)}/{CardDatabase.CardsPerGame} entdeckt", UiKit.Bold);
             GUILayout.EndHorizontal();
+            GUILayout.Space(4f);
 
             GUILayout.BeginHorizontal();
             collectionScroll = GUILayout.BeginScrollView(collectionScroll, GUILayout.Width(480f));
