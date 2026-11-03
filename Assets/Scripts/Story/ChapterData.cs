@@ -207,7 +207,7 @@ namespace TwoMoons
                         new QuestStage
                         {
                             Title = "Volle Regale",
-                            Quests = new List<Quest> { Sell(250), Cozy(15), ProfitDays(5) },
+                            Quests = new List<Quest> { Sell(180), Cozy(15), ProfitDays(5) },
                         },
                         new QuestStage
                         {
@@ -245,7 +245,7 @@ namespace TwoMoons
                         new QuestStage
                         {
                             Title = "Stadtgespräch",
-                            Quests = new List<Quest> { Reputation(3, "Stadtbekannt"), Sell(400), Serve(300), ProfitDays(6) },
+                            Quests = new List<Quest> { Reputation(3, "Stadtbekannt"), Sell(120), Serve(300), ProfitDays(6) },
                         },
                     };
 
@@ -278,7 +278,7 @@ namespace TwoMoons
                         new QuestStage
                         {
                             Title = "Legende werden",
-                            Quests = new List<Quest> { Reputation(4, "Legendär"), Furnished(Furniture.TrophyWall, 1), Sell(500), Serve(350) },
+                            Quests = new List<Quest> { Reputation(4, "Legendär"), Furnished(Furniture.TrophyWall, 1), Sell(150), Serve(350) },
                             Outro = new[] { "{0}: Die Trophäenwand füllt sich. Bald kommt der größte Pokal von allen." },
                         },
                         new QuestStage
