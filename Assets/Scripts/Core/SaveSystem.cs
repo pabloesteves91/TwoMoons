@@ -206,8 +206,9 @@ namespace TwoMoons
     }
 
     /// <summary>
-    /// Drei Speicherplätze. Auf dem Computer als Datei im Benutzerordner (Application.persistentDataPath),
-    /// im Browser über PlayerPrefs (dort sicher dauerhaft gespeichert).
+    /// Drei Speicherplätze. Auf dem Computer als Datei im Benutzerordner (Application.persistentDataPath).
+    /// Im Browser im localStorage: Der hängt nur an der Domain, nicht am Pfad – so überleben Spielstände
+    /// ein neues Hochladen auf itch.io (PlayerPrefs gingen dabei verloren, sie dienen nur noch als Rückfall).
     /// </summary>
     public static class SaveSystem
     {
@@ -219,14 +220,36 @@ namespace TwoMoons
 
         static string KeyFor(int slot) => $"TwoMoons.Spielstand{slot + 1}";
 
-        public static bool Exists(int slot) => InBrowser ? PlayerPrefs.HasKey(KeyFor(slot)) : File.Exists(PathFor(slot));
+#if UNITY_WEBGL && !UNITY_EDITOR
+        [System.Runtime.InteropServices.DllImport("__Internal")] static extern int BrowserStorage_Set(string key, string value);
+        [System.Runtime.InteropServices.DllImport("__Internal")] static extern string BrowserStorage_Get(string key);
+        [System.Runtime.InteropServices.DllImport("__Internal")] static extern int BrowserStorage_Has(string key);
+        [System.Runtime.InteropServices.DllImport("__Internal")] static extern void BrowserStorage_Remove(string key);
+#else
+        static int BrowserStorage_Set(string key, string value) => 0;
+        static string BrowserStorage_Get(string key) => null;
+        static int BrowserStorage_Has(string key) => 0;
+        static void BrowserStorage_Remove(string key) { }
+#endif
+
+        public static bool Exists(int slot)
+        {
+            if (!InBrowser) return File.Exists(PathFor(slot));
+            return BrowserStorage_Has(KeyFor(slot)) == 1 || PlayerPrefs.HasKey(KeyFor(slot));
+        }
 
         public static SaveData Load(int slot)
         {
             if (!Exists(slot)) return null;
             try
             {
-                string json = InBrowser ? PlayerPrefs.GetString(KeyFor(slot)) : File.ReadAllText(PathFor(slot));
+                string json;
+                if (InBrowser)
+                {
+                    json = BrowserStorage_Get(KeyFor(slot));
+                    if (string.IsNullOrEmpty(json)) json = PlayerPrefs.GetString(KeyFor(slot));
+                }
+                else json = File.ReadAllText(PathFor(slot));
                 return JsonUtility.FromJson<SaveData>(json);
             }
             catch (Exception e)
@@ -239,15 +262,18 @@ namespace TwoMoons
         public static void Save(int slot, SaveData data)
         {
             data.savedAtTicks = DateTime.Now.Ticks;
-            string json = JsonUtility.ToJson(data, true);
             if (InBrowser)
             {
+                // Kompakt speichern: Alle itch.io-Spiele teilen sich den Speicherplatz der Domain.
+                string json = JsonUtility.ToJson(data, false);
+                if (BrowserStorage_Set(KeyFor(slot), json) == 0)
+                    Debug.LogWarning("localStorage nicht verfügbar – Spielstand nur in PlayerPrefs.");
                 PlayerPrefs.SetString(KeyFor(slot), json);
                 PlayerPrefs.Save();
             }
             else
             {
-                File.WriteAllText(PathFor(slot), json);
+                File.WriteAllText(PathFor(slot), JsonUtility.ToJson(data, true));
             }
         }
 
@@ -255,6 +281,7 @@ namespace TwoMoons
         {
             if (InBrowser)
             {
+                BrowserStorage_Remove(KeyFor(slot));
                 PlayerPrefs.DeleteKey(KeyFor(slot));
                 PlayerPrefs.Save();
             }
