@@ -285,11 +285,12 @@ namespace TwoMoons
         {
             get
             {
-                // Flyer: den ganzen Tag ein Drittel mehr Kunden.
+                // Flyer: den ganzen Tag ein Drittel mehr Kunden. Nach einem Überfall trauen sich nur noch wenige herein.
                 float flyer = Promotions.Flyer ? 0.75f : 1f;
-                if (TodayEvent == DayEvent.Rain) return 1.4f * flyer;
-                if (TodayEvent == DayEvent.Rush && ClockMinutes >= 13 * 60 && ClockMinutes < 15 * 60) return 0.4f;
-                return flyer;
+                float police = policeOnSite ? 4f : 1f;
+                if (TodayEvent == DayEvent.Rain) return 1.4f * flyer * police;
+                if (TodayEvent == DayEvent.Rush && ClockMinutes >= 13 * 60 && ClockMinutes < 15 * 60) return 0.4f * police;
+                return flyer * police;
             }
         }
 
