@@ -295,6 +295,12 @@ namespace TwoMoons
 
         public bool CanLevelUp => StoreLevel < StoreLevels.Max && Xp >= StoreLevels.XpFor(StoreLevel + 1) && ChapterComplete;
 
+        /// <summary>
+        /// XP für Einnahmen: 1 XP pro € in den ersten Kapiteln, ab Level 4 (Ankauf, Grading, teure Karten)
+        /// nur noch 1 XP pro 2 € – sonst gibt es viel mehr XP, als die Level brauchen.
+        /// </summary>
+        int SalesXp(int cents) => StoreLevel >= 4 ? cents / 200 : cents / 100;
+
         public void AddXp(int amount)
         {
             if (IsDemo || amount <= 0) return;
@@ -858,7 +864,7 @@ namespace TwoMoons
             Today.CustomersServed++;
             ShowToast($"+{Money.Format(cents)}", 2f);
             SoundManager.Play(Sfx.Register);
-            AddXp(cents / 100);
+            AddXp(SalesXp(cents));
             if (product.Category == ProductCategory.Pack) PacksSold?.Invoke(count);
             ProductSold?.Invoke(product, count);
             CustomerServed?.Invoke();
@@ -912,7 +918,7 @@ namespace TwoMoons
             Today.CustomersServed++;
             ShowToast($"{card.Name}{(grade > 0 ? $" ({Grading.Label(grade)})" : "")} verkauft: +{Money.Format(cents)}", 3f);
             SoundManager.Play(Sfx.Register);
-            AddXp(cents / 100);
+            AddXp(SalesXp(cents));
             CardSold?.Invoke(grade);
             CustomerServed?.Invoke();
         }
@@ -1006,7 +1012,7 @@ namespace TwoMoons
             Collection.StartOver();
             MoneyCents += value;
             Today.Income += value;
-            AddXp(value / 100 + 200);
+            AddXp(SalesXp(value) + 200);
             ChangeReputation(30);
             SoundManager.Play(Sfx.Fanfare);
             ShowDialog(new[]
@@ -1286,7 +1292,7 @@ namespace TwoMoons
             Today.Income += TournamentManager.EntryFee;
             ShowToast($"Turnier-Anmeldung: +{Money.Format(TournamentManager.EntryFee)}", 2f);
             SoundManager.Play(Sfx.Register);
-            AddXp(TournamentManager.EntryFee / 100);
+            AddXp(SalesXp(TournamentManager.EntryFee));
         }
 
         public void NotifyShelfStocked(int packs) => ShelfStocked?.Invoke(packs);
