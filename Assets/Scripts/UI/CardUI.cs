@@ -107,6 +107,24 @@ namespace TwoMoons
             Draw(cardRect, card, true);
         }
 
+        /// <summary>Versiegelte Hülle, Note noch verdeckt: Kartenrückseite und „BSA ?“.</summary>
+        public static void DrawHiddenSlab(Rect rect)
+        {
+            EnsureTextures();
+            GUI.color = new Color(0.78f, 0.86f, 0.95f, 0.95f);
+            GUI.DrawTexture(rect, white);
+            float label = rect.height * 0.18f;
+            var labelRect = new Rect(rect.x + rect.width * 0.06f, rect.y + rect.height * 0.03f, rect.width * 0.88f, label);
+            GUI.color = new Color(0.35f, 0.4f, 0.5f);
+            GUI.DrawTexture(labelRect, white);
+            GUI.color = Color.white;
+            var style = new GUIStyle(UiKit.Bold) { alignment = TextAnchor.MiddleCenter, fontSize = Mathf.Max(8, Mathf.RoundToInt(label * 0.7f)) };
+            style.normal.textColor = Color.white;
+            GUI.Label(labelRect, "BSA ?", style);
+            float inset = rect.width * 0.1f;
+            DrawBack(new Rect(rect.x + inset, labelRect.yMax + rect.height * 0.03f, rect.width - 2f * inset, rect.yMax - labelRect.yMax - rect.height * 0.06f));
+        }
+
         public static void DrawBack(Rect rect) => GUI.DrawTexture(rect, CardArt.Back, ScaleMode.StretchToFill);
 
         /// <summary>Wandernder Regenbogen-Streifen und funkelnde Punkte über der Karte.</summary>

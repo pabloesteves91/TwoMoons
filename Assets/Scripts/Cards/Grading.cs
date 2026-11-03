@@ -7,6 +7,8 @@ namespace TwoMoons
     [Serializable]
     public class Slab
     {
+        /// <summary>Für das Ergebnis-Fenster: schon enthüllt? (wird nicht gespeichert)</summary>
+        [NonSerialized] public bool Revealed;
         public int card;
         public int grade;
 

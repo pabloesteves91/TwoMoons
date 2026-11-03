@@ -186,7 +186,7 @@ namespace TwoMoons
             switch (pauseScreen)
             {
                 case PauseScreen.Main:
-                    UiKit.BeginWindow(UiKit.Centered(width, 320f, ShowTestTools ? 520f : 390f));
+                    UiKit.BeginWindow(UiKit.Centered(width, 320f, ShowTestTools ? 560f : 390f));
                     GUILayout.Label("Pause", title);
                     GUILayout.Space(6f);
                     if (UiKit.BigButtonLayout("Weiter [Esc]")) Game.PauseOpen = false;
@@ -209,6 +209,11 @@ namespace TwoMoons
                             Game.TestRobbery();
                         }
                         GUI.enabled = true;
+                        if (Button("TEST: Black Label", GUILayout.Height(30f)))
+                        {
+                            Game.PauseOpen = false;
+                            Game.TestBlackLabel();
+                        }
                     }
                     UiKit.EndWindow();
                     break;

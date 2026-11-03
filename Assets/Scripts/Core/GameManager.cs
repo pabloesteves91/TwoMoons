@@ -379,8 +379,7 @@ namespace TwoMoons
             seenStories.Add(TwoMoonsGradedStory);
             var slab = new Slab { card = CardDatabase.TwoMoons.Id, grade = Grading.BlackLabel };
             GradeReveal = slab;
-            SoundManager.Play(Sfx.Fanfare);
-            SoundManager.Play(Sfx.ShinyCard);
+            SoundManager.Play(Sfx.Pickup);
             ChangeReputation(20);
             Graded?.Invoke(slab.grade);
             SaveGame();
@@ -1009,10 +1008,9 @@ namespace TwoMoons
             Slabs.Add(slab);
             if (!fresh) return;
             Collection.RecordGrade(slab.card, slab.grade);
+            // Die Note bleibt verdeckt, bis man sie im Ergebnis-Fenster enthüllt (dort kommen auch die Sounds).
             GradeReveal = slab;
-            if (slab.grade >= 10) SoundManager.Play(slab.Card.Rarity == Rarity.Ultra ? Sfx.Fanfare : Sfx.ShinyCard);
-            else SoundManager.Play(slab.grade >= 8 ? Sfx.RareCard : Sfx.CardFlip);
-            if (slab.grade >= 10 && slab.Card.Rarity == Rarity.Ultra) SoundManager.Play(Sfx.ShinyCard);
+            SoundManager.Play(Sfx.Pickup);
             Graded?.Invoke(slab.grade);
         }
 
@@ -1237,6 +1235,15 @@ namespace TwoMoons
         // ---------- Überfall ----------
 
         public void RobberArrived() => RobberyMinute = -1;
+
+        /// <summary>Nur zum Testen: eine zufällige Karte als frische Black-Label-Bewertung (mit Enthüllung).</summary>
+        public void TestBlackLabel()
+        {
+            var ultras = new List<CardDef>();
+            foreach (var c in CardDatabase.All) if (c.Rarity == Rarity.Ultra) ultras.Add(c);
+            var card = ultras[UnityEngine.Random.Range(0, ultras.Count)];
+            AddSlab(new Slab { card = card.Id, grade = Grading.BlackLabel }, true);
+        }
 
         /// <summary>Nur zum Testen: Überfall gleich jetzt (der Gauner kommt beim nächsten Kunden-Takt).</summary>
         public void TestRobbery() => RobberyMinute = ClockMinutes;

@@ -102,16 +102,59 @@ namespace TwoMoons
         }
 
         /// <summary>Die große Enthüllung: welche Note hat die Karte bekommen?</summary>
+        float revealTime;
+
+        /// <summary>Note enthüllen: Sounds und (bei Black Label) die große Animation starten.</summary>
+        void Reveal(Slab slab)
+        {
+            slab.Revealed = true;
+            revealTime = Time.unscaledTime;
+            bool blackLabel = slab.grade >= Grading.BlackLabel;
+            if (blackLabel || slab.grade >= 10) SoundManager.Play(blackLabel || slab.Card.Rarity == Rarity.Ultra ? Sfx.Fanfare : Sfx.ShinyCard);
+            else SoundManager.Play(slab.grade >= 8 ? Sfx.RareCard : Sfx.CardFlip);
+            if (blackLabel || (slab.grade >= 10 && slab.Card.Rarity == Rarity.Ultra)) SoundManager.Play(Sfx.ShinyCard);
+        }
+
         void DrawGradeReveal(float width)
         {
             var slab = Game.GradeReveal;
             var card = slab.Card;
-            UiKit.BeginWindow(UiKit.Centered(width, 420f, 440f));
+            bool blackLabel = slab.grade >= Grading.BlackLabel;
+            float t = slab.Revealed ? Time.unscaledTime - revealTime : 0f;
+            var window = UiKit.Centered(width, 420f, 440f);
+
+            // Black Label: Bildschirm blitzt auf, dann goldene Strahlen hinter dem Fenster.
+            if (slab.Revealed && blackLabel) DrawBlackLabelBackdrop(width, window, t);
+
+            UiKit.BeginWindow(window);
             GUILayout.Label("Grading-Ergebnis", UiKit.Title.WithAlignment(TextAnchor.MiddleCenter));
             var area = GUILayoutUtility.GetRect(380f, 260f);
-            CardUI.DrawSlab(new Rect(area.center.x - 90f, area.y, 180f, 250f), card, slab.grade);
-            GUI.color = slab.grade >= 10 ? UiKit.Gold : slab.grade >= 8 ? UiKit.Good : Color.white;
-            GUILayout.Label($"{Grading.Label(slab.grade)} – {Grading.Describe(slab.grade)}!", UiKit.Title.WithFontSize(22).WithAlignment(TextAnchor.MiddleCenter));
+            var slabRect = new Rect(area.center.x - 90f, area.y, 180f, 250f);
+
+            if (!slab.Revealed)
+            {
+                // Verdeckt: leichtes Wackeln macht neugierig.
+                float wobble = Mathf.Sin(Time.unscaledTime * 6f) * 2f;
+                CardUI.DrawHiddenSlab(new Rect(slabRect.x + wobble, slabRect.y, slabRect.width, slabRect.height));
+                GUILayout.Label("Die Note ist noch verdeckt …", UiKit.Title.WithFontSize(20).WithAlignment(TextAnchor.MiddleCenter));
+                GUILayout.FlexibleSpace();
+                if (UiKit.Button("Enthüllen!", GUILayout.Height(38f))) Reveal(slab);
+                UiKit.EndWindow();
+                return;
+            }
+
+            // Aufploppen: kurz größer, dann normal (bei Black Label länger und kräftiger).
+            float pop = blackLabel ? 1f + 0.25f * Mathf.Exp(-t * 3f) * Mathf.Cos(t * 14f) : 1f + 0.12f * Mathf.Exp(-t * 6f);
+            var popped = new Rect(slabRect.center.x - slabRect.width * pop / 2f, slabRect.center.y - slabRect.height * pop / 2f,
+                slabRect.width * pop, slabRect.height * pop);
+            if (blackLabel) DrawSparkles(popped, t);
+            CardUI.DrawSlab(popped, card, slab.grade);
+            if (blackLabel) DrawShineSweep(popped, t);
+
+            GUI.color = blackLabel ? Color.Lerp(UiKit.Gold, Color.white, 0.5f + 0.5f * Mathf.Sin(t * 8f))
+                : slab.grade >= 10 ? UiKit.Gold : slab.grade >= 8 ? UiKit.Good : Color.white;
+            GUILayout.Label(blackLabel ? "BLACK LABEL!" : $"{Grading.Label(slab.grade)} – {Grading.Describe(slab.grade)}!",
+                UiKit.Title.WithFontSize(blackLabel ? 26 : 22).WithAlignment(TextAnchor.MiddleCenter));
             GUI.color = Color.white;
             GUILayout.Label(card == CardDatabase.TwoMoons
                 ? $"Die Legende ist jetzt {Money.Format(slab.Value)} wert – aber unverkäuflich. Sie bleibt im Sammelbuch."
@@ -120,6 +163,50 @@ namespace TwoMoons
             GUILayout.FlexibleSpace();
             if (UiKit.Button("Super! [Esc]", GUILayout.Height(34f))) Game.GradeReveal = null;
             UiKit.EndWindow();
+        }
+
+        /// <summary>Weißer Blitz, abgedunkelter Hintergrund und rotierende goldene Strahlen.</summary>
+        static void DrawBlackLabelBackdrop(float width, Rect window, float t)
+        {
+            UiKit.DrawRect(new Rect(0f, 0f, width, UiKit.VirtualHeight), new Color(0f, 0f, 0f, Mathf.Clamp01(t * 2f) * 0.55f));
+            var center = new Vector2(window.center.x, window.y + 175f);
+            var matrix = GUI.matrix;
+            for (int i = 0; i < 12; i++)
+            {
+                GUIUtility.RotateAroundPivot(i * 30f + t * 20f, center);
+                float alpha = Mathf.Clamp01(t * 1.5f) * (0.25f + 0.1f * Mathf.Sin(t * 3f + i));
+                UiKit.DrawRect(new Rect(center.x - 6f, center.y - 420f, 12f, 420f), new Color(1f, 0.85f, 0.3f, alpha));
+                GUI.matrix = matrix;
+            }
+            // Blitz am Anfang
+            if (t < 0.5f) UiKit.DrawRect(new Rect(0f, 0f, width, UiKit.VirtualHeight), new Color(1f, 1f, 1f, 1f - t * 2f));
+        }
+
+        /// <summary>Goldene Funken rund um die Hülle.</summary>
+        static void DrawSparkles(Rect rect, float t)
+        {
+            for (int i = 0; i < 16; i++)
+            {
+                float phase = Mathf.Repeat(t * 0.8f + i * 0.137f, 1f);
+                float angle = i * 2.4f + t * 0.6f;
+                float radius = rect.width * (0.55f + 0.35f * phase);
+                var p = rect.center + new Vector2(Mathf.Cos(angle), Mathf.Sin(angle)) * radius;
+                float size = 3f + 5f * Mathf.Sin(phase * Mathf.PI);
+                UiKit.DrawRect(new Rect(p.x - size / 2f, p.y - size / 2f, size, size), new Color(1f, 0.9f, 0.4f, Mathf.Sin(phase * Mathf.PI)));
+            }
+        }
+
+        /// <summary>Ein heller Glanz-Streifen wandert über die schwarze Hülle.</summary>
+        static void DrawShineSweep(Rect rect, float t)
+        {
+            float x = Mathf.Repeat(t * 0.6f, 1.6f) - 0.3f;
+            if (x < 0f || x > 1f) return;
+            GUI.BeginGroup(rect);
+            var matrix = GUI.matrix;
+            GUIUtility.RotateAroundPivot(20f, new Vector2(rect.width * x, rect.height / 2f));
+            UiKit.DrawRect(new Rect(rect.width * x - 8f, -rect.height, 16f, rect.height * 3f), new Color(1f, 1f, 1f, 0.35f));
+            GUI.matrix = matrix;
+            GUI.EndGroup();
         }
 
         void DrawPrinter(float width)
