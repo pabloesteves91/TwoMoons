@@ -245,7 +245,7 @@ namespace TwoMoons
                         new QuestStage
                         {
                             Title = "Stadtgespräch",
-                            Quests = new List<Quest> { Reputation(3, "Stadtbekannt"), Sell(120), Serve(300), ProfitDays(6) },
+                            Quests = new List<Quest> { Reputation(3, "Stadtbekannt"), Sell(200), Serve(300), ProfitDays(6) },
                         },
                     };
 
