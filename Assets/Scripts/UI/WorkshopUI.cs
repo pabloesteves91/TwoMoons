@@ -65,7 +65,11 @@ namespace TwoMoons
                         // Kurz und in Gold, damit es auch bei einer 10 in eine Zeile passt.
                         bestStyle ??= new GUIStyle(UiKit.Hint) { fontSize = 11, fontStyle = FontStyle.Bold, wordWrap = false, clipping = TextClipping.Overflow };
                         bestStyle.normal.textColor = UiKit.Gold;
-                        GUI.Label(new Rect(rect.x - 10f, rect.yMax + 15f, rect.width + 20f, 16f), best >= Grading.BlackLabel ? "Beste: Black Label" : $"Beste: {Grading.Label(best)}", bestStyle);
+                        // Schrift so weit verkleinern, dass der Text unter die Karte passt (nichts wird abgeschnitten).
+                        var bestText = new GUIContent(best >= Grading.BlackLabel ? "Beste: Black Label" : $"Beste: {Grading.Label(best)}");
+                        bestStyle.fontSize = 11;
+                        while (bestStyle.fontSize > 7 && bestStyle.CalcSize(bestText).x > rect.width + 6f) bestStyle.fontSize--;
+                        GUI.Label(new Rect(rect.x - 3f, rect.yMax + 15f, rect.width + 6f, 16f), bestText, bestStyle);
                     }
                     GUI.enabled = Game.MoneyCents >= Grading.Cost;
                     if (GUI.Button(rect, GUIContent.none, GUIStyle.none))
