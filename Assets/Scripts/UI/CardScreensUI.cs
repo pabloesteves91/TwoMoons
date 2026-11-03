@@ -162,7 +162,8 @@ namespace TwoMoons
 
         void DrawCollection(float width)
         {
-            var area = UiKit.Centered(width, 760f, 480f);
+            // Etwas höher, weil die Tabs eine eigene Zeile haben.
+            var area = UiKit.Centered(width, 760f, 515f);
             UiKit.BeginWindow(area);
             var collection = Game.Collection;
             // Erste Zeile: Titel und Fortschritt, zweite Zeile: die Tabs – so passt alles, auch mit dem Two-Moons-Tab.
