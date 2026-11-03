@@ -5,6 +5,8 @@ namespace TwoMoons
     /// <summary>Fenster für den 3D-Drucker (Modell wählen), den Ankauf an der Kasse und die Grading-Station.</summary>
     public class WorkshopUI : MonoBehaviour
     {
+        static GUIStyle bestStyle;
+
         string counterMessage;
         Vector2 gradingScroll;
 
@@ -56,7 +58,13 @@ namespace TwoMoons
                     CardUI.Draw(rect, card, true);
                     GUI.Label(new Rect(rect.x, rect.yMax, rect.width, 16f), $"×{Game.Collection.Count(card.Id)} · {Money.Format(card.Value)}", UiKit.Hint);
                     int best = Game.Collection.BestGrade(card.Id);
-                    if (best > 0) GUI.Label(new Rect(rect.x, rect.yMax + 14f, rect.width, 16f), $"beste Note {best}", UiKit.Hint);
+                    if (best > 0)
+                    {
+                        // Kurz und in Gold, damit es auch bei einer 10 in eine Zeile passt.
+                        bestStyle ??= new GUIStyle(UiKit.Hint) { fontSize = 11, fontStyle = FontStyle.Bold, wordWrap = false, clipping = TextClipping.Overflow };
+                        bestStyle.normal.textColor = UiKit.Gold;
+                        GUI.Label(new Rect(rect.x - 10f, rect.yMax + 15f, rect.width + 20f, 16f), $"Beste: BSA {best}", bestStyle);
+                    }
                     GUI.enabled = Game.MoneyCents >= Grading.Cost;
                     if (GUI.Button(rect, GUIContent.none, GUIStyle.none))
                     {

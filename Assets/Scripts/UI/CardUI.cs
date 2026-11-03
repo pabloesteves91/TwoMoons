@@ -83,7 +83,7 @@ namespace TwoMoons
             GUI.color = Color.white;
             var style = new GUIStyle(UiKit.Bold) { alignment = TextAnchor.MiddleCenter, fontSize = Mathf.Max(8, Mathf.RoundToInt(label * 0.7f)) };
             style.normal.textColor = Color.white;
-            GUI.Label(labelRect, $"TM {grade}", style);
+            GUI.Label(labelRect, $"BSA {grade}", style);
 
             float inset = rect.width * 0.1f;
             var cardRect = new Rect(rect.x + inset, labelRect.yMax + rect.height * 0.03f, rect.width - 2f * inset, rect.yMax - labelRect.yMax - rect.height * 0.06f);
