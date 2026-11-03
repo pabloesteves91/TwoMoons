@@ -201,13 +201,6 @@ namespace TwoMoons
                 {
                     CardUI.Draw(rect, card, true);
                     GUI.Label(new Rect(rect.x, rect.yMax - 20f, rect.width - 4f, 18f), $"×{collection.Count(card.Id)}", UiKit.Bold.WithAlignment(TextAnchor.LowerRight));
-                    int best = collection.BestGrade(card.Id);
-                    if (best > 0)
-                    {
-                        GUI.color = UiKit.Gold;
-                        GUI.Label(new Rect(rect.x + 3f, rect.y + 1f, rect.width, 18f), $"{best}/10", UiKit.Bold);
-                        GUI.color = Color.white;
-                    }
                 }
                 else
                 {
