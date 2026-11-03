@@ -83,6 +83,11 @@ namespace TwoMoons
                     s.Note(0.07f, 0.35f, Midi(88), Wave.Square, 0.25f);
                     s.Note(0f, 0.05f, 6000f, Wave.Noise, 0.12f);
                     break;
+                case Sfx.Siren: // Martinshorn: tatü-tata, zweimal
+                    s = new Synth(1.4f);
+                    for (int i = 0; i < 4; i++)
+                        s.Note(i * 0.35f, 0.33f, i % 2 == 0 ? 660f : 880f, Wave.Triangle, 0.3f, decay: false);
+                    break;
                 case Sfx.Doorbell:
                     s = new Synth(0.8f);
                     s.Note(0f, 0.4f, Midi(76), Wave.Triangle, 0.45f);

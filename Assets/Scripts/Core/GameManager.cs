@@ -1229,9 +1229,19 @@ namespace TwoMoons
             if (CurrentRobbery != null) return;
             CurrentRobbery = Robbery.Create(robber);
             SoundManager.Play(Sfx.Error);
+            // Ein Teil der Kunden flieht, die anderen sind Zeugen und werden später von der Polizei befragt.
+            robberyWitnesses.Clear();
             foreach (var customer in new List<Customer>(Customer.Active))
-                if (customer != robber && UnityEngine.Random.value < 0.4f) customer.Flee();
+            {
+                if (customer == robber || customer.IsThief) continue;
+                if (UnityEngine.Random.value < 0.4f) customer.Flee();
+                else robberyWitnesses.Add(customer);
+            }
         }
+
+        readonly List<Customer> robberyWitnesses = new List<Customer>();
+        int lootCents, lootCount;
+        Product lootProduct;
 
         public void LoseMoney(int cents)
         {
@@ -1245,11 +1255,14 @@ namespace TwoMoons
             CurrentRobbery = null;
             lastRobberyDay = Day;
             robbery.Robber.RunAway();
-            // Bis Ladenschluss sichert die Polizei die Spuren.
+            // Mit Sirene kommt die Polizei, verhaftet den Gauner und bleibt bis Ladenschluss.
+            lootCents = cents;
+            lootCount = count;
+            lootProduct = robbery.Product;
             policeOnSite = true;
             cleanupTomorrow = true;
-            PoliceScene.Create();
-            ShowToast("Die Polizei ist da und sichert die Spuren – bis Ladenschluss bleibt abgesperrt.", 6f);
+            PoliceScene.Create(robbery.Robber, new List<Customer>(robberyWitnesses));
+            robberyWitnesses.Clear();
             if (cents > 0 || count > 0)
             {
                 ShowToast(cents > 0 ? $"Der Gauner ist mit {Money.Format(cents)} abgehauen." : $"Der Gauner ist mit {count}× {robbery.Product.Name} abgehauen.", 5f);
@@ -1284,6 +1297,28 @@ namespace TwoMoons
                 if (cell != null) WorldFactory.SpawnRobberyMess(RobberyMess.Kind.Clutter, cell.Value);
             }
             for (int i = 0; i < 8; i++) WorldFactory.SpawnDirtSomewhere();
+        }
+
+        /// <summary>Die Polizei hat den Gauner geschnappt: Die Hälfte der Beute ist sichergestellt.</summary>
+        public void RobberArrested()
+        {
+            SoundManager.Play(Sfx.Quest);
+            string back = "";
+            if (lootCents > 0)
+            {
+                MoneyCents += lootCents / 2;
+                Today.Expenses -= lootCents / 2;
+                back = $" Die Hälfte der Beute ist zurück: {Money.Format(lootCents / 2)}.";
+            }
+            else if (lootCount > 1 && lootProduct != null)
+            {
+                WorldFactory.SpawnBox(WorldFactory.FreeDeliveryCell(), lootProduct, lootCount / 2);
+                back = $" Die Hälfte der Beute ist zurück: {lootCount / 2}× {lootProduct.Name} (Karton am Eingang).";
+            }
+            ShowToast("Die Polizei hat den Gauner verhaftet!" + back + " Jetzt werden die Zeugen befragt.", 7f);
+            lootCents = 0;
+            lootCount = 0;
+            lootProduct = null;
         }
 
         void ReturnStolenGoods()

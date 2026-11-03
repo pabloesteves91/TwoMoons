@@ -23,6 +23,7 @@ namespace TwoMoons
         public const string RareCard = "rareCard";
         public const string ShinyCard = "shinyCard";
         public const string Music = "music";
+        public const string Siren = "siren";
     }
 
     /// <summary>
@@ -42,6 +43,8 @@ namespace TwoMoons
         public AudioClip order;
         public AudioClip build;
         public AudioClip error;
+        [Tooltip("Polizeisirene nach einem Überfall")]
+        public AudioClip siren;
 
         [Header("Fortschritt")]
         public AudioClip quest;
@@ -64,7 +67,7 @@ namespace TwoMoons
         {
             Sfx.Register, Sfx.Doorbell, Sfx.Pickup, Sfx.Drop, Sfx.Stock, Sfx.Clean, Sfx.Order, Sfx.Build, Sfx.Error,
             Sfx.Quest, Sfx.Fanfare, Sfx.DayEnd, Sfx.CardFlip, Sfx.RareCard, Sfx.ShinyCard,
-            Sfx.UiClick, Sfx.Dialog, Sfx.Music,
+            Sfx.UiClick, Sfx.Dialog, Sfx.Music, Sfx.Siren,
         };
     }
 }

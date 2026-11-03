@@ -14,7 +14,6 @@ namespace TwoMoons
         const float Chance = 0.05f;
         const float NegotiateSuccess = 0.6f;
         const float AlarmSuccess = 0.7f;
-        const float RefundChance = 0.3f;
 
         public Customer Robber;
         public bool WantsGoods;
@@ -140,7 +139,7 @@ namespace TwoMoons
 
         void Finish(int cents, int count)
         {
-            Game.EndRobbery(this, cents, count, Random.value < RefundChance);
+            Game.EndRobbery(this, cents, count, false);
         }
     }
 }

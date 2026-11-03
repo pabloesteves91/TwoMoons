@@ -250,6 +250,12 @@ namespace TwoMoons
 
         void Update()
         {
+            // Während der Befragung durch die Polizei bleibt der Kunde stehen.
+            if (questioned > 0f)
+            {
+                questioned -= Time.deltaTime;
+                return;
+            }
             MoveAlongPath();
 
             switch (state)
@@ -627,6 +633,26 @@ namespace TwoMoons
             if (state == State.Leaving || IsRobber) return;
             Say("Hilfe!", 2f);
             Leave(true, null, alreadyRewarded: true);
+        }
+
+        public bool IsArrested { get; private set; }
+        float questioned;
+
+        /// <summary>Von der Polizei geschnappt: wird abgeführt.</summary>
+        public void Arrest()
+        {
+            if (IsArrested) return;
+            IsArrested = true;
+            Say("Mist … erwischt!", 3f);
+            state = State.Queued;
+            Leave(true, null, alreadyRewarded: true);
+        }
+
+        /// <summary>Als Zeuge befragt: bleibt kurz stehen und erzählt, was er gesehen hat.</summary>
+        public void HoldForQuestioning(float seconds, string line)
+        {
+            questioned = seconds;
+            Say(line, seconds);
         }
 
         /// <summary>Der Gauner haut ab.</summary>

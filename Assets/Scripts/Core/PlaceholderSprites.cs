@@ -232,6 +232,16 @@ namespace TwoMoons
                     Rect(3, 4, 1, 4, new Color32(120, 180, 230, 255)); // Handschuhe
                     Rect(12, 4, 1, 4, new Color32(120, 180, 230, 255));
                     break;
+                case "policeCar": // weißer Streifenwagen mit blauem Streifen und Blaulicht
+                    Rect(1, 3, 14, 6, new Color32(240, 240, 245, 255));
+                    Rect(4, 9, 8, 3, new Color32(240, 240, 245, 255));
+                    Rect(5, 10, 6, 2, new Color32(140, 190, 230, 255));
+                    Rect(1, 5, 14, 2, new Color32(40, 80, 170, 255));
+                    Rect(6, 12, 2, 1, new Color32(60, 110, 255, 255));
+                    Rect(8, 12, 2, 1, new Color32(240, 50, 50, 255));
+                    Rect(2, 1, 3, 3, new Color32(30, 30, 35, 255));
+                    Rect(11, 1, 3, 3, new Color32(30, 30, 35, 255));
+                    break;
                 case "policeTape":
                     Rect(0, 0, 1, 10, new Color32(90, 90, 95, 255));
                     Rect(15, 0, 1, 10, new Color32(90, 90, 95, 255));
