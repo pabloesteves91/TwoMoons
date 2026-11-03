@@ -176,6 +176,12 @@ namespace TwoMoons
         /// <summary>Uhrzeit des heutigen Überfalls (-1 = keiner).</summary>
         public int RobberyMinute { get; private set; } = -1;
         int lastRobberyDay = -100;
+        /// <summary>Polizei und Spurensicherung sind heute bis Ladenschluss im Laden.</summary>
+        bool policeOnSite;
+        /// <summary>Morgen nach dem Überfall: erst aufräumen, dann öffnen.</summary>
+        bool cleanupTomorrow;
+        public bool RobberyCleanupPending { get; private set; }
+        public int CleanupLeft => RobberyCleanupPending ? DirtSpot.Existing.Count : 0;
         /// <summary>Was die Polizei am nächsten Morgen zurückbringt.</summary>
         int refundCents, refundProduct = -1, refundCount;
         /// <summary>Kartenwahl an der Grading-Station.</summary>
@@ -532,6 +538,11 @@ namespace TwoMoons
             {
                 Phase = GamePhase.Summary;
                 EndPapaDay();
+                if (policeOnSite)
+                {
+                    PoliceScene.Remove();
+                    policeOnSite = false;
+                }
                 if (Staff != null)
                 {
                     MoneyCents -= Employee.DailyWage;
@@ -650,6 +661,10 @@ namespace TwoMoons
             refundCents = data.robberyRefundCents;
             refundProduct = data.robberyRefundProduct;
             refundCount = data.robberyRefundCount;
+            policeOnSite = data.policeOnSite;
+            cleanupTomorrow = data.robberyCleanupTomorrow;
+            RobberyCleanupPending = data.robberyCleanupPending;
+            if (policeOnSite && (Phase == GamePhase.Open || Phase == GamePhase.Closing)) PoliceScene.Create();
             if (data.today != null) Today = data.today;
             ShowToast($"Willkommen zurück, {PlayerName}! Tag {Day}, {ClockText}.");
         }
@@ -674,6 +689,9 @@ namespace TwoMoons
                 robberyRefundCents = refundCents,
                 robberyRefundProduct = refundProduct,
                 robberyRefundCount = refundCount,
+                policeOnSite = policeOnSite,
+                robberyCleanupTomorrow = cleanupTomorrow,
+                robberyCleanupPending = RobberyCleanupPending,
                 today = Today,
                 chapter = ChapterProgress.Chapter,
                 questProgress = ChapterProgress.SaveProgress(),
@@ -830,6 +848,13 @@ namespace TwoMoons
         public void OpenShop()
         {
             if (Phase != GamePhase.Preparation) return;
+            if (CleanupLeft > 0)
+            {
+                ShowToast($"Erst aufräumen: Noch {CleanupLeft} Flecken vom Überfall.");
+                SoundManager.Play(Sfx.Error);
+                return;
+            }
+            RobberyCleanupPending = false;
             Phase = GamePhase.Open;
             DayTime = 0f;
             DayLength = DayLengthFor(StoreLevel);
@@ -1168,6 +1193,14 @@ namespace TwoMoons
 
             Tournament.OnNewDay();
             ReturnStolenGoods();
+            if (cleanupTomorrow)
+            {
+                // Die Spurensicherung hat Chaos hinterlassen: erst aufräumen, dann öffnen.
+                cleanupTomorrow = false;
+                RobberyCleanupPending = true;
+                for (int i = 0; i < 5; i++) WorldFactory.SpawnDirtSomewhere();
+                ShowToast("Nach dem Überfall ist es unordentlich: Putz alle Flecken weg, dann kannst du öffnen.", 7f);
+            }
             RobberyMinute = Robbery.RollForToday(lastRobberyDay);
 
             // Automatisch speichern, jeden Morgen nach dem Schlafen.
@@ -1203,6 +1236,11 @@ namespace TwoMoons
             CurrentRobbery = null;
             lastRobberyDay = Day;
             robbery.Robber.RunAway();
+            // Bis Ladenschluss sichert die Polizei die Spuren.
+            policeOnSite = true;
+            cleanupTomorrow = true;
+            PoliceScene.Create();
+            ShowToast("Die Polizei ist da und sichert die Spuren – bis Ladenschluss bleibt abgesperrt.", 6f);
             if (cents > 0 || count > 0)
             {
                 ShowToast(cents > 0 ? $"Der Gauner ist mit {Money.Format(cents)} abgehauen." : $"Der Gauner ist mit {count}× {robbery.Product.Name} abgehauen.", 5f);

@@ -7,7 +7,9 @@ namespace TwoMoons
         {
             switch (GameManager.Instance.Phase)
             {
-                case GamePhase.Preparation: return "Laden öffnen";
+                case GamePhase.Preparation:
+                    int left = GameManager.Instance.CleanupLeft;
+                    return left > 0 ? $"Erst aufräumen ({left} Flecken vom Überfall)" : "Laden öffnen";
                 case GamePhase.Open: return "Geöffnet bis 18:00";
                 default: return "Geschlossen";
             }

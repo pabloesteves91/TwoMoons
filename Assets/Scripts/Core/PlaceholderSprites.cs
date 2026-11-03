@@ -220,6 +220,30 @@ namespace TwoMoons
                     Rect(8, 9, 1, 3, new Color32(30, 22, 18, 255));
                     Rect(8, 9, 2, 1, new Color32(30, 22, 18, 255));
                     break;
+                case "police":
+                    Person(new Color32(40, 70, 150, 255), new Color32(40, 70, 150, 255));
+                    Rect(4, 14, 8, 2, new Color32(25, 35, 80, 255));   // Mütze
+                    Rect(7, 15, 2, 1, new Color32(245, 200, 80, 255)); // Abzeichen
+                    Rect(5, 6, 2, 2, new Color32(245, 200, 80, 255));  // Stern auf der Brust
+                    break;
+                case "forensic":
+                    Person(new Color32(240, 240, 245, 255), new Color32(240, 240, 245, 255));
+                    Rect(5, 9, 6, 2, new Color32(120, 180, 230, 255)); // Maske
+                    Rect(3, 4, 1, 4, new Color32(120, 180, 230, 255)); // Handschuhe
+                    Rect(12, 4, 1, 4, new Color32(120, 180, 230, 255));
+                    break;
+                case "policeTape":
+                    Rect(0, 0, 1, 10, new Color32(90, 90, 95, 255));
+                    Rect(15, 0, 1, 10, new Color32(90, 90, 95, 255));
+                    Rect(0, 6, 16, 3, new Color32(250, 215, 40, 255));
+                    for (int x = 1; x < 16; x += 4) Rect(x, 6, 2, 3, new Color32(30, 30, 30, 255));
+                    break;
+                case "evidenceMarker":
+                    Rect(5, 2, 6, 1, new Color32(200, 160, 20, 255));
+                    Rect(6, 3, 4, 2, new Color32(250, 210, 40, 255));
+                    Rect(7, 5, 2, 2, new Color32(250, 210, 40, 255));
+                    Rect(7, 3, 2, 1, new Color32(30, 30, 30, 255));
+                    break;
                 case "alarm": // weißer Kasten mit rotem Knopf und Blinklicht
                     Rect(4, 4, 8, 9, new Color32(60, 60, 70, 255));
                     Rect(5, 5, 6, 7, new Color32(230, 230, 235, 255));

@@ -155,6 +155,9 @@ namespace TwoMoons
         public int robberyRefundCents;
         public int robberyRefundProduct = -1;
         public int robberyRefundCount;
+        public bool policeOnSite;
+        public bool robberyCleanupTomorrow;
+        public bool robberyCleanupPending;
         public DayStats today;
         public int chapter = 1;
         public int[] questProgress;
