@@ -1240,6 +1240,7 @@ namespace TwoMoons
         }
 
         readonly List<Customer> robberyWitnesses = new List<Customer>();
+        const float RobberEscapeChance = 0.4f;
         int lootCents, lootCount;
         Product lootProduct;
 
@@ -1261,7 +1262,9 @@ namespace TwoMoons
             lootProduct = robbery.Product;
             policeOnSite = true;
             cleanupTomorrow = true;
-            PoliceScene.Create(robbery.Robber, new List<Customer>(robberyWitnesses));
+            // Manchmal ist der Gauner weg, bevor die Polizei da ist – dann ist die Beute verloren.
+            bool escapes = (cents > 0 || count > 0) && UnityEngine.Random.value < RobberEscapeChance;
+            PoliceScene.Create(robbery.Robber, new List<Customer>(robberyWitnesses), escapes);
             robberyWitnesses.Clear();
             if (cents > 0 || count > 0)
             {
@@ -1299,23 +1302,32 @@ namespace TwoMoons
             for (int i = 0; i < 8; i++) WorldFactory.SpawnDirtSomewhere();
         }
 
-        /// <summary>Die Polizei hat den Gauner geschnappt: Die Hälfte der Beute ist sichergestellt.</summary>
+        /// <summary>Die Polizei hat den Gauner geschnappt: Er hatte die ganze Beute noch bei sich.</summary>
         public void RobberArrested()
         {
             SoundManager.Play(Sfx.Quest);
             string back = "";
             if (lootCents > 0)
             {
-                MoneyCents += lootCents / 2;
-                Today.Expenses -= lootCents / 2;
-                back = $" Die Hälfte der Beute ist zurück: {Money.Format(lootCents / 2)}.";
+                MoneyCents += lootCents;
+                Today.Expenses -= lootCents;
+                back = $" Er hatte die Beute noch bei sich: {Money.Format(lootCents)} sind zurück.";
             }
-            else if (lootCount > 1 && lootProduct != null)
+            else if (lootCount > 0 && lootProduct != null)
             {
-                WorldFactory.SpawnBox(WorldFactory.FreeDeliveryCell(), lootProduct, lootCount / 2);
-                back = $" Die Hälfte der Beute ist zurück: {lootCount / 2}× {lootProduct.Name} (Karton am Eingang).";
+                WorldFactory.SpawnBox(WorldFactory.FreeDeliveryCell(), lootProduct, lootCount);
+                back = $" Er hatte die Beute noch bei sich: {lootCount}× {lootProduct.Name} (Karton am Eingang).";
             }
             ShowToast("Die Polizei hat den Gauner verhaftet!" + back + " Jetzt werden die Zeugen befragt.", 7f);
+            lootCents = 0;
+            lootCount = 0;
+            lootProduct = null;
+        }
+
+        /// <summary>Zu spät: Der Gauner ist mit der Beute entkommen.</summary>
+        public void RobberEscaped()
+        {
+            ShowToast("Die Polizei kam zu spät – der Gauner ist mit der Beute entkommen. Jetzt werden die Spuren gesichert.", 7f);
             lootCents = 0;
             lootCount = 0;
             lootProduct = null;

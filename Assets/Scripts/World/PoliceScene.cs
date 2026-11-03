@@ -16,13 +16,19 @@ namespace TwoMoons
 
         /// <param name="robber">Der flüchtende Gauner (null nach dem Laden eines Spielstands).</param>
         /// <param name="witnesses">Kunden, die beim Überfall im Laden geblieben sind.</param>
-        public static void Create(Customer robber = null, List<Customer> witnesses = null)
+        /// <param name="escapes">Die Polizei kommt zu spät: Der Gauner ist mit der Beute weg.</param>
+        public static void Create(Customer robber = null, List<Customer> witnesses = null, bool escapes = false)
         {
             if (current != null) return;
             current = new GameObject("Polizei").AddComponent<PoliceScene>();
             current.transform.SetParent(WorldFactory.Root);
+            current.escapes = escapes;
             current.Build(robber, witnesses);
         }
+
+        bool escapes;
+        /// <summary>Wie lange der Streifenwagen noch braucht, bis er auftaucht.</summary>
+        float delay;
 
         public static void Remove()
         {
@@ -105,6 +111,7 @@ namespace TwoMoons
             }
 
             if (!animate) Arrive(false);
+            else if (escapes) delay = 6f; // zu spät: erst wenn der Gauner längst weg ist
             else SoundManager.Play(Sfx.Siren);
         }
 
@@ -114,17 +121,23 @@ namespace TwoMoons
             arrived = true;
             // Nach dem Laden eines Spielstands ist die Verhaftung längst erledigt.
             if (!fromCar) robberHandled = true;
+            else if (escapes)
+            {
+                robberHandled = true;
+                GameManager.Instance.RobberEscaped();
+            }
             var grid = GameManager.Instance.Grid;
             var door = ShopGrid.DoorCell;
             var spawn = fromCar ? ShopGrid.SpawnCell : (Vector2Int?)null;
             AddOfficer("Polizist", Free(grid, door + new Vector2Int(-1, 1)), false, spawn);
             AddOfficer("Polizistin", Free(grid, door + new Vector2Int(1, 1)), true, spawn);
-            if (fromCar && robber != null && !robber.IsArrested)
+            if (robberHandled) return;
+            if (robber != null && !robber.IsArrested)
             {
                 officers[0].Mode = Mode.Chase;
                 officers[0].Target = robber;
             }
-            else if (fromCar) ArrestRobber();
+            else ArrestRobber();
         }
 
         static Vector2Int Free(ShopGrid grid, Vector2Int cell)
@@ -175,6 +188,12 @@ namespace TwoMoons
 
         void DriveIn()
         {
+            if (delay > 0f)
+            {
+                delay -= Time.deltaTime;
+                if (delay <= 0f) SoundManager.Play(Sfx.Siren);
+                return;
+            }
             car.transform.position = Vector3.MoveTowards(car.transform.position, carParked, CarSpeed * Time.deltaTime);
             sirenTimer -= Time.deltaTime;
             if (sirenTimer <= 0f)
@@ -189,7 +208,7 @@ namespace TwoMoons
         void AssignJobs()
         {
             // Hat der Gauner den Laden schon verlassen, wird er draußen am Wagen verhaftet.
-            if (robber == null && !robberHandled) ArrestRobber();
+            if (robber == null && !robberHandled && !escapes) ArrestRobber();
 
             foreach (var customer in Customer.Active)
             {
